@@ -27,7 +27,14 @@ static IAPShare * _sharedHelper;
     return _sharedHelper;
 }
 
-- (void)requestProductWithID:(NSString *)productID isProduction:(BOOL)production {
+- (void)requestAllPurchasedProducts:(BOOL)production {
+	for (NSString* identifier in _iap._productIdentifiers) {
+		[self requestPurchasedProductWithID : identifier
+				      isProduction : production];
+	}
+}
+
+- (void)requestPurchasedProductWithID:(NSString *)productID isProduction:(BOOL)production {
     if (_iap.products == nil) {
         _iap.production = production; // No for test, YES for release
         
@@ -37,7 +44,7 @@ static IAPShare * _sharedHelper;
                 if ([_iap isPurchasedProductsIdentifier : productID] == YES)
                 {
                     // notify others to reset removead statues
-                    Director::getInstance()->getEventDispatcher()->dispatchCustomEvent(EVENT_PURCHASED_REMOVEAD + [productID UTF8String]);
+                    Director::getInstance()->getEventDispatcher()->dispatchCustomEvent(EVENT_PURCHASED + [productID UTF8String]);
                 }
             }
         }];
@@ -47,7 +54,7 @@ static IAPShare * _sharedHelper;
         if ([_iap isPurchasedProductsIdentifier : productID] == YES)
         {
             // notify others to reset removead statues
-            Director::getInstance()->getEventDispatcher()->dispatchCustomEvent(EVENT_PURCHASED_REMOVEAD + [productID UTF8String]);
+            Director::getInstance()->getEventDispatcher()->dispatchCustomEvent(EVENT_PURCHASED + [productID UTF8String]);
         }
     }
 }
@@ -78,7 +85,7 @@ static IAPShare * _sharedHelper;
                                                        NSLog(@"SUCCESS %@",response);
                                                        NSLog(@"Pruchases %@",_iap.purchasedProducts);
                                                        // buy success, proceed next step
-                                                       Director::getInstance()->getEventDispatcher()->dispatchCustomEvent(EVENT_RESTORED_REMOVEAD+[productID UTF8String]);
+                                                       Director::getInstance()->getEventDispatcher()->dispatchCustomEvent(EVENT_PURCHASED+[productID UTF8String]);
                                                    }
                                                    else {
                                                        [ProgressHUD showError : @"Receipt status is wrong."];

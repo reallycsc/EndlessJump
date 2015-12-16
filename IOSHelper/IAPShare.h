@@ -9,14 +9,19 @@
 #import <Foundation/Foundation.h>
 #import "IAPHelper.h"
 
-#include "CommonHeader.h"
+#include "..\CommonDefinition.h"
+#include "cocos2d.h"
+USING_NS_CC;
+using namespace std;
 
 @interface IAPShare : NSObject
 @property (nonatomic,strong) IAPHelper *iap;
 
 + (IAPShare *) sharedHelper;
 
-- (void)requestProductWithID:(NSString *)productID isProduction:(BOOL)production;
+- (void)requestAllPurchasedProducts:(BOOL)production;
+
+- (void)requestPurchasedProductWithID:(NSString *)productID isProduction:(BOOL)production;
 
 - (void)buyProductWithID:(NSString *)productID;
 

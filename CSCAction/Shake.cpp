@@ -2,7 +2,6 @@
 //  Shake.cpp
 //
 
-#include "pch.h"
 #include "Shake.h"
 
 // not really useful, but I like clean default constructors

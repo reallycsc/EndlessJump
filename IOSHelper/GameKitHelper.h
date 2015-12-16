@@ -12,7 +12,7 @@
 #import <Foundation/Foundation.h>
 #import <GameKit/GameKit.h>
 
-#include "CommonHeader.h"
+#include "..\CommonDefinition.h"
 
 #ifndef GAMEKITHELPER_LOGGING
 #define GAMEKITHELPER_LOGGING 1
