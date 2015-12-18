@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GameLevel>
+	<Level level="1" stage="1" width="128" height="204" color_r="95" color_g="102" color_b="120">
+		<Player speed="768" jumpTime="1.0"/>
+		<Enemys color_r="125" color_g="149" color_b="153">
+			<Enemy id="1" width="50" height="50" x="384" y="0"/>
+			<Enemy id="2" width="50" height="100" x="455" y="0"/>
+		</Enemys>
+    </Level>
+</GameLevel>
