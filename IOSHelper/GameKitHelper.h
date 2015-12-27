@@ -12,8 +12,6 @@
 #import <Foundation/Foundation.h>
 #import <GameKit/GameKit.h>
 
-#include "..\CommonDefinition.h"
-
 #ifndef GAMEKITHELPER_LOGGING
 #define GAMEKITHELPER_LOGGING 1
 #endif

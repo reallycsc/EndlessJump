@@ -9,6 +9,8 @@
 #import <CommonCrypto/CommonCryptor.h>
 #import "GameKitHelper.h"
 
+#include "../CommonDefinition.h"
+
 #define IS_MIN_IOS6 ([[[UIDevice currentDevice] systemVersion] floatValue] >= 6.0f)
 
 @interface GameKitHelper () <GKLeaderboardViewControllerDelegate, GKAchievementViewControllerDelegate>
@@ -101,7 +103,7 @@
             [self retirieveLocalPlayerScore:@"ReviveNumber"];
             [self retirieveLocalPlayerScore:@"DoubleNumber"];
             // notify mainmenu to reset purchase status
-            Director::getInstance()->getEventDispatcher()->dispatchCustomEvent(EVENT_GAMECENTER_AUTHENTICATED);
+            cocos2d::Director::getInstance()->getEventDispatcher()->dispatchCustomEvent(EVENT_GAMECENTER_AUTHENTICATED);
         }
 
         if (error) {
@@ -140,7 +142,7 @@
                 string eventId = EVENT_GAMECENTER_SCORERETRIVED + [leaderboardId UTF8String];
                 char* buf = new char[21];
                 sprintf(buf, "%lld", leaderboard.localPlayerScore.value);
-                Director::getInstance()->getEventDispatcher()->dispatchCustomEvent(eventId, buf);
+                cocos2d::Director::getInstance()->getEventDispatcher()->dispatchCustomEvent(eventId, buf);
             }
         }];
     }

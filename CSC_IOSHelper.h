@@ -4,13 +4,6 @@
 USING_NS_CC;
 using namespace std;
 
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
-#import "IOSHelper/GameKitHelper.h"
-#import "IOSHelper/IAPShare.h"
-#import "IOSHelper/Reachability.h"
-#import "IOSHelper/ProgressHUD.h"
-#endif
-
 class CSC_IOSHelper : public Node
 {
 public:
@@ -37,18 +30,18 @@ public:
 	static void IAP_initWithProductSet(vector<string>* products); // init
 
 	static void IAP_requestAllPurchasedProducts(bool isTest);
-	static void IAP_requestAllPurchasedProductsWithCallback(bool isTest, const function<void()> &func);
+    void IAP_requestAllPurchasedProductsWithCallback(bool isTest, const function<void()> &func);
 
-	static int IAP_getProductsCount();
+	static unsigned long IAP_getProductsCount();
 	static const char* IAP_getProductID(int index);
 	static const char* IAP_getProductTitle(int index);
 	static const char* IAP_getProductDescription(int index);
 	static const char* IAP_getProductPrice(int index);
 
 	static bool IAP_isPurchased(const char* id);
-	static void IAP_purchaseProduct(bool isTest, const char* id);
-	static void IAP_restorePurchase(); // restore 
+    void IAP_purchaseProduct(bool isTest, const char* id);
+    void IAP_restorePurchase(); // restore 
 
 private:
-	static void waitingTimeOut(float dt);
+    void waitingTimeOut(float dt);
 };
