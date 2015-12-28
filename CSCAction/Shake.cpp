@@ -1,9 +1,6 @@
-//
-//  Shake.cpp
-//
-
 #include "Shake.h"
 
+NS_CSC_BEGIN
 // not really useful, but I like clean default constructors
 Shake::Shake() : _strength_x(0), _strength_y(0), _initial_x(0), _initial_y(0)
 {
@@ -84,3 +81,4 @@ void Shake::stop(void)
     
     ActionInterval::stop();
 }
+NS_CSC_END

@@ -1,5 +1,6 @@
 #include "TextNumChange.h"
 
+NS_CSC_BEGIN
 TextNumChange::TextNumChange() :
 	m_nFromNum(0),
 	m_nToNum(0)
@@ -44,7 +45,6 @@ void TextNumChange::startWithTarget(Node *pTarget)
 	{
 		pText->setString(StringUtils::format("%d", m_nFromNum));
 	}
-
 }
 
 ActionInterval* TextNumChange::reverse(void)
@@ -55,12 +55,11 @@ ActionInterval* TextNumChange::reverse(void)
 
 void TextNumChange::update(float t)
 {
-
 	Text *pText = dynamic_cast<Text*>(_target);
 	if (pText)
 	{
 		int num = m_nFromNum + (m_nToNum - m_nFromNum) * t;
 		pText->setString(StringUtils::format("%d", num));
 	}
-
 }
+NS_CSC_END

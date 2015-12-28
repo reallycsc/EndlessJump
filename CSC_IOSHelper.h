@@ -1,8 +1,5 @@
 #pragma once
 #include "CommonDefinition.h"
-#include "cocos2d.h"
-USING_NS_CC;
-using namespace std;
 
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
 #import "IOSHelper/GameKitHelper.h"
@@ -11,6 +8,7 @@ using namespace std;
 #import "IOSHelper/ProgressHUD.h"
 #endif
 
+NS_CSC_BEGIN
 class CSC_IOSHelper : public Node
 {
 public:
@@ -52,3 +50,4 @@ public:
 private:
 	static void waitingTimeOut(float dt);
 };
+NS_CSC_END

@@ -1,5 +1,6 @@
 #include "CSC_IOSHelper.h"
 
+NS_CSC_BEGIN
 static CSC_IOSHelper _sharedContext;
 
 CSC_IOSHelper* CSC_IOSHelper::getInstance()
@@ -318,3 +319,4 @@ void CSC_IOSHelper::waitingTimeOut(float dt)
 	[ProgressHUD showError : @"Response time out, please try again."];
 #endif
 }
+NS_CSC_END

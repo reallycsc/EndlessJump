@@ -1,12 +1,7 @@
-//
-//  Shake.h
-//
-
 #pragma once
-#include "cocos2d.h"
+#include "../CommonDefinition.h"
 
-using namespace cocos2d;
-
+NS_CSC_BEGIN
 class Shake : public ActionInterval
 {
 public:
@@ -33,3 +28,4 @@ protected:
      // Strength of the action
      float _strength_x, _strength_y;
 };
+NS_CSC_END

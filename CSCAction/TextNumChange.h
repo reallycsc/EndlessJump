@@ -1,12 +1,7 @@
 #pragma once
-#include "cocos2d.h"
-#include "cocostudio/CocoStudio.h"
-#include "ui/CocosGUI.h"
+#include "../CommonDefinition.h"
 
-USING_NS_CC;
-using namespace cocostudio::timeline;
-using namespace ui;
-
+NS_CSC_BEGIN
 class TextNumChange : public ActionInterval
 {
 public:
@@ -27,3 +22,4 @@ protected:
 	int m_nFromNum;
 	int m_nToNum;
 };
+NS_CSC_END
