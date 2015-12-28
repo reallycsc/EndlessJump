@@ -8,10 +8,10 @@ Player::~Player(void)
 {
 }
 
-Player* Player::create(const Color3B &color, GameLevelData* levelData)
+Player* Player::create(const Color3B &color, float speed, float jumpTime)
 {
 	Player *pRet = new(std::nothrow) Player();
-	if (pRet && pRet->init(color, levelData))
+	if (pRet && pRet->init(color, speed, jumpTime))
 	{
 		pRet->autorelease();
 		return pRet;
@@ -24,7 +24,7 @@ Player* Player::create(const Color3B &color, GameLevelData* levelData)
 	}
 }
 
-bool Player::init(const Color3B &color, GameLevelData* levelData)
+bool Player::init(const Color3B &color, float speed, float jumpTime)
 {  
     bool bRet = false;  
     do   
@@ -35,15 +35,10 @@ bool Player::init(const Color3B &color, GameLevelData* levelData)
 
 		// set attribute
 		m_playerColor = Color4F(color);
-		m_fSpeed = visibleSize.width / 5;
 		Size playerSize = Size(32, 32);
 		m_fJumpHeight = playerSize.height * 4;
-		m_fJumpDuration = 0.8f;
-		if (levelData)
-		{
-			m_fSpeed = levelData->getPlayerSpeed();
-			m_fJumpDuration = levelData->getPlayerJumpDuration();
-		}
+		m_fSpeed = speed;
+		m_fJumpDuration = jumpTime;
 
 		// draw player rect
 		auto draw = DrawNode::create();

@@ -1,5 +1,6 @@
 #include "AppDelegate.h"
 #include "LevelMakeScene.h"
+#include "GameMediator.h"
 
 USING_NS_CC;
 
@@ -90,6 +91,8 @@ bool AppDelegate::applicationDidFinishLaunching() {
 	gettimeofday(&tv, NULL);
 	unsigned int time = ((unsigned int)tv.tv_sec) * 1000 + tv.tv_usec / 1000;
 	srand(time);
+
+	GameMediator::getInstance();
 
     // run
     director->runWithScene(LevelMakeScene::createScene());

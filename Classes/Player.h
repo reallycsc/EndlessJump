@@ -13,8 +13,8 @@ public:
 	Player(void);
 	~Player(void);
 
-	static Player* create(const Color3B &color = Color3B::BLUE, GameLevelData* levelData = NULL);
-	bool init(const Color3B &color = Color3B::BLUE, GameLevelData* levelData = NULL);
+	static Player* create(const Color3B &color = Color3B::BLUE, float speed = 128, float jumpTime = 0.8f);
+	bool init(const Color3B &color = Color3B::BLUE, float speed = 128, float jumpTime = 0.8f);
 
 	void jump();
 	void die();

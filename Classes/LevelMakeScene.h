@@ -9,13 +9,13 @@
 enum TextFieldTag
 {
 	TAG_LEVEL_MIN = 0,
-	TAG_LEVEL_STAGE_ID,
-	TAG_LEVEL_LEVEL_ID,
-	TAG_LEVEL_WIDTH,
-	TAG_LEVEL_HEIGHT,
-	TAG_LEVEL_COLOR_R,
-	TAG_LEVEL_COLOR_G,
-	TAG_LEVEL_COLOR_B,
+	TAG_LEVEL_ID,
+	TAG_LEVEL_ROOM_ID,
+	TAG_LEVEL_ROOM_WIDTH,
+	TAG_LEVEL_ROOM_HEIGHT,
+	TAG_LEVEL_ROOM_COLOR_R,
+	TAG_LEVEL_ROOM_COLOR_G,
+	TAG_LEVEL_ROOM_COLOR_B,
 	TAG_LEVEL_MAX,
 
 	TAG_ENEMY_MIN,
@@ -99,10 +99,12 @@ private:
 	void buttonCallback_RemoveBlock(Ref* pSender);
 	void buttonCallback_CalcFoothold(Ref* pSender);
 	void buttonCallback_Try(Ref* pSender);
+	void buttonCallback_Save(Ref* pSender);
+	void buttonCallback_Load(Ref* pSender);
 	void buttonCallback_Export(Ref* pSender);
 	void buttonCallback_Import(Ref* pSender);
 
-	void addLevelBack();
+	void addRoom();
 	void addEnemy();
 	void addPlayer();
 	void addPlayerForTrying();
@@ -110,6 +112,9 @@ private:
 	void updateCurEnemy(int tag);
 	void updatePlayer(int tag);
 	void calcFoothold();
+
+	void loadDataFrom(int level, int room);
+	void saveDataTo(int level, int room);
 
 	inline void getLevelNode(Node* root, int tag, bool isWithSlider = true);
 	static inline void initStruct(TextFieldSliderBindInt* structTmp, int min, int number, int max);
@@ -123,6 +128,7 @@ private:
 private:
 	map<int, tagTextFieldSliderBindInt> m_mTextFieldStructs;
 	CSCClass::DropDownList* m_pDropDownListLevel;
+	CSCClass::DropDownList* m_pDropDownListRoom;
 
 	Vector<Enemy*>	m_vEnemys;
 	Player*	m_pPlayer;

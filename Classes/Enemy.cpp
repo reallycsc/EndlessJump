@@ -59,7 +59,7 @@ bool Enemy::init(const Size &size, const Color3B &color, const int &id)
 			Text* text = Text::create(buf, "Arial", 20);
 			text->setAnchorPoint(Vec2(0.5f, 0.5f));
 			text->setPosition(m_size / 2);
-			this->addChild(text);
+			this->addChild(text, 2);
 		}
 
         bRet = true;

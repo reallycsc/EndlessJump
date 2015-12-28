@@ -3,10 +3,12 @@
 
 GameLevelData::GameLevelData(void)
 {
+	m_vRoomsData.clear();
 }
 
 GameLevelData::~GameLevelData(void)
 {
+	m_vRoomsData.clear();
 }
 
 GameLevelData* GameLevelData::create(GameLevelData* gamedata)
@@ -33,14 +35,10 @@ bool GameLevelData::init(GameLevelData* gamedata)
 		{
 			m_nLevel = gamedata->getLevel();
 
-			m_playerColor = gamedata->getPlayerColor();
-			m_fPlayerSpeed = gamedata->getPlayerSpeed();
-			m_fPlayerJumpDuration = gamedata->getPlayerJumpDuration();
-
-			for (list<RoomData>::const_iterator iter = gamedata->getRoomsData()->begin();
-			iter != gamedata->getRoomsData()->end(); iter++)
+			auto inRoomsData = gamedata->getRoomsData();
+			for (auto iter = inRoomsData->begin(), endIter = inRoomsData->end(); iter != endIter; ++iter)
 			{
-				m_lRoomsData.push_back((*iter));
+				m_vRoomsData.push_back(*iter);
 			}
 		}
 		else
@@ -49,39 +47,6 @@ bool GameLevelData::init(GameLevelData* gamedata)
 
 			// level data
 			m_nLevel = 1;
-
-			// player data
-			m_playerColor = Color4F::BLUE;
-			m_fPlayerSpeed = visibleSize.width / 3;
-			m_fPlayerJumpDuration = 0.8f;
-
-			// room data
-			float topPosY = visibleSize.height;
-			float roomHeight = visibleSize.height * 0.2;
-			int roomNumber = 5;
-			for (int i = 0; i < roomNumber; i++)
-			{
-				RoomData room;
-				room.size = Size(visibleSize.width, roomHeight);
-				room.position = Vec2(0, topPosY - roomHeight);
-				int c = 25*i + 128;
-				room.color = Color3B(c, c, c);
-
-				// enemy
-				Size enemySize = generateRandomEnemySize();
-				while (enemySize.width <= 0 || enemySize.height <= 0)
-				{
-					enemySize = generateRandomEnemySize();
-				}
-				EnemyData enemy;
-				enemy.size = enemySize;
-				enemy.position = Vec2(visibleSize.width / 2, room.position.y);
-				enemy.color = Color3B(c, 0, 0);
-				room.enemysData.push_back(enemy);
-
-				topPosY = room.position.y;
-				m_lRoomsData.push_back(room);
-			}
 		}
 		
 		bRet = true;
@@ -90,19 +55,48 @@ bool GameLevelData::init(GameLevelData* gamedata)
 	return bRet;
 }
 
-Size GameLevelData::generateRandomEnemySize() const
+bool GameLevelData::setRoomDataWithFile(XMLElement* surface)
 {
-	float halfTime = m_fPlayerJumpDuration / 2;
-	float randTime = random(0.0f, halfTime);
-	float scaleRandTime = randTime / halfTime * 0.5f;
+	bool bRet = false;
+	do
+	{
+		CC_BREAK_IF(!surface);
+		m_vRoomsData.clear();
+		for (XMLElement* surface1 = surface->FirstChildElement("Room"); surface1 != NULL; surface1 = surface1->NextSiblingElement("Room"))
+		{
+			RoomData room;
+			// room
+			room.id = surface1->IntAttribute("id");
+			room.size = Size(surface1->IntAttribute("width"), surface1->IntAttribute("height"));
+			room.position = Point(surface1->IntAttribute("x"), surface1->IntAttribute("y"));
+			room.color = Color3B(surface1->IntAttribute("color_r"),
+				surface1->IntAttribute("color_g"),
+				surface1->IntAttribute("color_b"));
+			// player
+			XMLElement* surface2 = surface1->FirstChildElement("Player");
+			room.player_speed = surface2->FloatAttribute("speed");
+			room.player_jumpTime = surface2->FloatAttribute("jumpTime");
+			room.player_color = Color3B(surface2->IntAttribute("color_r"),
+				surface2->IntAttribute("color_g"),
+				surface2->IntAttribute("color_b"));
+			// enemys
+			surface2 = surface1->FirstChildElement("Enemys");
+			room.enemy_color = Color3B(surface2->IntAttribute("color_r"),
+				surface2->IntAttribute("color_g"),
+				surface2->IntAttribute("color_b"));
+			for (XMLElement* surface3 = surface2->FirstChildElement("Enemy"); surface3 != NULL; surface3 = surface3->NextSiblingElement("Enemy"))
+			{
+				EnemyData enemy;
+				enemy.id = surface3->IntAttribute("id");
+				enemy.size = Size(surface3->IntAttribute("width"), surface3->IntAttribute("height"));
+				enemy.position = Point(surface3->IntAttribute("x"), surface3->IntAttribute("y"));
+				room.enemysData.push_back(enemy);
+			}
+			m_vRoomsData.push_back(room);
+		}
 
-	float width = m_fPlayerSpeed * (halfTime - randTime) * 2 - 48;
-	float height = 48 * 4 * scaleRandTime * (1 - scaleRandTime);
+		bRet = true;
+	} while (false);
 
-	return Size(width, height);
-}
-
-void GameLevelData::generateRandomLevel(int w, int h)
-{
-
+	return bRet;
 }

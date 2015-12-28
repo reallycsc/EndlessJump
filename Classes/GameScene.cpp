@@ -52,31 +52,31 @@ bool GameScene::init()
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
     /////////////////////////////
-	// get level data
-	m_pLevelData = GameLevelData::create();
-
-	// add level background
-	for (list<RoomData>::const_iterator roomIter = m_pLevelData->getRoomsData()->begin();
-	roomIter !=  m_pLevelData->getRoomsData()->end(); ++roomIter)
-	{
-		auto background = DrawNode::create();
-		background->drawSolidRect(roomIter->position, roomIter->position + roomIter->size, Color4F(roomIter->color));
-		this->addChild(background);
-
-		// add enemys
-		for (vector<EnemyData>::const_iterator iter = roomIter->enemysData.begin();
-		iter != roomIter->enemysData.end(); ++iter)
-		{
-			auto enemy = Enemy::create(iter->size, iter->color);
-			enemy->setPosition(iter->position);
-			this->addChild(enemy);
-			m_vEnemys.pushBack(enemy);
-		}
-	}
-	
-	// add player
-	m_iterCurRoom = m_pLevelData->getRoomsData()->begin();
-	this->addPlayer();
+//	// get level data
+//	m_pLevelData = GameLevelData::create();
+//
+//	// add level background
+//	for (list<RoomData>::const_iterator roomIter = m_pLevelData->getRoomsData()->begin();
+//	roomIter !=  m_pLevelData->getRoomsData()->end(); ++roomIter)
+//	{
+//		auto background = DrawNode::create();
+//		background->drawSolidRect(roomIter->position, roomIter->position + roomIter->size, Color4F(roomIter->color));
+//		this->addChild(background);
+//
+//		// add enemys
+//		for (vector<EnemyData>::const_iterator iter = roomIter->enemysData.begin();
+//		iter != roomIter->enemysData.end(); ++iter)
+//		{
+//			auto enemy = Enemy::create(iter->size, iter->color);
+//			enemy->setPosition(iter->position);
+//			this->addChild(enemy);
+//			m_vEnemys.pushBack(enemy);
+//		}
+//	}
+//	
+//	// add player
+//	m_iterCurRoom = m_pLevelData->getRoomsData()->begin();
+//	this->addPlayer();
 
 	this->scheduleUpdate();
 
@@ -163,8 +163,8 @@ void GameScene::addPlayer()
 {
 	Size visibleSize = Director::getInstance()->getVisibleSize();
 
-	float duration = visibleSize.width / m_pLevelData->getPlayerSpeed();
-	m_pPlayer = Player::create(m_iterCurRoom->enemysData.begin()->color, m_pLevelData);
+	float duration = visibleSize.width / m_iterCurRoom->player_speed;
+	m_pPlayer = Player::create(m_iterCurRoom->enemy_color, m_iterCurRoom->player_speed, m_iterCurRoom->player_jumpTime);
 	Size playerSize = m_pPlayer->getContentSize();
 	float posX = playerSize.width / 2;
 	float posY = m_iterCurRoom->position.y + playerSize.height / 2;
@@ -175,10 +175,10 @@ void GameScene::addPlayer()
 	{
 		m_pPlayer->die();
 		++m_iterCurRoom;
-		if (m_iterCurRoom != m_pLevelData->getRoomsData()->end())
-		{
-			this->addPlayer();
-		}
+//		if (m_iterCurRoom != m_pLevelData->getRoomsData()->end())
+//		{
+//			this->addPlayer();
+//		}
 	})));
 	this->addChild(m_pPlayer);
 }
@@ -189,14 +189,14 @@ void GameScene::addMaximumEnemy_Debug()
 	Size visibleSize = Director::getInstance()->getVisibleSize();
 
 	float stepT = 0.01f;
-	float halfT = m_pLevelData->getPlayerJumpDuration() / 2;
+	float halfT = m_iterCurRoom->player_jumpTime / 2;
 	int steps = halfT / stepT;
 	float realT = 0;
 	float scaleT = 0;
 	float scaleStepT = 0.5f / steps;
 	for (int i = 0; i < steps; i++)
 	{
-		float enemyWidth = (m_pLevelData->getPlayerSpeed() * (halfT - realT) - m_pPlayer->getContentSize().width / 2) * 2;
+		float enemyWidth = (m_iterCurRoom->player_speed * (halfT - realT) - m_pPlayer->getContentSize().width / 2) * 2;
 		float enemyHeight = m_pPlayer->getJumpHeight() * 4 * scaleT * (1 - scaleT);
 		if (enemyHeight > 0 && enemyWidth > 0)
 		{
