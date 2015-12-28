@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "IAPHelper.h"
 
-#include "..\CommonDefinition.h"
+#include "../CommonDefinition.h"
 #include "cocos2d.h"
 USING_NS_CC;
 using namespace std;

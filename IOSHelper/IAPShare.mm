@@ -28,7 +28,7 @@ static IAPShare * _sharedHelper;
 }
 
 - (void)requestAllPurchasedProducts:(BOOL)production {
-	for (NSString* identifier in _iap._productIdentifiers) {
+	for (NSString* identifier in _iap.productIdentifiers) {
 		[self requestPurchasedProductWithID : identifier
 				      isProduction : production];
 	}
