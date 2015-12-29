@@ -34,6 +34,8 @@ bool GameLevelData::init(GameLevelData* gamedata)
 		if (gamedata)
 		{
 			m_nLevel = gamedata->getLevel();
+			m_sLevelName = gamedata->getLevelName();
+			m_nMaxDeadTime = gamedata->getMaxDeadTime();
 
 			auto inRoomsData = gamedata->getRoomsData();
 			for (auto iter = inRoomsData->begin(), endIter = inRoomsData->end(); iter != endIter; ++iter)
@@ -43,10 +45,10 @@ bool GameLevelData::init(GameLevelData* gamedata)
 		}
 		else
 		{
-			Size visibleSize = Director::getInstance()->getVisibleSize();
-
 			// level data
 			m_nLevel = 1;
+			m_sLevelName = "Default Name";
+			m_nMaxDeadTime = 0;
 		}
 		
 		bRet = true;

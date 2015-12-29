@@ -10,6 +10,8 @@ enum TextFieldTag
 {
 	TAG_LEVEL_MIN = 0,
 	TAG_LEVEL_ID,
+	TAG_LEVEL_NAME,
+	TAG_LEVEL_MAX_DEADTIME,
 	TAG_LEVEL_ROOM_ID,
 	TAG_LEVEL_ROOM_WIDTH,
 	TAG_LEVEL_ROOM_HEIGHT,
@@ -95,6 +97,9 @@ private:
 
 	void update(float dt);
 
+	void buttonCallback_MainMenu(Ref* pSender);
+	void buttonCallback_AddNewLevel(Ref* pSender);
+	void buttonCallback_AddNewRoom(Ref* pSender);
 	void buttonCallback_AddBlock(Ref* pSender);
 	void buttonCallback_RemoveBlock(Ref* pSender);
 	void buttonCallback_CalcFoothold(Ref* pSender);
@@ -116,6 +121,8 @@ private:
 	void loadDataFrom(int level, int room);
 	void saveDataTo(int level, int room);
 
+	void setDropDownList(vector<GameLevelData*>* levelsData);
+
 	inline void getLevelNode(Node* root, int tag, bool isWithSlider = true);
 	static inline void initStruct(TextFieldSliderBindInt* structTmp, int min, int number, int max);
 	inline void updateBlockTextFieldNumber(int tag, int number);
@@ -127,6 +134,9 @@ private:
 		int frameRate, float playerWidth, float speed, float posY, Color4B color) const;
 private:
 	map<int, tagTextFieldSliderBindInt> m_mTextFieldStructs;
+	TextField*	m_pTextFieldLevelName;
+	string m_sLevelName;
+
 	CSCClass::DropDownList* m_pDropDownListLevel;
 	CSCClass::DropDownList* m_pDropDownListRoom;
 

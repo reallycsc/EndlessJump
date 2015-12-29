@@ -1,6 +1,7 @@
 #include "GameScene.h"
 #include "CSCClass\CSCAction\Shake.h"
-#include "CSCClass\CommonFunctions.h"
+#include "MainMenuScene.h"
+#include "GameOverScene.h"
 
 Scene* GameScene::createScene()
 {
@@ -47,38 +48,39 @@ bool GameScene::init()
     {
         return false;
     }
-    
-    Size visibleSize = Director::getInstance()->getVisibleSize();
-    Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
+	m_nDeadNumber = 0;
     /////////////////////////////
-//	// get level data
-//	m_pLevelData = GameLevelData::create();
-//
-//	// add level background
-//	for (list<RoomData>::const_iterator roomIter = m_pLevelData->getRoomsData()->begin();
-//	roomIter !=  m_pLevelData->getRoomsData()->end(); ++roomIter)
-//	{
-//		auto background = DrawNode::create();
-//		background->drawSolidRect(roomIter->position, roomIter->position + roomIter->size, Color4F(roomIter->color));
-//		this->addChild(background);
-//
-//		// add enemys
-//		for (vector<EnemyData>::const_iterator iter = roomIter->enemysData.begin();
-//		iter != roomIter->enemysData.end(); ++iter)
-//		{
-//			auto enemy = Enemy::create(iter->size, iter->color);
-//			enemy->setPosition(iter->position);
-//			this->addChild(enemy);
-//			m_vEnemys.pushBack(enemy);
-//		}
-//	}
-//	
-//	// add player
-//	m_iterCurRoom = m_pLevelData->getRoomsData()->begin();
-//	this->addPlayer();
+	m_pGameMediator = GameMediator::getInstance();
+	// get level data
+	auto levelsData = m_pGameMediator->getGameLevelData();
+	int curLevel = m_pGameMediator->getCurGameLevel();
+	m_pCurLevelData = levelsData->at(curLevel - 1);
+	auto roomsData = m_pCurLevelData->getRoomsData();
+	m_nCurRoomIndex = 1;
+	m_pCurRoomData = &roomsData->at(0);
 
-	this->scheduleUpdate();
+	// load scene
+	auto rootNode = CSLoader::createNode("GameScene.csb");
+	this->addChild(rootNode);
+	// get button
+	auto buttonReturn = dynamic_cast<Button*>(rootNode->getChildByName("Button_Return"));
+	buttonReturn->addClickEventListener(CC_CALLBACK_1(GameScene::buttonCallback_MainMenu, this));
+	// get text
+	m_pTextDeadNum = dynamic_cast<Text*>(rootNode->getChildByName("Text_DeadNumber"));
+	m_pTextDeadNum->setString(StringUtils::format("%d", m_nDeadNumber));
+	Text* levelName = dynamic_cast<Text*>(rootNode->getChildByName("Text_LevelName"));
+	levelName->setString(m_pCurLevelData->getLevelName());
+	Text* levelNumber = dynamic_cast<Text*>(rootNode->getChildByName("Text_LevelNumber"));
+	levelNumber->setString(StringUtils::format("%d/%d", curLevel, m_pGameMediator->getMaxGameLevel()));
+
+	// add first room
+	this->addRoom(m_pCurRoomData);
+
+	// add player
+	this->addPlayer(m_pCurRoomData);
+
+	//this->scheduleUpdate();
 
     return true;
 }
@@ -100,6 +102,11 @@ void GameScene::onTouchEnded(Touch *touch, Event *event)
 	{
 		m_pPlayer->jump();
 	}
+}
+
+void GameScene::buttonCallback_MainMenu(Ref* pSender)
+{
+	Director::getInstance()->replaceScene(MainMenuScene::createScene());
 }
 
 bool GameScene::onContactBegin(const PhysicsContact& contact)
@@ -134,12 +141,14 @@ bool GameScene::onContactBegin(const PhysicsContact& contact)
 
 		m_pPlayer->die();
 		m_pPlayer = NULL;
+		m_nDeadNumber++;
+		m_pTextDeadNum->setString(StringUtils::format("%d", m_nDeadNumber));
 
 		this->runAction(Sequence::createWithTwoActions(
 			DelayTime::create(0.5f),
 			CallFuncN::create([=](Ref* pSender)->void
 		{
-			this->addPlayer();
+			this->addPlayer(m_pCurRoomData);
 		})));
 	}
 
@@ -149,64 +158,69 @@ bool GameScene::onContactBegin(const PhysicsContact& contact)
 // schedule functions
 void GameScene::update(float dt)
 {
-	//Size visibleSize = Director::getInstance()->getVisibleSize();
-	//float stepW = visibleSize.width * 0.2f * dt;
-	//float halfEnemyWidth = m_pPlayer->getSpeed() * m_pPlayer->getJumpDuration() / 2 - m_pPlayer->getContentSize().width / 2;
-	//if (m_pPlayer->getPositionX() + stepW * 6 >= visibleSize.width / 2 - halfEnemyWidth &&
-	//	m_pPlayer->getPositionX() - stepW * 6 <= visibleSize.width / 2 + halfEnemyWidth)
-	//{
-	//	m_pPlayer->jump();
-	//}
 }
 
-void GameScene::addPlayer()
+void GameScene::addRoom(RoomData* roomData)
 {
-	Size visibleSize = Director::getInstance()->getVisibleSize();
+	// background
+	DrawNode* background = DrawNode::create();
+	background->drawSolidRect(Point::ZERO, roomData->size, Color4F(roomData->color));
+	background->setPosition(roomData->position);
+	this->addChild(background);
 
-	float duration = visibleSize.width / m_iterCurRoom->player_speed;
-	m_pPlayer = Player::create(m_iterCurRoom->enemy_color, m_iterCurRoom->player_speed, m_iterCurRoom->player_jumpTime);
+	// enemys
+	auto enemysData = &roomData->enemysData;
+	for (size_t i = 0, j = enemysData->size(); i < j; i++)
+	{
+		auto enemyData = &enemysData->at(i);
+		auto enemy = Enemy::create(enemyData->size, roomData->enemy_color, i);
+		enemy->setPosition(enemyData->position);
+		background->addChild(enemy);
+		m_vEnemys.pushBack(enemy);
+	}
+}
+
+void GameScene::addPlayer(RoomData* roomData)
+{
+	m_pPlayer = Player::create(roomData->player_color, roomData->player_speed, roomData->player_jumpTime);
+
+	Size visibleSize = Director::getInstance()->getVisibleSize();
+	auto screenWidth = visibleSize.width;
+#if (DEBUG_FLAG == 1)
+	screenWidth = screenWidth / 2;
+#endif
+	float duration = screenWidth / roomData->player_speed;
 	Size playerSize = m_pPlayer->getContentSize();
 	float posX = playerSize.width / 2;
-	float posY = m_iterCurRoom->position.y + playerSize.height / 2;
+	float posY = roomData->position.y + playerSize.height / 2;
 	m_pPlayer->setPosition(posX, posY);
 	m_pPlayer->runAction(Sequence::createWithTwoActions(
-		MoveTo::create(duration, Vec2(posX + visibleSize.width, posY)),
+		MoveTo::create(duration, Vec2(posX + screenWidth, posY)),
 		CallFuncN::create([=](Ref* pSender)->void
 	{
 		m_pPlayer->die();
-		++m_iterCurRoom;
-//		if (m_iterCurRoom != m_pLevelData->getRoomsData()->end())
-//		{
-//			this->addPlayer();
-//		}
+		if (m_nCurRoomIndex < m_pCurLevelData->getRoomsData()->size())
+		{
+			// next room
+			m_pCurRoomData = &m_pCurLevelData->getRoomsData()->at(m_nCurRoomIndex++);
+			this->addRoom(m_pCurRoomData);
+			this->addPlayer(m_pCurRoomData);
+		}
+		else
+		{
+			// the last room
+			RenderTexture* renderTexture = RenderTexture::create(visibleSize.width, visibleSize.height, Texture2D::PixelFormat::RGBA8888, GL_DEPTH24_STENCIL8);
+			// Go through all child of Game class and draw in renderTexture
+			// It's like screenshot
+			renderTexture->begin();
+			Director::getInstance()->getRunningScene()->visit();
+			renderTexture->end();
+
+			Director::getInstance()->getRenderer()->render();// Must add this for version 3.0 or image goes black  
+			Director::getInstance()->getTextureCache()->addImage(renderTexture->newImage(), "GameOverImage");
+
+			Director::getInstance()->replaceScene(GameOverScene::createScene(m_nDeadNumber));
+		}
 	})));
 	this->addChild(m_pPlayer);
-}
-
-// Debug functions
-void GameScene::addMaximumEnemy_Debug()
-{
-	Size visibleSize = Director::getInstance()->getVisibleSize();
-
-	float stepT = 0.01f;
-	float halfT = m_iterCurRoom->player_jumpTime / 2;
-	int steps = halfT / stepT;
-	float realT = 0;
-	float scaleT = 0;
-	float scaleStepT = 0.5f / steps;
-	for (int i = 0; i < steps; i++)
-	{
-		float enemyWidth = (m_iterCurRoom->player_speed * (halfT - realT) - m_pPlayer->getContentSize().width / 2) * 2;
-		float enemyHeight = m_pPlayer->getJumpHeight() * 4 * scaleT * (1 - scaleT);
-		if (enemyHeight > 0 && enemyWidth > 0)
-		{
-			auto enemy = Enemy::create(Size(enemyWidth, enemyHeight), Color3B::MAGENTA);
-			enemy->setPosition(visibleSize.width / 2, m_pLevelData->getRoomsData()->begin()->position.y);
-			this->addChild(enemy);
-			m_vEnemys.pushBack(enemy);
-			//i = steps;
-		}
-		realT += stepT;
-		scaleT += scaleStepT;
-	}
 }

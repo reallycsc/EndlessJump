@@ -2,7 +2,7 @@
 #define __GAME_SCENE_H__
 
 #include "CommonHeader.h"
-#include "GameLevelData.h"
+#include "GameMediator.h"
 #include "Player.h"
 #include "Enemy.h"
 
@@ -23,22 +23,28 @@ private:
 	virtual void onTouchEnded(Touch* touch, Event* event) override;
 	bool onContactBegin(const PhysicsContact& contact);
 
+	void buttonCallback_MainMenu(Ref* pSender);
+
 	void update(float dt) override;
 
-	void setPhyWorld(PhysicsWorld* world) { m_world = world; }
-	void addPlayer();
+	void setPhyWorld(PhysicsWorld* world) { m_pWorld = world; }
 
-	void addMaximumEnemy_Debug();
+	void addRoom(RoomData* roomData);
+	void addPlayer(RoomData* roomData);
 
-	
 private:
-	PhysicsWorld* m_world;
+	PhysicsWorld*	m_pWorld;
+	GameMediator*	m_pGameMediator;
 
-	GameLevelData*	m_pLevelData;
+	GameLevelData*	m_pCurLevelData;
+	RoomData*	m_pCurRoomData;
+	int	m_nCurRoomIndex;
+
 	Player*	m_pPlayer;
 	Vector<Enemy*>	m_vEnemys;
 
-	list<RoomData>::const_iterator	m_iterCurRoom;
+	Text*	m_pTextDeadNum;
+	int	m_nDeadNumber;
 };
 
 #endif // __GAME_SCENE_H__

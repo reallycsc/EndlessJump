@@ -39,6 +39,8 @@ public:
 
 public:
 	CC_SYNTHESIZE(int, m_nLevel, Level);
+	CC_SYNTHESIZE(string, m_sLevelName, LevelName);
+	CC_SYNTHESIZE(int, m_nMaxDeadTime, MaxDeadTime);
 
 private:
 	vector<RoomData>	m_vRoomsData;

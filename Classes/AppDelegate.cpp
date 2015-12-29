@@ -1,5 +1,6 @@
 #include "AppDelegate.h"
-#include "LevelMakeScene.h"
+#include "CommonHeader.h"
+#include "MainMenuScene.h"
 #include "GameMediator.h"
 
 USING_NS_CC;
@@ -56,8 +57,10 @@ bool AppDelegate::applicationDidFinishLaunching() {
         director->setOpenGLView(glview);
     }
 
+#if (DEBUG_FLAG == 1)
     // turn on display FPS
     director->setDisplayStats(true);
+#endif
 
     // set FPS. the default value is 1.0/60 if you don't call this
     director->setAnimationInterval(1.0f / 60);
@@ -95,7 +98,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
 	GameMediator::getInstance();
 
     // run
-    director->runWithScene(LevelMakeScene::createScene());
+    director->runWithScene(MainMenuScene::createScene());
 
     return true;
 }

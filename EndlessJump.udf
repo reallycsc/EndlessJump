@@ -7,12 +7,33 @@
         <LastRunType Value="Windows" />
       </Value>
     </Item>
+    <Item Key="PackageParamsKey">
+      <Value ctype="PackageParams">
+        <LuaIsEncrypt Value="False" />
+        <LuaEncryptKey Value="" />
+        <LuaEncryptSign Value="" />
+        <Android_PackageName Value="org.cocos.EndlessJump" />
+        <AndroidkeyStore Value="" />
+        <AndroidVersion Value="android-22" />
+        <iOS_Target Value="EndlessJump iOS" />
+        <iOS_BundleID Value="" />
+        <Platform Value="None" />
+        <RunPlatform Value="None" />
+        <FrameworkVersion Value="cocos2d-x-3.6" />
+        <IsDebugKeystore Value="True" />
+        <EnableSourceMap Value="False" />
+        <EnableHTML5Advanced Value="False" />
+      </Value>
+    </Item>
     <Item Key="TabsParamsKey">
       <Value ctype="TabsInfo">
         <OpenedDocuments>
           <FilePathData Path="LevelMakeScene.csd" />
+          <FilePathData Path="MainMenuScene.csd" />
+          <FilePathData Path="GameScene.csd" />
+          <FilePathData Path="GameOverScene.csd" />
         </OpenedDocuments>
-        <ActiveDocument Path="LevelMakeScene.csd" />
+        <ActiveDocument Path="GameOverScene.csd" />
       </Value>
     </Item>
   </Properties>

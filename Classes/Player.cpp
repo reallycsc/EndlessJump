@@ -36,7 +36,7 @@ bool Player::init(const Color3B &color, float speed, float jumpTime)
 		// set attribute
 		m_playerColor = Color4F(color);
 		Size playerSize = Size(32, 32);
-		m_fJumpHeight = playerSize.height * 4;
+		m_fJumpHeight = playerSize.height * 3;
 		m_fSpeed = speed;
 		m_fJumpDuration = jumpTime;
 

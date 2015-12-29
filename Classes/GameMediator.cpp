@@ -1,6 +1,4 @@
 #include "GameMediator.h"
-#include "CSCClass/CommonFunctions.h"
-#include <complex>
 
 static GameMediator _sharedContext;
 
@@ -17,13 +15,11 @@ GameMediator* GameMediator::getInstance()
 
 GameMediator::GameMediator(void)
 {
-	m_mGameText.clear();
 	m_vGameLevelData.clear();
 }
 
 GameMediator::~GameMediator(void)
 {
-	m_mGameText.clear();
 	m_vGameLevelData.clear();
 }
 
@@ -32,36 +28,26 @@ bool GameMediator::init()
 	bool bRet = false;
 	do
 	{
-		m_languageType = Application::getInstance()->getCurrentLanguage();
+		m_nMaxGameLevel = 0;
 		m_nCurGameLevel = 1;
-		m_nGameLevelMax = 0;
+		// get local save data
+		UserDefault* user = UserDefault::getInstance();
+		if (!user->getBoolForKey("isHaveSaveFileXml"))
+		{
+			user->setBoolForKey("isHaveSaveFileXml", true);
+			user->setIntegerForKey("CurLevel", 1);
+		}
+		else
+		{
+			m_nCurGameLevel = user->getIntegerForKey("CurLevel", 1);
+		}
 
 		CC_BREAK_IF(!this->loadGameLevelFile());
-
-		CC_BREAK_IF(!this->loadGameTextFile());
 
 		bRet = true;
 	} while (false);
 	
 	return bRet;
-}
-
-void GameMediator::reloadAllConfigFiles()
-{
-	m_nGameLevelMax = 0;
-
-	CS_RETURN_IF(!this->loadGameLevelFile());
-
-	CS_RETURN_IF(!this->loadGameTextFile());
-}
-
-void GameMediator::changeLanguageTo(LanguageType &type)
-{
-	CS_RETURN_IF(m_languageType == type);
-
-	m_languageType = type;
-
-	this->loadGameTextFile();
 }
 
 bool GameMediator::loadGameLevelFile()
@@ -80,12 +66,14 @@ bool GameMediator::loadGameLevelFile()
 		for (XMLElement* surface1 = root->FirstChildElement("Level"); surface1 != NULL; surface1 = surface1->NextSiblingElement("Level"))
 		{
 			GameLevelData* data = GameLevelData::create();
-			int level = surface1->IntAttribute("level");
-			data->setLevel(level);
+			data->setLevel(surface1->IntAttribute("level"));
+			data->setLevelName(surface1->Attribute("name"));
+			data->setMaxDeadTime(surface1->IntAttribute("deadTime"));
 
 			CC_BREAK_IF(!data->setRoomDataWithFile(surface1));
 
 			m_vGameLevelData.push_back(data);
+			m_nMaxGameLevel++;
 		}
 		bRet = true;
 	} while (false);
@@ -111,7 +99,9 @@ bool GameMediator::saveGameLevelFile()
 		for (size_t i = 0, j = m_vGameLevelData.size(); i < j; i++)
 		{
 			XMLElement *surface1 = document->NewElement("Level");
-			surface1->SetAttribute("level", i + 1);
+			surface1->SetAttribute("level", m_vGameLevelData.at(i)->getLevel());
+			surface1->SetAttribute("name", m_vGameLevelData.at(i)->getLevelName().c_str());
+			surface1->SetAttribute("deadTime", m_vGameLevelData.at(i)->getMaxDeadTime());
 			root->LinkEndChild(surface1);
 
 			auto roomsData = m_vGameLevelData.at(i)->getRoomsData();
@@ -176,46 +166,8 @@ bool GameMediator::saveGameLevelFile()
 	return bRet;
 }
 
-bool GameMediator::loadGameTextFile()
+void GameMediator::saveGameData()
 {
-	bool bRet = false;
-	do
-	{
-		tinyxml2::XMLDocument document;
-		string filename;
-		switch (m_languageType)
-		{
-		case LanguageType::CHINESE:
-			filename = FileUtils::getInstance()->fullPathForFilename("config/GameText_Chinese.xml");
-			break;
-		case LanguageType::ENGLISH:
-			filename = FileUtils::getInstance()->fullPathForFilename("config/GameText_English.xml");
-			break;
-		default:
-			filename = FileUtils::getInstance()->fullPathForFilename("config/GameText_English.xml");
-			break;
-		}
-
-        document.LoadFile(filename.c_str());
-		XMLElement* root = document.RootElement();
-		CC_BREAK_IF(!root);
-
-		m_mGameText.clear();
-		for (XMLElement* surface1 = root->FirstChildElement("Text"); surface1 != NULL;
-		surface1 = surface1->NextSiblingElement("Text"))
-		{
-            string str = string(surface1->GetText());
-            string oldStr = "\\n";
-            string newStr = "\n";
-			m_mGameText.insert(pair<string, string>(surface1->Attribute("id"), CSCClass::replace_all_distinct(str, oldStr, newStr)));
-		}
-
-		bRet = true;
-	} while (false);
-	return bRet;
-}
-
-void GameMediator::initGame()
-{
-	m_nCurGameLevel = 1;
+	UserDefault* user = UserDefault::getInstance();
+	user->setIntegerForKey("CurLevel", m_nCurGameLevel);
 }
