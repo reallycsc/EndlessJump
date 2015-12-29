@@ -217,7 +217,7 @@ void CSC_IOSHelper::IAP_purchaseProduct(bool isTest, const char* id)
 #endif
 }
 
-int CSC_IOSHelper::IAP_getProductsCount()
+unsigned long CSC_IOSHelper::IAP_getProductsCount()
 {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
 	return [[IAPShare sharedHelper].iap.products count];
