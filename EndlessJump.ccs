@@ -8,6 +8,7 @@
         <Project Name="LevelMakeScene.csd" Type="Scene" />
         <Project Name="GameScene.csd" Type="Scene" />
         <Project Name="GameOverScene.csd" Type="Scene" />
+        <Project Name="MainMenuScene_NodeLevel.csd" Type="Node" />
       </RootFolder>
     </Group>
   </SolutionFolder>

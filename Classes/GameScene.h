@@ -25,8 +25,6 @@ private:
 
 	void buttonCallback_MainMenu(Ref* pSender);
 
-	void update(float dt) override;
-
 	void setPhyWorld(PhysicsWorld* world) { m_pWorld = world; }
 
 	void addRoom(RoomData* roomData);
@@ -38,7 +36,6 @@ private:
 
 	GameLevelData*	m_pCurLevelData;
 	RoomData*	m_pCurRoomData;
-	int	m_nCurRoomIndex;
 
 	Player*	m_pPlayer;
 	Vector<Enemy*>	m_vEnemys;

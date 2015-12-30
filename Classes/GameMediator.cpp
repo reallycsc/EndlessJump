@@ -15,12 +15,18 @@ GameMediator* GameMediator::getInstance()
 
 GameMediator::GameMediator(void)
 {
+	m_nGameLevelCount = 0;
+	m_nMaxGameLevel = m_nCurGameLevel = 1;
+	m_nMaxGameRoom = m_nCurGameRoom = 1;
+
 	m_vGameLevelData.clear();
+	m_vLevelMinDeadCount.clear();
 }
 
 GameMediator::~GameMediator(void)
 {
 	m_vGameLevelData.clear();
+	m_vLevelMinDeadCount.clear();
 }
 
 bool GameMediator::init()
@@ -28,21 +34,35 @@ bool GameMediator::init()
 	bool bRet = false;
 	do
 	{
-		m_nMaxGameLevel = 0;
-		m_nCurGameLevel = 1;
+		// get level config file
+		CC_BREAK_IF(!this->loadGameLevelFile());
+
 		// get local save data
 		UserDefault* user = UserDefault::getInstance();
 		if (!user->getBoolForKey("isHaveSaveFileXml"))
 		{
 			user->setBoolForKey("isHaveSaveFileXml", true);
 			user->setIntegerForKey("CurLevel", 1);
+			user->setIntegerForKey("MaxLevel", 1);
+			user->setIntegerForKey("MaxRoom", 1);
+			for (size_t i = 0; i < m_nGameLevelCount; i++)
+			{
+				string key = StringUtils::format("Level%d-DeadCount", i + 1);
+				user->setIntegerForKey(key.c_str(), -1);
+				m_vLevelMinDeadCount.push_back(-1);
+			}
 		}
 		else
 		{
-			m_nCurGameLevel = user->getIntegerForKey("CurLevel", 1);
+			m_nCurGameLevel = MIN(user->getIntegerForKey("CurLevel", 1), m_nGameLevelCount);
+			m_nMaxGameLevel = MIN(user->getIntegerForKey("MaxLevel", 1), m_nGameLevelCount);
+			m_nMaxGameRoom = user->getIntegerForKey("MaxRoom", 1);
+			for (size_t i = 0; i < m_nGameLevelCount; i++)
+			{
+				string key = StringUtils::format("Level%d-DeadCount", i + 1);
+				m_vLevelMinDeadCount.push_back(user->getIntegerForKey(key.c_str(), 0));
+			}
 		}
-
-		CC_BREAK_IF(!this->loadGameLevelFile());
 
 		bRet = true;
 	} while (false);
@@ -73,7 +93,7 @@ bool GameMediator::loadGameLevelFile()
 			CC_BREAK_IF(!data->setRoomDataWithFile(surface1));
 
 			m_vGameLevelData.push_back(data);
-			m_nMaxGameLevel++;
+			m_nGameLevelCount++;
 		}
 		bRet = true;
 	} while (false);
@@ -166,8 +186,53 @@ bool GameMediator::saveGameLevelFile()
 	return bRet;
 }
 
-void GameMediator::saveGameData()
+void GameMediator::saveIntegerGameDataForKey(const char* key, int data)
 {
-	UserDefault* user = UserDefault::getInstance();
-	user->setIntegerForKey("CurLevel", m_nCurGameLevel);
+	UserDefault::getInstance()->setIntegerForKey(key, data);
+}
+
+void GameMediator::setDeadCount(int deadCount)
+{
+	int minDeadCount = m_vLevelMinDeadCount.at(m_nCurGameLevel - 1);
+	if (minDeadCount < 0 || deadCount < minDeadCount)
+	{
+		m_vLevelMinDeadCount.at(m_nCurGameLevel - 1) = deadCount;
+		string key = StringUtils::format("Level%d-DeadCount", m_nCurGameLevel);
+		this->saveIntegerGameDataForKey(key.c_str(), deadCount);
+	}
+
+}
+
+void GameMediator::setMaxGameLevel()
+{
+	int nextLevel = m_nCurGameLevel + 1;
+	CS_RETURN_IF(nextLevel > m_nGameLevelCount);
+
+	if (nextLevel > m_nMaxGameLevel)
+	{
+		m_nMaxGameLevel = nextLevel;
+		m_nMaxGameRoom = 1;
+		this->saveIntegerGameDataForKey("MaxLevel", m_nMaxGameLevel);
+		this->saveIntegerGameDataForKey("MaxRoom", m_nMaxGameRoom);
+	}
+}
+
+void GameMediator::gotoNextGameLevel()
+{
+	if (m_nCurGameLevel < m_nGameLevelCount)
+	{
+		m_nCurGameLevel++;
+		this->saveIntegerGameDataForKey("CurLevel", m_nCurGameLevel);
+	}
+	m_nCurGameRoom = 1;
+}
+
+void GameMediator::gotoNextGameRoom()
+{
+	m_nCurGameRoom++;
+	if (m_nCurGameLevel == m_nMaxGameLevel && m_nCurGameRoom > m_nMaxGameRoom)
+	{
+		m_nMaxGameRoom = m_nCurGameRoom;
+		this->saveIntegerGameDataForKey("MaxRoom", m_nMaxGameRoom);
+	}
 }

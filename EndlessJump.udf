@@ -32,8 +32,9 @@
           <FilePathData Path="MainMenuScene.csd" />
           <FilePathData Path="GameScene.csd" />
           <FilePathData Path="GameOverScene.csd" />
+          <FilePathData Path="MainMenuScene_NodeLevel.csd" />
         </OpenedDocuments>
-        <ActiveDocument Path="GameOverScene.csd" />
+        <ActiveDocument Path="MainMenuScene_NodeLevel.csd" />
       </Value>
     </Item>
   </Properties>

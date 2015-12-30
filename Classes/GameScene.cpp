@@ -57,8 +57,32 @@ bool GameScene::init()
 	int curLevel = m_pGameMediator->getCurGameLevel();
 	m_pCurLevelData = levelsData->at(curLevel - 1);
 	auto roomsData = m_pCurLevelData->getRoomsData();
-	m_nCurRoomIndex = 1;
+	m_pGameMediator->setCurGameRoom(1);
 	m_pCurRoomData = &roomsData->at(0);
+	// add all room that have been
+	int maxLevel = m_pGameMediator->getMaxGameLevel();
+	if (curLevel < maxLevel) // show all rooms
+	{
+		for (size_t i = 0, j = roomsData->size(); i < j; i++)
+		{
+			this->addRoom(&roomsData->at(i));
+		}
+	}
+	else if (curLevel == maxLevel) // show to max room
+	{
+		int maxRoom = m_pGameMediator->getMaxGameRoom();
+		for (size_t i = 0, j = maxRoom; i < j; i++)
+		{
+			this->addRoom(&roomsData->at(i));
+		}
+	}
+	else // should not be in here, show only 1 room
+	{
+		this->addRoom(m_pCurRoomData);
+	}
+
+	// add player
+	this->addPlayer(m_pCurRoomData);
 
 	// load scene
 	auto rootNode = CSLoader::createNode("GameScene.csb");
@@ -72,15 +96,7 @@ bool GameScene::init()
 	Text* levelName = dynamic_cast<Text*>(rootNode->getChildByName("Text_LevelName"));
 	levelName->setString(m_pCurLevelData->getLevelName());
 	Text* levelNumber = dynamic_cast<Text*>(rootNode->getChildByName("Text_LevelNumber"));
-	levelNumber->setString(StringUtils::format("%d/%d", curLevel, m_pGameMediator->getMaxGameLevel()));
-
-	// add first room
-	this->addRoom(m_pCurRoomData);
-
-	// add player
-	this->addPlayer(m_pCurRoomData);
-
-	//this->scheduleUpdate();
+	levelNumber->setString(StringUtils::format("%d/%d", curLevel, m_pGameMediator->getGameLevelCount()));
 
     return true;
 }
@@ -88,6 +104,10 @@ bool GameScene::init()
 bool GameScene::onTouchBegan(Touch *touch, Event *event)
 {
 	//Point point = touch->getLocation();
+	if (m_pPlayer)
+	{
+		m_pPlayer->jump();
+	}
 	return true;
 }
 
@@ -98,10 +118,6 @@ void GameScene::onTouchMoved(Touch *touch, Event *event)
 
 void GameScene::onTouchEnded(Touch *touch, Event *event)
 {
-	if (m_pPlayer)
-	{
-		m_pPlayer->jump();
-	}
 }
 
 void GameScene::buttonCallback_MainMenu(Ref* pSender)
@@ -155,11 +171,6 @@ bool GameScene::onContactBegin(const PhysicsContact& contact)
 	return false;
 }
 
-// schedule functions
-void GameScene::update(float dt)
-{
-}
-
 void GameScene::addRoom(RoomData* roomData)
 {
 	// background
@@ -199,10 +210,12 @@ void GameScene::addPlayer(RoomData* roomData)
 		CallFuncN::create([=](Ref* pSender)->void
 	{
 		m_pPlayer->die();
-		if (m_nCurRoomIndex < m_pCurLevelData->getRoomsData()->size())
+		int roomIndex = m_pGameMediator->getCurGameRoom();
+		if (roomIndex < m_pCurLevelData->getRoomsData()->size())
 		{
 			// next room
-			m_pCurRoomData = &m_pCurLevelData->getRoomsData()->at(m_nCurRoomIndex++);
+			m_pCurRoomData = &m_pCurLevelData->getRoomsData()->at(roomIndex++);
+			m_pGameMediator->gotoNextGameRoom();
 			this->addRoom(m_pCurRoomData);
 			this->addPlayer(m_pCurRoomData);
 		}

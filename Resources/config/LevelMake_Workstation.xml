@@ -1,63 +1,64 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GameLevel>
-    <Level level="1" name="Morning" deadTime="1">
+    <Level level="1" name="Morning" deadTime="100">
         <Room id="1" width="768" height="204" x="0" y="0" color_r="125" color_g="149" color_b="153">
-            <Player speed="300" jumpTime="0.8" color_r="95" color_g="102" color_b="120"/>
+            <Player speed="300" jumpTime="0.6" color_r="95" color_g="102" color_b="120"/>
             <Enemys color_r="95" color_g="102" color_b="120">
                 <Enemy id="1" width="50" height="50" x="384" y="0"/>
             </Enemys>
         </Room>
         <Room id="2" width="768" height="204" x="0" y="204" color_r="169" color_g="204" color_b="169">
-            <Player speed="300" jumpTime="0.8" color_r="95" color_g="102" color_b="120"/>
+            <Player speed="300" jumpTime="0.6" color_r="95" color_g="102" color_b="120"/>
             <Enemys color_r="95" color_g="102" color_b="120">
                 <Enemy id="1" width="50" height="50" x="256" y="0"/>
                 <Enemy id="2" width="50" height="50" x="494" y="0"/>
             </Enemys>
         </Room>
         <Room id="3" width="768" height="204" x="0" y="408" color_r="222" color_g="242" color_b="167">
-            <Player speed="300" jumpTime="0.8" color_r="95" color_g="102" color_b="120"/>
+            <Player speed="300" jumpTime="0.6" color_r="95" color_g="102" color_b="120"/>
             <Enemys color_r="95" color_g="102" color_b="120">
                 <Enemy id="1" width="50" height="50" x="379" y="0"/>
-                <Enemy id="2" width="50" height="100" x="602" y="0"/>
+                <Enemy id="2" width="50" height="70" x="602" y="0"/>
             </Enemys>
         </Room>
         <Room id="4" width="768" height="204" x="0" y="612" color_r="250" color_g="245" color_b="197">
-            <Player speed="300" jumpTime="0.8" color_r="95" color_g="102" color_b="120"/>
+            <Player speed="300" jumpTime="0.6" color_r="95" color_g="102" color_b="120"/>
             <Enemys color_r="95" color_g="102" color_b="120">
                 <Enemy id="1" width="50" height="80" x="240" y="0"/>
-                <Enemy id="2" width="50" height="80" x="441" y="0"/>
+                <Enemy id="2" width="50" height="80" x="447" y="0"/>
             </Enemys>
         </Room>
     </Level>
-    <Level level="2" name="Spring" deadTime="10">
+    <Level level="2" name="Spring" deadTime="100">
         <Room id="1" width="768" height="204" x="0" y="0" color_r="204" color_g="225" color_b="152">
-            <Player speed="300" jumpTime="0.8" color_r="43" color_g="79" color_b="63"/>
+            <Player speed="300" jumpTime="0.6" color_r="43" color_g="79" color_b="63"/>
             <Enemys color_r="43" color_g="79" color_b="63">
-                <Enemy id="1" width="150" height="50" x="198" y="0"/>
-                <Enemy id="2" width="150" height="50" x="570" y="0"/>
+                <Enemy id="1" width="100" height="40" x="198" y="0"/>
+                <Enemy id="2" width="100" height="40" x="476" y="0"/>
             </Enemys>
         </Room>
         <Room id="2" width="768" height="204" x="0" y="204" color_r="79" color_g="134" color_b="125">
-            <Player speed="300" jumpTime="0.8" color_r="43" color_g="79" color_b="63"/>
+            <Player speed="300" jumpTime="0.6" color_r="43" color_g="79" color_b="63"/>
             <Enemys color_r="43" color_g="79" color_b="63">
-                <Enemy id="1" width="100" height="100" x="231" y="0"/>
-                <Enemy id="2" width="150" height="50" x="534" y="0"/>
+                <Enemy id="1" width="50" height="70" x="166" y="0"/>
+                <Enemy id="2" width="50" height="50" x="447" y="0"/>
+                <Enemy id="3" width="110" height="40" x="622" y="0"/>
             </Enemys>
         </Room>
         <Room id="3" width="768" height="204" x="0" y="408" color_r="125" color_g="175" color_b="52">
-            <Player speed="300" jumpTime="0.8" color_r="43" color_g="79" color_b="63"/>
+            <Player speed="300" jumpTime="0.6" color_r="43" color_g="79" color_b="63"/>
             <Enemys color_r="43" color_g="79" color_b="63">
-                <Enemy id="1" width="50" height="80" x="190" y="0"/>
-                <Enemy id="2" width="100" height="50" x="400" y="1"/>
-                <Enemy id="3" width="50" height="80" x="669" y="0"/>
+                <Enemy id="1" width="60" height="50" x="187" y="0"/>
+                <Enemy id="2" width="60" height="50" x="369" y="0"/>
+                <Enemy id="3" width="60" height="50" x="555" y="0"/>
             </Enemys>
         </Room>
         <Room id="4" width="768" height="204" x="0" y="612" color_r="202" color_g="230" color_b="189">
-            <Player speed="300" jumpTime="0.8" color_r="43" color_g="79" color_b="63"/>
+            <Player speed="300" jumpTime="0.6" color_r="43" color_g="79" color_b="63"/>
             <Enemys color_r="43" color_g="79" color_b="63">
-                <Enemy id="1" width="50" height="50" x="197" y="0"/>
-                <Enemy id="2" width="80" height="100" x="404" y="0"/>
-                <Enemy id="3" width="50" height="100" x="648" y="0"/>
+                <Enemy id="1" width="110" height="30" x="174" y="0"/>
+                <Enemy id="2" width="90" height="50" x="384" y="0"/>
+                <Enemy id="3" width="40" height="85" x="603" y="0"/>
             </Enemys>
         </Room>
     </Level>

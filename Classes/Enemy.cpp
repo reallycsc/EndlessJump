@@ -52,6 +52,7 @@ bool Enemy::init(const Size &size, const Color3B &color, const int &id)
 		body->setContactTestBitmask(MASK_PLAYER);
 		this->setPhysicsBody(body);
 
+#if DEBUG_FLAG == 1
 		if (id >= 0) // add id label
 		{
 			char buf[10];
@@ -61,6 +62,7 @@ bool Enemy::init(const Size &size, const Color3B &color, const int &id)
 			text->setPosition(m_size / 2);
 			this->addChild(text, 2);
 		}
+#endif // DEBUG_FLAG == 1
 
         bRet = true;
     } while (0);
