@@ -35,9 +35,12 @@ bool GameOverScene::init(int deadCount)
     {
         return false;
     }
+	//////////////////////////////
+	m_bIsNextLevelAvailable = false;
+
 	GameMediator* pGameMediator = GameMediator::getInstance();
 	pGameMediator->setDeadCount(deadCount);
-	pGameMediator->setMaxGameLevel();
+	int deadCountAll = pGameMediator->getDeadCountAll(pGameMediator->getMaxGameLevel());
 
 	// add background screenshot
 	Size visibleSize = Director::getInstance()->getVisibleSize();
@@ -65,11 +68,30 @@ bool GameOverScene::init(int deadCount)
 	int curLevel = pGameMediator->getCurGameLevel();
 	auto levelData = pGameMediator->getGameLevelData()->at(curLevel - 1);
 	textTitle->setString(levelData->getLevelName());
-	auto textDeadNumber = dynamic_cast<Text*>(layout->getChildByName("Node_EnlargeAnimation")->getChildByName("Text_DeadNumber"));
-	textDeadNumber->setString(StringUtils::format("Dead %d times.", deadCount));
+	auto nodeEnlargeAnimation = dynamic_cast<Node*>(layout->getChildByName("Node_EnlargeAnimation"));
+	auto textDeadNumber = dynamic_cast<Text*>(nodeEnlargeAnimation->getChildByName("Text_DeadNumber"));
+	if (deadCount == 0)
+	{
+		textDeadNumber->setString(StringUtils::format("Perfect this level!"));
+		textDeadNumber->setTextColor(Color4B::ORANGE);
+	}
+	else if (deadCount == 1)
+		textDeadNumber->setString(StringUtils::format("%d dead this level.", deadCount));
+	else
+		textDeadNumber->setString(StringUtils::format("%d deads this level.", deadCount));
+	auto textDeadNumberAll = dynamic_cast<Text*>(nodeEnlargeAnimation->getChildByName("Text_DeadNumberAll"));
+	if (deadCountAll == 0)
+	{
+		textDeadNumberAll->setString(StringUtils::format("Perfect till now!"));
+		textDeadNumberAll->setTextColor(Color4B::ORANGE);
+	}
+	else if (deadCountAll == 1)
+		textDeadNumberAll->setString(StringUtils::format("%d dead total.", deadCountAll));
+	else
+		textDeadNumberAll->setString(StringUtils::format("%d deads total.", deadCountAll));
 	int maxDeadTime = levelData->getMaxDeadTime();
 	auto textNextRequirement = dynamic_cast<Text*>(layout->getChildByName("Text_NextRequirement"));
-	textNextRequirement->setString(StringUtils::format("(Dead < %d times)", maxDeadTime));
+	textNextRequirement->setString(StringUtils::format("(Total deads < %d)", maxDeadTime));
 	auto textFinish = dynamic_cast<Text*>(layout->getChildByName("Text_Finish"));
 
 	if (pGameMediator->getCurGameLevel() == pGameMediator->getGameLevelCount()) // the last level, finish the game!
@@ -81,14 +103,25 @@ bool GameOverScene::init(int deadCount)
 	else
 	{
 		textFinish->setVisible(false);
-		if (deadCount <= maxDeadTime)
+		if (pGameMediator->getCurGameLevel() < pGameMediator->getMaxGameLevel())
 		{
-			textNextRequirement->setTextColor(Color4B::GREEN);
+			textNextRequirement->setVisible(false);
+			m_bIsNextLevelAvailable = true;
 		}
 		else
 		{
-			textNextRequirement->setTextColor(Color4B::RED);
-			buttonNext->setEnabled(false);
+			if (deadCountAll < maxDeadTime)
+			{
+				textNextRequirement->setTextColor(Color4B::GREEN);
+				pGameMediator->setMaxGameLevel();
+				m_bIsNextLevelAvailable = true;
+			}
+			else
+			{
+				textNextRequirement->setTextColor(Color4B::RED);
+				buttonNext->setEnabled(false);
+				m_bIsNextLevelAvailable = false;
+			}
 		}
 	}
 
@@ -111,6 +144,9 @@ void GameOverScene::buttonCallback_Retry(Ref* pSender)
 void GameOverScene::buttonCallback_MainMenu(Ref* pSender)
 {
 	Director::getInstance()->getTextureCache()->removeTextureForKey("GameOverImage");
-	GameMediator::getInstance()->gotoNextGameLevel();
+	if (m_bIsNextLevelAvailable)
+	{
+		GameMediator::getInstance()->gotoNextGameLevel();
+	}
 	Director::getInstance()->replaceScene(MainMenuScene::createScene());
 }

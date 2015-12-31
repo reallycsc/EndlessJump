@@ -59,13 +59,22 @@ bool MainMenuScene::init()
 		m_vLevelButtons.pushBack(buttonLevel);
 		// text
 		auto textDeadCount = dynamic_cast<Text*>(levelNode->getChildByName("Text_DeadTime"));
-		if (levelDeadCounts->at(i) < 0)
+		int deadCount = levelDeadCounts->at(i);
+		if (deadCount < 0)
 		{
 			textDeadCount->setVisible(false);
 		}
 		else
 		{
-			textDeadCount->setString(StringUtils::format("%d Deads", levelDeadCounts->at(i)));
+			if (deadCount == 0)
+			{
+				textDeadCount->setString(StringUtils::format("perfect"));
+				textDeadCount->setTextColor(Color4B::ORANGE);
+			}
+			else if (deadCount == 1)
+				textDeadCount->setString(StringUtils::format("%d dead", deadCount));
+			else
+				textDeadCount->setString(StringUtils::format("%d deads", deadCount));
 		}
 	}
 

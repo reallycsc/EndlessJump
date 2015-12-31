@@ -24,6 +24,7 @@ public:
 	// getter function
 	vector<GameLevelData*>* getGameLevelData() { return &m_vGameLevelData; }
 	vector<int>* getLevelMinDeadCount() { return &m_vLevelMinDeadCount; }
+	int getDeadCountAll(int level);
 
 public:
 	CC_SYNTHESIZE(int, m_nGameLevelCount, GameLevelCount);

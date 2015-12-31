@@ -67,9 +67,9 @@ inline bool sortJumpPoints(const JumpPoints &p1, const JumpPoints &p2)
 	return p1.pEndStart < p2.pEndStart; // ascending
 }
 
-inline bool sortJumpPointsForAutoTrying(const float &p1, const float &p2)  
+inline bool sortJumpPointsForAutoTrying(const pair<float, bool> &p1, const pair<float, bool> &p2)
 {
-	return p1 < p2; // ascending
+	return p1.first < p2.first; // ascending
 }
 
 class LevelMakeScene : public Layer
@@ -104,6 +104,7 @@ private:
 	void buttonCallback_RemoveBlock(Ref* pSender);
 	void buttonCallback_CalcFoothold(Ref* pSender);
 	void buttonCallback_Try(Ref* pSender);
+	void buttonCallback_TryAuto(Ref* pSender);
 	void buttonCallback_Save(Ref* pSender);
 	void buttonCallback_Load(Ref* pSender);
 	void buttonCallback_Export(Ref* pSender);
@@ -122,14 +123,14 @@ private:
 	void saveDataTo(int level, int room);
 
 	void setDropDownList(vector<GameLevelData*>* levelsData);
+	bool isJumpLineConflict(const Vec2 &origin, const Vec2 &control, const Vec2 &destination);
 
 	inline void getLevelNode(Node* root, int tag, bool isWithSlider = true);
 	static inline void initStruct(TextFieldSliderBindInt* structTmp, int min, int number, int max);
 	inline void updateBlockTextFieldNumber(int tag, int number);
 	inline void updateBlockTextFieldMax(int tag, int max);
 	inline void updateBlockByLevel(int tag, int number);
-	static inline void drawJumpLineByStart(DrawNode* draw, Vec2 start, Vec2 ctlOffset, Vec2 endOffset, Color4F color);
-	static inline void drawJumpLineByEnd(DrawNode* draw, Vec2 end, Vec2 ctlOffset, Vec2 endOffset, Color4F color);
+	inline void drawJumpLine(DrawNode* draw, const Vec2 &origin, const Vec2 &control, const Vec2 &destination, const Color4F &color);
 	inline void AddEstimateFrameText(Node* parent, char* buf, float p1, float p2,
 		int frameRate, float playerWidth, float speed, float posY, Color4B color) const;
 private:
@@ -142,13 +143,16 @@ private:
 
 	Vector<Enemy*>	m_vEnemys;
 	Player*	m_pPlayer;
+
 	vector<JumpPoints>	m_vJumpPoints;
-	vector<float>	m_vJumpPointsForAutoTrying;
+	vector<pair<float, bool>>	m_vJumpPointsForAutoTrying;
+	vector<Point>	m_vAirPoints;
 
 	int m_nCurEnemyId;
 	int m_nCurJumpPointId;
 
 	bool m_bIsTrying;
+	bool m_bIsAutoTrying;
 	bool m_bIsTouchEnemy;
 	Vec2 m_touchOffset;
 };

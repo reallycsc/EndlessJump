@@ -60,7 +60,8 @@ bool GameMediator::init()
 			for (size_t i = 0; i < m_nGameLevelCount; i++)
 			{
 				string key = StringUtils::format("Level%d-DeadCount", i + 1);
-				m_vLevelMinDeadCount.push_back(user->getIntegerForKey(key.c_str(), 0));
+				int deadCount = user->getIntegerForKey(key.c_str(), -1);
+				m_vLevelMinDeadCount.push_back(deadCount);
 			}
 		}
 
@@ -200,7 +201,6 @@ void GameMediator::setDeadCount(int deadCount)
 		string key = StringUtils::format("Level%d-DeadCount", m_nCurGameLevel);
 		this->saveIntegerGameDataForKey(key.c_str(), deadCount);
 	}
-
 }
 
 void GameMediator::setMaxGameLevel()
@@ -235,4 +235,16 @@ void GameMediator::gotoNextGameRoom()
 		m_nMaxGameRoom = m_nCurGameRoom;
 		this->saveIntegerGameDataForKey("MaxRoom", m_nMaxGameRoom);
 	}
+}
+
+int GameMediator::getDeadCountAll(int level)
+{
+	int deadCountAll = 0;
+	for (size_t i = 0, length = level; i < length; i++)
+	{
+		int deadCount = m_vLevelMinDeadCount.at(i);
+		if (deadCount > 0)
+			deadCountAll += deadCount;
+	}
+	return deadCountAll;
 }

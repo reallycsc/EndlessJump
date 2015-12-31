@@ -5,6 +5,7 @@ enum DrawNodeTag
 {
 	TAG_BLOCK = 1,
 	TAG_SELECTED_BLOCK,
+	TAG_PLAYER_BLOCK,
 };
 
 class Enemy :
@@ -23,8 +24,12 @@ public:
 	void select();
 	void unSelect();
 
+	void addPlayerBlockForLevelMake(Size playerSize);
+	void removePlayerBlockForLevelMake();
+
 public:
 	CC_SYNTHESIZE(bool, m_bIsSelected, IsSelected);
+	CC_SYNTHESIZE(bool, m_bIsPlayerAdded, IsPlayerAdded);
 
 private:
 	Size	m_size;

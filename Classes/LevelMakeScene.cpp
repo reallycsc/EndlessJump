@@ -10,6 +10,7 @@ LevelMakeScene::LevelMakeScene()
 	, m_nCurEnemyId(0)
 	, m_nCurJumpPointId(0)
 	, m_bIsTrying(false)
+	, m_bIsAutoTrying(false)
 	, m_bIsTouchEnemy(false)
 	, m_touchOffset(Vec2(0,0))
 {
@@ -17,6 +18,7 @@ LevelMakeScene::LevelMakeScene()
 	m_vEnemys.clear();
 	m_vJumpPoints.clear();
 	m_vJumpPointsForAutoTrying.clear();
+	m_vAirPoints.clear();
 }
 
 LevelMakeScene::~LevelMakeScene()
@@ -25,6 +27,7 @@ LevelMakeScene::~LevelMakeScene()
 	m_vEnemys.clear();
 	m_vJumpPoints.clear();
 	m_vJumpPointsForAutoTrying.clear();
+	m_vAirPoints.clear();
 }
 
 Scene* LevelMakeScene::createScene()
@@ -87,6 +90,7 @@ bool LevelMakeScene::init()
 	auto buttonRemoveBlock = dynamic_cast<Button*>(rootNode->getChildByName("Button_RemoveBlock"));
 	auto buttonCalcFoothold = dynamic_cast<Button*>(rootNode->getChildByName("Button_CalcFoothold"));
 	auto buttonTry = dynamic_cast<Button*>(rootNode->getChildByName("Button_Try"));
+	auto buttonTryAuto = dynamic_cast<Button*>(rootNode->getChildByName("Button_Try_Auto"));
 	auto buttonSave = dynamic_cast<Button*>(rootNode->getChildByName("Button_SaveLevel")); 
 	auto buttonLoad = dynamic_cast<Button*>(rootNode->getChildByName("Button_LoadLevel"));
 	auto buttonExport = dynamic_cast<Button*>(rootNode->getChildByName("Button_ExportLevel"));
@@ -98,6 +102,7 @@ bool LevelMakeScene::init()
 	buttonRemoveBlock->addClickEventListener(CC_CALLBACK_1(LevelMakeScene::buttonCallback_RemoveBlock, this));
 	buttonCalcFoothold->addClickEventListener(CC_CALLBACK_1(LevelMakeScene::buttonCallback_CalcFoothold, this));
 	buttonTry->addClickEventListener(CC_CALLBACK_1(LevelMakeScene::buttonCallback_Try, this));
+	buttonTryAuto->addClickEventListener(CC_CALLBACK_1(LevelMakeScene::buttonCallback_TryAuto, this));
 	buttonSave->addClickEventListener(CC_CALLBACK_1(LevelMakeScene::buttonCallback_Save, this));
 	buttonLoad->addClickEventListener(CC_CALLBACK_1(LevelMakeScene::buttonCallback_Load, this));
 	buttonExport->addClickEventListener(CC_CALLBACK_1(LevelMakeScene::buttonCallback_Export, this));
@@ -226,7 +231,14 @@ bool LevelMakeScene::init()
 // event functions
 bool LevelMakeScene::onTouchBegan(Touch *touch, Event *event)
 {
-	if (!m_bIsTrying)
+	if (m_bIsTrying || m_bIsAutoTrying)
+	{
+		if (m_pPlayer)
+		{
+			m_pPlayer->jump();
+		}
+	}
+	else
 	{
 		Point point = touch->getLocation();  // get touch point
 		for (ssize_t i = 0; i < m_vEnemys.size(); i++)
@@ -270,14 +282,7 @@ void LevelMakeScene::onTouchMoved(Touch *touch, Event *event)
 
 void LevelMakeScene::onTouchEnded(Touch *touch, Event *event)
 {
-	if (m_bIsTrying)
-	{
-		if (m_pPlayer)
-		{
-			m_pPlayer->jump();
-		}
-	}
-	else
+	if (!m_bIsTrying && !m_bIsAutoTrying)
 	{
 		if (m_bIsTouchEnemy)
 		{
@@ -378,7 +383,7 @@ void LevelMakeScene::onSliderEvent(Ref* pSender, Slider::EventType type)
 
 bool LevelMakeScene::onContactBegin(const PhysicsContact& contact)
 {
-	if (!m_bIsTrying)
+	if (!m_bIsTrying && !m_bIsAutoTrying)
 		return false;
 
 	auto body1 = contact.getShapeA()->getBody();
@@ -398,8 +403,8 @@ bool LevelMakeScene::onContactBegin(const PhysicsContact& contact)
 		particle->setStartSizeVar(5);
 		particle->setStartColor(m_pPlayer->getPlayerColor());
 		particle->setStartColorVar(Color4F(0, 0, 0, 0));
-		//particle->setEndColor(m_pPlayer->getPlayerColor());
-		//particle->setEndColorVar(Color4F(0, 0, 0, 0));
+		particle->setEndColor(m_pPlayer->getPlayerColor());
+		particle->setEndColorVar(Color4F(0, 0, 0, 0));
 		particle->setSpeed(500);
 		particle->setSpeedVar(300);
 		particle->setLife(0.5f);
@@ -424,21 +429,36 @@ bool LevelMakeScene::onContactBegin(const PhysicsContact& contact)
 // schedule functions
 void LevelMakeScene::update(float dt)
 {
-	if (m_bIsTrying && m_pPlayer)
+	if (m_bIsAutoTrying && m_pPlayer)
 	{
 		if (m_nCurJumpPointId < m_vJumpPointsForAutoTrying.size())
 		{
 			float rangePerFrame = m_pPlayer->getSpeed() / Director::getInstance()->getFrameRate();
 			float rightPt = m_pPlayer->getPositionX() + m_pPlayer->getContentSize().width / 2;
-			float jumpPt = m_vJumpPointsForAutoTrying.at(m_nCurJumpPointId);
-			if (rightPt + rangePerFrame >= jumpPt && rightPt < jumpPt)
+			pair<float,bool> jumpPt = m_vJumpPointsForAutoTrying.at(m_nCurJumpPointId);
+			if (jumpPt.second) // start point, jump at this frame
 			{
-				m_pPlayer->jump();
-				m_nCurJumpPointId++;
+				if (rightPt + rangePerFrame >= jumpPt.first && rightPt < jumpPt.first)
+				{
+					m_pPlayer->jump();
+					m_nCurJumpPointId++;
+				}
+				else if (rightPt > jumpPt.first)
+				{
+					m_nCurJumpPointId++;
+				}
 			}
-			else if (rightPt > jumpPt)
+			else // endStart point, jump the next frame
 			{
-				m_nCurJumpPointId++;
+				if (rightPt >= jumpPt.first && rightPt - rangePerFrame < jumpPt.first)
+				{
+					m_pPlayer->jump();
+					m_nCurJumpPointId++;
+				}
+				else if (rightPt > jumpPt.first)
+				{
+					m_nCurJumpPointId++;
+				}
 			}
 		}
 	}
@@ -457,24 +477,28 @@ void LevelMakeScene::buttonCallback_AddNewLevel(Ref* pSender)
 	sprintf(buf, "%d", newLevelIndex);
 	m_pDropDownListLevel->addLabel(Label::createWithSystemFont(buf, "Arial", 22));
 	m_pDropDownListLevel->setSelectedIndex(newLevelIndex - 1);
+	m_pDropDownListRoom->setSelectedIndex(0);
 	this->updateBlockTextFieldNumber(TAG_LEVEL_ID, newLevelIndex);
 	m_sLevelName = "Initial Title";
 	m_pTextFieldLevelName->setString(m_sLevelName);
 	this->updateBlockTextFieldNumber(TAG_LEVEL_MAX_DEADTIME, 10);
 	this->updateBlockTextFieldNumber(TAG_LEVEL_ROOM_ID, 1);
+	this->saveDataTo(newLevelIndex, 1);
 }
 
 void LevelMakeScene::buttonCallback_AddNewRoom(Ref* pSender)
 {
 	auto levelsData = GameMediator::getInstance()->getGameLevelData();
 	CS_RETURN_IF(levelsData->size() == 0);
-	auto roomsData = levelsData->at(m_pDropDownListLevel->getSelectedIndex())->getRoomsData();
+	int level = m_mTextFieldStructs.at(TAG_LEVEL_ID).number;
+	auto roomsData = levelsData->at(level - 1)->getRoomsData();
 	int newRoomIndex = roomsData->size() + 1;
 	char buf[10];
 	sprintf(buf, "%d", newRoomIndex);
 	m_pDropDownListRoom->addLabel(Label::createWithSystemFont(buf, "Arial", 22));
 	m_pDropDownListRoom->setSelectedIndex(newRoomIndex - 1);
 	this->updateBlockTextFieldNumber(TAG_LEVEL_ROOM_ID, newRoomIndex);
+	this->saveDataTo(level, newRoomIndex);
 }
 
 // callback functions
@@ -527,6 +551,42 @@ void LevelMakeScene::buttonCallback_Try(Ref* pSender)
 		m_bIsTouchEnemy = false;
 		button->setTitleText("Stop");
 		m_bIsTrying = true;
+		for (auto obj : m_mTextFieldStructs)
+		{
+			obj.second.textField->setEnabled(false);
+			if (obj.second.slider)
+			{
+				obj.second.slider->setEnabled(false);
+			}
+		}
+
+		this->addPlayerForTrying();
+	}
+}
+
+void LevelMakeScene::buttonCallback_TryAuto(Ref* pSender)
+{
+	Button* button = dynamic_cast<Button*>(pSender);
+	if (m_bIsAutoTrying) // stop trying
+	{
+		button->setTitleText("Auto Try");
+		m_bIsAutoTrying = false;
+		for (auto obj : m_mTextFieldStructs)
+		{
+			obj.second.textField->setEnabled(true);
+			if (obj.second.slider)
+			{
+				obj.second.slider->setEnabled(true);
+			}
+		}
+
+		this->addPlayer();
+	}
+	else // start to try
+	{
+		m_bIsTouchEnemy = false;
+		button->setTitleText("Stop");
+		m_bIsAutoTrying = true;
 		for (auto obj : m_mTextFieldStructs)
 		{
 			obj.second.textField->setEnabled(false);
@@ -678,9 +738,19 @@ void LevelMakeScene::updateCurEnemy(int tag)
 	{
 	case TAG_ENEMY_WIDTH:
 		obj->updateSize(Size(number, obj->getContentSize().height));
+		if (obj->getIsPlayerAdded())
+		{
+			obj->removePlayerBlockForLevelMake();
+			obj->addPlayerBlockForLevelMake(m_pPlayer->getContentSize());
+		}
 		break;
 	case TAG_ENEMY_HEIGHT:
 		obj->updateSize(Size(obj->getContentSize().width, number));
+		if (obj->getIsPlayerAdded())
+		{
+			obj->removePlayerBlockForLevelMake();
+			obj->addPlayerBlockForLevelMake(m_pPlayer->getContentSize());
+		}
 		break;
 	case TAG_ENEMY_POSITION_X:
 		obj->setPositionX(number);
@@ -711,30 +781,56 @@ void LevelMakeScene::calcFoothold()
 	float jumpHeight = m_pPlayer->getJumpHeight();
 	float jumpTime = m_pPlayer->getJumpDuration();
 	float speed = m_pPlayer->getSpeed();
-	float playerWidth = m_pPlayer->getContentSize().width;
+	Size playerSize = m_pPlayer->getContentSize();
+	float playerWidth = playerSize.width;
 	float jumpLength = jumpTime * speed;
-	float endOffsetX = jumpLength - playerWidth;
+	float endOffsetX = jumpLength - playerWidth * 0.7; // this 0.82 is tryout
+
+	float ctlOffsetX = jumpLength / 2;
+	Vec2 vecCtlOffsetStart = Vec2(ctlOffsetX, jumpHeight);
+	Vec2 vecCtlOffsetEnd = Vec2(-ctlOffsetX, jumpHeight);
+	Vec2 vecEndOffset = Vec2(endOffsetX, 0);
 
 	// calc all land point
 	m_vJumpPoints.clear();
 	m_vJumpPointsForAutoTrying.clear();
+	m_vAirPoints.clear();
 	for (auto obj : m_vEnemys)
 	{
-		// calc min start point & min end point for enemys
 		Size enemySize = obj->getContentSize();
-		if (enemySize.height >= jumpHeight)
-			continue;
 		Vec2 enemyPos = obj->getPosition();
-		float tmp = sqrt(1 - enemySize.height / jumpHeight);
-		float landTime1 = (1 - tmp) * jumpTime * 0.5;
-		float landTime2 = jumpTime - (1 + tmp) * jumpTime * 0.5;
-		float pStart = enemyPos.x - enemySize.width / 2 - landTime1 * speed;
-		float pStartEnd = pStart + endOffsetX;
-		float pEnd = enemyPos.x + enemySize.width / 2 + landTime2 * speed;
-		float pEndStart = pEnd - endOffsetX;
-		m_vJumpPoints.push_back({ pEndStart, pStart, pEnd, pStartEnd });
-		m_vJumpPointsForAutoTrying.push_back(pEndStart);
-		m_vJumpPointsForAutoTrying.push_back(pStart);
+		if (enemyPos.y < playerSize.height)
+		{
+			obj->removePlayerBlockForLevelMake();
+			// calc min start point & min end point for enemys on the land
+			float realHeight = enemyPos.y + enemySize.height;
+			if (realHeight >= jumpHeight) // too high, can't jumpover
+				continue;
+			float tmp = sqrt(1 - realHeight / jumpHeight);
+			float landTime1 = (1 - tmp) * jumpTime * 0.5;
+			float landTime2 = jumpTime - (1 + tmp) * jumpTime * 0.5;
+			float pStart = enemyPos.x - enemySize.width / 2 - landTime1 * speed;
+			float pStartEnd = pStart + endOffsetX;
+			float pEnd = enemyPos.x + enemySize.width / 2 + landTime2 * speed;
+			float pEndStart = pEnd - endOffsetX;
+			m_vJumpPoints.push_back({ pEndStart, pStart, pEnd, pStartEnd });
+
+			Vec2 vecStart = Vec2(pStart, 0);
+			if (!this->isJumpLineConflict(vecStart, vecStart + vecCtlOffsetStart, vecStart + vecEndOffset))
+				m_vJumpPointsForAutoTrying.push_back(pair<float, bool>(pStart, true));
+			vecStart = Vec2(pEndStart, 0);
+			if (!this->isJumpLineConflict(vecStart, vecStart + vecCtlOffsetStart, vecStart + vecEndOffset))
+				m_vJumpPointsForAutoTrying.push_back(pair<float, bool>(pEndStart, false));
+		}
+		else
+		{
+			obj->addPlayerBlockForLevelMake(playerSize);
+			// add left and right bottom point to air point for conflict calc
+			Point pBottomLeft = Point(enemyPos.x - enemySize.width / 2 - playerWidth, enemyPos.y - playerSize.height);
+			Point pBottomRight = Point(enemyPos.x + enemySize.width / 2 + playerWidth, enemyPos.y - playerSize.height);
+			m_vAirPoints.push_back(pBottomLeft);
+			m_vAirPoints.push_back(pBottomRight);
+		}
 	}
 	std::sort(m_vJumpPoints.begin(), m_vJumpPoints.end(), sortJumpPoints);
 	std::sort(m_vJumpPointsForAutoTrying.begin(), m_vJumpPointsForAutoTrying.end(), sortJumpPointsForAutoTrying);
@@ -745,6 +841,7 @@ void LevelMakeScene::calcFoothold()
 	size_t length = m_vJumpPoints.size();
 	if (length > 0)
 	{
+		// set colors
 		Color4F colorStart = Color4F::GREEN;
 		Color4F colorEnd = Color4F::BLUE;
 		Color4F colorCollapse = Color4F::RED;
@@ -758,21 +855,17 @@ void LevelMakeScene::calcFoothold()
 		}
 
 		DrawNode* draw = DrawNode::create();
-		int lineWidth = 2;
+		int lineWidth = 1;
 		draw->setLineWidth(lineWidth);
-		
-		float ctlOffsetX = jumpLength / 2;
-		float ctlOffsetY = jumpHeight * 2;
-		Vec2 vecCtlOffsetStart = Vec2(ctlOffsetX, ctlOffsetY);
-		Vec2 vecCtlOffsetEnd = Vec2(-ctlOffsetX, ctlOffsetY);
-		Vec2 vecEndOffset = Vec2(endOffsetX, 0);
 
 		Node* textNode = Node::create();
 		char buf[10];
 		int frameRate = Director::getInstance()->getFrameRate();
 		// draw 0 - p1 first width one jump line
 		float p1 = m_vJumpPoints.at(0).pStart;
-		this->drawJumpLineByStart(draw, Vec2(p1, 0), vecCtlOffsetStart, vecEndOffset, colorStart);
+		Vec2 vecEnd;
+		Vec2 vecStart = Vec2(p1, 0);
+		this->drawJumpLine(draw, vecStart, vecStart + vecCtlOffsetStart, vecStart + vecEndOffset, colorStart);
 		draw->drawLine(Vec2(0, lineWidth), Vec2(p1, lineWidth), colorStart);
 		// calc estimate time with frame number for start jump
 		this->AddEstimateFrameText(textNode, buf, 0, p1, frameRate, playerWidth, speed, 20, Color4B(colorStart));
@@ -790,9 +883,11 @@ void LevelMakeScene::calcFoothold()
 			float landLength = p2Start - p1End - playerWidth;
 			if (landLength < 0)
 				color = colorCollapse;
-			this->drawJumpLineByEnd(draw, Vec2(p1End, 0), vecCtlOffsetEnd, vecEndOffset, colorEnd);
+			vecEnd = Vec2(p1End, 0);
+			this->drawJumpLine(draw, vecEnd - vecEndOffset, vecEnd + vecCtlOffsetEnd, vecEnd, colorEnd);
 			draw->drawLine(Vec2(p1End, lineWidth), Vec2(p2Start, lineWidth), color);
-			this->drawJumpLineByStart(draw, Vec2(p2Start, 0), vecCtlOffsetStart, vecEndOffset, colorStart);
+			vecStart = Vec2(p2Start, 0);
+			this->drawJumpLine(draw, vecStart, vecStart + vecCtlOffsetStart, vecStart + vecEndOffset, colorStart);
 			// calc estimate time with frame number for 4-combinations
 			this->AddEstimateFrameText(textNode, buf, p1End, p2Start, frameRate, playerWidth, speed, 20, Color4B(colorEnd));
 			this->AddEstimateFrameText(textNode, buf, p1StartEnd, p2Start, frameRate, playerWidth, speed, 40, Color4B(colorStart));
@@ -803,14 +898,13 @@ void LevelMakeScene::calcFoothold()
 		// draw last p - width with one jump line
 		int width = m_mTextFieldStructs.at(TAG_LEVEL_ROOM_WIDTH).number;
 		p1 = m_vJumpPoints.at(length - 1).pEnd;
-		this->drawJumpLineByEnd(draw, Vec2(p1, 0), vecCtlOffsetEnd, vecEndOffset, colorEnd);
+		vecEnd = Vec2(p1, 0);
+		this->drawJumpLine(draw, vecEnd - vecEndOffset, vecEnd +  vecCtlOffsetEnd, vecEnd, colorEnd);
 		draw->drawLine(Vec2(p1, lineWidth), Vec2(width, lineWidth), colorEnd);
 
 		// draw start point for trying
 		for (auto obj : m_vJumpPointsForAutoTrying)
-		{
-			draw->drawDot(Vec2(obj, 2), 4, Color4F::RED);
-		}
+			draw->drawDot(Vec2(obj.first, 2), 4, Color4F::RED);
 		this->addChild(draw, 1, TAG_FOOTHOLDLINE);
 	}
 }
@@ -971,6 +1065,27 @@ void LevelMakeScene::setDropDownList(vector<GameLevelData*>* levelsData)
 	}
 }
 
+bool LevelMakeScene::isJumpLineConflict(const Vec2& origin, const Vec2& control, const Vec2& destination)
+{
+	float dx = destination.x - origin.x;
+	for (size_t i = 0, length = m_vAirPoints.size(); i < length; i++)
+	{
+		Point p = m_vAirPoints.at(i);
+		if (p.x <= origin.x || p.x >= destination.x)
+			continue;
+		else
+		{
+			float t = (p.x - origin.x) / dx;
+			float lineY = origin.y + 4 * control.y * t * (1 - t);
+			if (p.y < lineY)
+			{
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 // inline functions
 void LevelMakeScene::getLevelNode(Node* root, int tag, bool isWithSlider)
 {
@@ -1054,14 +1169,30 @@ void LevelMakeScene::updateBlockByLevel(int tag, int number)
 	}
 }
 
-void LevelMakeScene::drawJumpLineByStart(DrawNode* draw, Vec2 start, Vec2 ctlOffset, Vec2 endOffset, Color4F color)
+void LevelMakeScene::drawJumpLine(DrawNode* draw, const Vec2 &origin, const Vec2 &control, const Vec2 &destination, const Color4F &color)
 {
-	draw->drawQuadBezier(start, start + ctlOffset, start + endOffset, 20, color);
-}
+	Color4F lineColor = color;
+	if (this->isJumpLineConflict(origin, control, destination))
+		lineColor = Color4F::RED;
+	// draw line
+	int segments = 20;
+	Vec2* vertices = new (std::nothrow) Vec2[segments + 1];
+	if (!vertices)
+		return;
+	float t = 0.0f;
+	float dx = destination.x - origin.x;
+	for (unsigned int i = 0; i < segments; i++)
+	{
+		vertices[i].x = origin.x + t * dx;
+		vertices[i].y = origin.y + 4 * control.y * t * (1 - t);
+		t += 1.0f / segments;
+	}
+	vertices[segments].x = destination.x;
+	vertices[segments].y = destination.y;
 
-void LevelMakeScene::drawJumpLineByEnd(DrawNode* draw, Vec2 end, Vec2 ctlOffset, Vec2 endOffset, Color4F color)
-{
-	draw->drawQuadBezier(end - endOffset, end + ctlOffset, end, 20, color);
+	draw->drawPoly(vertices, segments + 1, false, lineColor);
+
+	CC_SAFE_DELETE_ARRAY(vertices);
 }
 
 void LevelMakeScene::AddEstimateFrameText(Node* parent, char* buf, float p1, float p2,

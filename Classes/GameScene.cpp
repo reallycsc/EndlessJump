@@ -48,8 +48,6 @@ bool GameScene::init()
     {
         return false;
     }
-
-	m_nDeadNumber = 0;
     /////////////////////////////
 	m_pGameMediator = GameMediator::getInstance();
 	// get level data
@@ -59,6 +57,7 @@ bool GameScene::init()
 	auto roomsData = m_pCurLevelData->getRoomsData();
 	m_pGameMediator->setCurGameRoom(1);
 	m_pCurRoomData = &roomsData->at(0);
+
 	// add all room that have been
 	int maxLevel = m_pGameMediator->getMaxGameLevel();
 	if (curLevel < maxLevel) // show all rooms
@@ -83,6 +82,9 @@ bool GameScene::init()
 
 	// add player
 	this->addPlayer(m_pCurRoomData);
+
+	// get dead count
+	m_nDeadNumber = 0;
 
 	// load scene
 	auto rootNode = CSLoader::createNode("GameScene.csb");
@@ -146,8 +148,8 @@ bool GameScene::onContactBegin(const PhysicsContact& contact)
 		particle->setStartSizeVar(5);
 		particle->setStartColor(m_pPlayer->getPlayerColor());
 		particle->setStartColorVar(Color4F(0, 0, 0, 0));
-		//particle->setEndColor(m_pPlayer->getPlayerColor());
-		//particle->setEndColorVar(Color4F(0, 0, 0, 0));
+		particle->setEndColor(m_pPlayer->getPlayerColor());
+		particle->setEndColorVar(Color4F(0, 0, 0, 0));
 		particle->setSpeed(500);
 		particle->setSpeedVar(300);
 		particle->setLife(0.5f);

@@ -1,5 +1,5 @@
 #include "GameLevelData.h"
-#include "CommonFunctions.h"
+#include "CSCClass/CommonFunctions.h"
 
 GameLevelData::GameLevelData(void)
 {

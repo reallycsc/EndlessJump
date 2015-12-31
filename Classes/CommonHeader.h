@@ -11,7 +11,7 @@ using namespace std;
 using namespace tinyxml2;
 
 // flags
-#define DEBUG_FLAG 0
+#define DEBUG_FLAG 1
 
 // physics mask  
 const int MASK_PLAYER = 1 << 0; // player

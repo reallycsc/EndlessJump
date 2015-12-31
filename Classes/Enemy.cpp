@@ -3,7 +3,8 @@
 Enemy::Enemy(void)
 	:m_bIsSelected(false),
 	m_size(Size(50,50)),
-	m_color(Color4F::BLUE)
+	m_color(Color4F::BLUE),
+	m_bIsPlayerAdded(false)
 {
 }
 
@@ -136,5 +137,41 @@ void Enemy::unSelect()
 	{
 		this->removeChildByTag(TAG_SELECTED_BLOCK);
 		m_bIsSelected = false;
+	}
+}
+
+void Enemy::addPlayerBlockForLevelMake(Size playerSize)
+{
+	if (!m_bIsPlayerAdded)
+	{
+		DrawNode* drawNode = DrawNode::create();
+		drawNode->setLineWidth(1);
+		Color4F color = Color4F::WHITE;
+		if (m_color == Color4F::WHITE)
+			color = Color4F::RED;
+		float shortRadius = playerSize.width / 2;
+		float sqrt2 = sqrtf(2.0f);
+		float longRadius = playerSize.width / sqrt2;
+		float longCenter = shortRadius / sqrt2;
+		// left 
+		drawNode->drawRect(Point::ZERO - playerSize, Point::ZERO, color);
+		//drawNode->drawCircle(Point(-shortRadius, -shortRadius), longRadius, 360, 20, false, color);
+		//drawNode->drawCircle(Point(-longCenter, -longCenter), shortRadius, 360, 20, false, color);
+		// right
+		drawNode->drawRect(Point(m_size.width, -playerSize.height), Point(m_size.width + playerSize.width, 0), color);
+		//drawNode->drawCircle(Point(m_size.width + shortRadius, -shortRadius), longRadius, 360, 20, false, color);
+		//drawNode->drawCircle(Point(m_size.width + longCenter, -longCenter), shortRadius, 360, 20, false, color);
+
+		this->addChild(drawNode, 1, TAG_PLAYER_BLOCK);
+		m_bIsPlayerAdded = true;
+	}
+} 
+
+void Enemy::removePlayerBlockForLevelMake()
+{
+	if (m_bIsPlayerAdded)
+	{
+		this->removeChildByTag(TAG_PLAYER_BLOCK);
+		m_bIsPlayerAdded = false;
 	}
 }
