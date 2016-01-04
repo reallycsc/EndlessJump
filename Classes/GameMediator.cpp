@@ -17,7 +17,7 @@ GameMediator::GameMediator(void)
 {
 	m_nGameLevelCount = 0;
 	m_nMaxGameLevel = m_nCurGameLevel = 1;
-	m_nMaxGameRoom = m_nCurGameRoom = 1;
+	m_nCurGameRoom = 1;
 
 	m_vGameLevelData.clear();
 	m_vLevelMinDeadCount.clear();
@@ -56,7 +56,6 @@ bool GameMediator::init()
 		{
 			m_nCurGameLevel = MIN(user->getIntegerForKey("CurLevel", 1), m_nGameLevelCount);
 			m_nMaxGameLevel = MIN(user->getIntegerForKey("MaxLevel", 1), m_nGameLevelCount);
-			m_nMaxGameRoom = user->getIntegerForKey("MaxRoom", 1);
 			for (size_t i = 0; i < m_nGameLevelCount; i++)
 			{
 				string key = StringUtils::format("Level%d-DeadCount", i + 1);
@@ -84,6 +83,7 @@ bool GameMediator::loadGameLevelFile()
 
 		// load workstation
 		m_vGameLevelData.clear();
+		m_nGameLevelCount = 0;
 		for (XMLElement* surface1 = root->FirstChildElement("Level"); surface1 != NULL; surface1 = surface1->NextSiblingElement("Level"))
 		{
 			GameLevelData* data = GameLevelData::create();
@@ -166,21 +166,32 @@ bool GameMediator::saveGameLevelFile()
 				auto enemysData = &(iter2->enemysData);
 				for (size_t i1 = 0, j1 = enemysData->size(); i1 < j1; i1++)
 				{
+					int type = enemysData->at(i1).type;
 					XMLElement *surface4 = document->NewElement("Enemy");
 					surface4->SetAttribute("id", i1 + 1);
+					surface4->SetAttribute("type", type);
 					Size size = enemysData->at(i1).size;
 					surface4->SetAttribute("width", size.width);
 					surface4->SetAttribute("height", size.height);
 					Point pos = enemysData->at(i1).position;
 					surface4->SetAttribute("x", static_cast<int>(pos.x));
 					surface4->SetAttribute("y", static_cast<int>(pos.y));
+					switch (type)
+					{
+					case TYPE_ROTATE:
+						surface4->SetAttribute("rotateTime", enemysData->at(i1).rotateTime);
+					default:
+						break;
+					}
 					surface3->LinkEndChild(surface4);
 				}
 			}
 		}
 
-		string filename = FileUtils::getInstance()->fullPathForFilename("config/LevelMake_Workstation.xml");
-		document->SaveFile(filename.c_str());
+		string filename1 = FileUtils::getInstance()->fullPathForFilename("config/LevelMake_Workstation.xml");
+		document->SaveFile(filename1.c_str());
+		string filename2 = FileUtils::getInstance()->fullPathForFilename("../../Resources/config/LevelMake_Workstation.xml");
+		document->SaveFile(filename2.c_str());
 		bRet = true;
 	} while (false);
 
@@ -211,9 +222,7 @@ void GameMediator::setMaxGameLevel()
 	if (nextLevel > m_nMaxGameLevel)
 	{
 		m_nMaxGameLevel = nextLevel;
-		m_nMaxGameRoom = 1;
 		this->saveIntegerGameDataForKey("MaxLevel", m_nMaxGameLevel);
-		this->saveIntegerGameDataForKey("MaxRoom", m_nMaxGameRoom);
 	}
 }
 
@@ -230,11 +239,6 @@ void GameMediator::gotoNextGameLevel()
 void GameMediator::gotoNextGameRoom()
 {
 	m_nCurGameRoom++;
-	if (m_nCurGameLevel == m_nMaxGameLevel && m_nCurGameRoom > m_nMaxGameRoom)
-	{
-		m_nMaxGameRoom = m_nCurGameRoom;
-		this->saveIntegerGameDataForKey("MaxRoom", m_nMaxGameRoom);
-	}
 }
 
 int GameMediator::getDeadCountAll(int level)

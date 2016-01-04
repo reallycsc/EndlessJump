@@ -25,38 +25,45 @@ bool MainMenuScene::init()
     {
         return false;
     }
+	auto pGameMediator = GameMediator::getInstance();
 	// load csb
 	auto rootNode = CSLoader::createNode("MainMenuScene.csb");
 	this->addChild(rootNode);
-
-	auto buttonPlay = dynamic_cast<Button*>(rootNode->getChildByName("Button_Play"));
-	buttonPlay->addClickEventListener(CC_CALLBACK_1(MainMenuScene::buttonCallback_Play, this));
+	// get button
 	auto buttonEditor = dynamic_cast<Button*>(rootNode->getChildByName("Button_LevelEditor"));
 	buttonEditor->addClickEventListener(CC_CALLBACK_1(MainMenuScene::buttonCallback_LevelEditor, this));
+	// get text
+	auto textTotalDead = dynamic_cast<Text*>(rootNode->getChildByName("Text_TotalDead"));
+	int maxLevel = pGameMediator->getMaxGameLevel();
+	int totalDead = pGameMediator->getDeadCountAll(maxLevel);
+	textTotalDead->setString(StringUtils::format("Total Dead: %d", totalDead));
 
 	// set level select boxes
 	auto scrollView = dynamic_cast<ScrollView*>(rootNode->getChildByName("ScrollView_Levels"));
-	float scrollHeight = scrollView->getContentSize().height;
-	auto pGameMediator = GameMediator::getInstance();
+	float scrollWidth = scrollView->getContentSize().width;
 	// get level data
-	int maxLevel = pGameMediator->getMaxGameLevel();
 	auto levelDeadCounts = pGameMediator->getLevelMinDeadCount();
-	m_vLevelButtons.clear();
+	int innerHeight = 0;
+	int maxLevelHeight = 0;
 	for (size_t i = 0, j = pGameMediator->getGameLevelCount(); i < j; i++)
 	{
 		auto levelNode = CSLoader::createNode("MainMenuScene_NodeLevel.csb");
 		scrollView->addChild(levelNode);
 		// button
 		auto buttonLevel = dynamic_cast<Button*>(levelNode->getChildByName("Button_Level"));
-		levelNode->setPosition((buttonLevel->getContentSize().width / 2 + 100) * i + 100, scrollHeight / 2);
+		int posY = (buttonLevel->getContentSize().height / 2 + 100) * i + 100;
+		levelNode->setPosition(scrollWidth / 2 , posY);
+		innerHeight = posY + buttonLevel->getContentSize().height / 2;
 		buttonLevel->setTitleText(StringUtils::format("%d", i + 1));
 		buttonLevel->setTag(i + 1);
-		buttonLevel->addClickEventListener(CC_CALLBACK_1(MainMenuScene::buttonCallback_LevelSelect, this));
+		buttonLevel->addClickEventListener(CC_CALLBACK_1(MainMenuScene::buttonCallback_LevelPlay, this));
 		if (i > maxLevel - 1)
 		{
 			buttonLevel->setEnabled(false);
+			buttonLevel->setColor(Color3B::GRAY);
 		}
-		m_vLevelButtons.pushBack(buttonLevel);
+		else if (i == maxLevel - 1)
+			maxLevelHeight = innerHeight;
 		// text
 		auto textDeadCount = dynamic_cast<Text*>(levelNode->getChildByName("Text_DeadTime"));
 		int deadCount = levelDeadCounts->at(i);
@@ -77,42 +84,26 @@ bool MainMenuScene::init()
 				textDeadCount->setString(StringUtils::format("%d deads", deadCount));
 		}
 	}
+	int scrollInnerHeight = scrollView->getInnerContainerSize().height;
+	innerHeight = MAX(scrollInnerHeight, innerHeight + 100);
+	scrollView->setInnerContainerSize(Size(scrollView->getInnerContainerSize().width, innerHeight));
+	//scrollView->setInnerContainerPosition(Point::ZERO);
+	scrollView->setInnerContainerPosition(Point(0,-maxLevelHeight + scrollInnerHeight / 2));
 
 #if (DEBUG_FLAG == 0)
 	buttonEditor->setEnabled(false);
 	buttonEditor->setVisible(false);
 #endif
 
-	// draw select rect
-	m_nSelectLevel = pGameMediator->getCurGameLevel();
-	m_cButtonNormalColor = m_vLevelButtons.at(m_nSelectLevel - 1)->getColor();
-	m_vLevelButtons.at(m_nSelectLevel - 1)->setColor(Color3B::ORANGE);
-
     return true;
 }
 
-void MainMenuScene::buttonCallback_LevelSelect(Ref* pSender)
+void MainMenuScene::buttonCallback_LevelPlay(Ref* pSender)
 {
 	Button*	button = static_cast<Button*>(pSender);
-	if (m_nSelectLevel != button->getTag())
-	{
-		m_nSelectLevel = button->getTag();
-		button->setColor(Color3B::ORANGE);
-		for (size_t i = 0, j = m_vLevelButtons.size(); i < j; i++)
-		{
-			Button* tmpBtn = m_vLevelButtons.at(i);
-			if (tmpBtn->isEnabled() && tmpBtn->getTag() != m_nSelectLevel)
-			{
-				tmpBtn->setColor(m_cButtonNormalColor);
-			}
-		}
-		GameMediator::getInstance()->setCurGameLevel(m_nSelectLevel);
-		GameMediator::getInstance()->saveIntegerGameDataForKey("CurLevel", m_nSelectLevel);
-	}
-}
-
-void MainMenuScene::buttonCallback_Play(Ref* pSender)
-{
+	int curLevel = button->getTag();
+	GameMediator::getInstance()->setCurGameLevel(curLevel);
+	GameMediator::getInstance()->saveIntegerGameDataForKey("CurLevel", curLevel);
 	Director::getInstance()->replaceScene(GameScene::createScene());
 }
 

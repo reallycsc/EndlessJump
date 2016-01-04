@@ -1,10 +1,12 @@
 #include "Enemy.h"
 
 Enemy::Enemy(void)
-	:m_bIsSelected(false),
-	m_size(Size(50,50)),
-	m_color(Color4F::BLUE),
-	m_bIsPlayerAdded(false)
+	: m_nType(TYPE_NORMAL)
+	, m_bIsSelected(false)
+	, m_size(Size(50,50))
+	, m_color(Color4F::BLUE)
+	, m_bIsPlayerAdded(false)
+	, m_fRotateDuration(1.0f)
 {
 }
 
@@ -71,6 +73,29 @@ bool Enemy::init(const Size &size, const Color3B &color, const int &id)
     return bRet;
 }
 
+Enemy* Enemy::createWithType(const int type, const Size &size, const Color3B &color, const int &id, const float rotateDuration)
+{
+	Enemy* enemy = Enemy::create(size, color, id);
+	enemy->setType(type);
+	switch (type)
+	{
+	case TYPE_NORMAL:
+		break;
+	case TYPE_ROTATE:
+	{
+		enemy->setAnchorPoint(Vec2(0.5f, 0.5f));
+		enemy->setRotateDuration(rotateDuration);
+		auto action = RepeatForever::create(RotateBy::create(rotateDuration, -360));
+		action->setTag(TAG_ACTION_ROTATE);
+		enemy->runAction(action);
+		break;
+	}
+	default:
+		break;
+	}
+	return enemy;
+}
+
 void Enemy::updateSize(const Size& size)
 {
 	this->removeChildByTag(TAG_BLOCK);
@@ -113,6 +138,18 @@ void Enemy::updateColor(const Color3B& color)
 	}
 }
 
+void Enemy::updateRotateDuration(const float duration)
+{
+	m_fRotateDuration = duration;
+	if (m_nType == TYPE_ROTATE)
+	{
+		this->stopActionByTag(TAG_ACTION_ROTATE);
+		auto action = RepeatForever::create(RotateBy::create(duration, -360));
+		action->setTag(TAG_ACTION_ROTATE);
+		this->runAction(action);
+	}
+}
+
 void Enemy::select()
 {
 	if (!m_bIsSelected)
@@ -142,6 +179,8 @@ void Enemy::unSelect()
 
 void Enemy::addPlayerBlockForLevelMake(Size playerSize)
 {
+	CS_RETURN_IF(m_nType == TYPE_ROTATE);
+
 	if (!m_bIsPlayerAdded)
 	{
 		DrawNode* drawNode = DrawNode::create();

@@ -90,8 +90,18 @@ bool GameLevelData::setRoomDataWithFile(XMLElement* surface)
 			{
 				EnemyData enemy;
 				enemy.id = surface3->IntAttribute("id");
+				enemy.type = surface3->IntAttribute("type");
 				enemy.size = Size(surface3->IntAttribute("width"), surface3->IntAttribute("height"));
 				enemy.position = Point(surface3->IntAttribute("x"), surface3->IntAttribute("y"));
+				switch (enemy.type)
+				{
+				case TYPE_ROTATE:
+					enemy.rotateTime = surface3->FloatAttribute("rotateTime");
+					break;
+				default:
+					enemy.rotateTime = 0.0f;
+					break;
+				}
 				room.enemysData.push_back(enemy);
 			}
 			m_vRoomsData.push_back(room);

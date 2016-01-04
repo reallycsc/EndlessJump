@@ -14,14 +14,8 @@ public:
     CREATE_FUNC(MainMenuScene);
 
 private:
-	void buttonCallback_LevelSelect(Ref* pSender);
-	void buttonCallback_Play(Ref* pSender);
+	void buttonCallback_LevelPlay(Ref* pSender);
 	void buttonCallback_LevelEditor(Ref* pSender);
-
-private:
-	Vector<Button*>	m_vLevelButtons;
-	int	m_nSelectLevel;
-	Color3B	m_cButtonNormalColor;
 };
 
 #endif // __MAINMENU_SCENE_H__

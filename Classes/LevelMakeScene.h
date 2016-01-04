@@ -28,6 +28,7 @@ enum TextFieldTag
 	TAG_ENEMY_HEIGHT,
 	TAG_ENEMY_POSITION_X,
 	TAG_ENEMY_POSITION_Y,
+	TAG_ENEMY_ROTATE_TIME10,
 	TAG_ENEMY_MAX,
 
 	TAG_PLAYER_MIN,
@@ -104,7 +105,6 @@ private:
 	void buttonCallback_RemoveBlock(Ref* pSender);
 	void buttonCallback_CalcFoothold(Ref* pSender);
 	void buttonCallback_Try(Ref* pSender);
-	void buttonCallback_TryAuto(Ref* pSender);
 	void buttonCallback_Save(Ref* pSender);
 	void buttonCallback_Load(Ref* pSender);
 	void buttonCallback_Export(Ref* pSender);
@@ -140,6 +140,7 @@ private:
 
 	CSCClass::DropDownList* m_pDropDownListLevel;
 	CSCClass::DropDownList* m_pDropDownListRoom;
+	CSCClass::DropDownList* m_pDropDownListType;
 
 	Vector<Enemy*>	m_vEnemys;
 	Player*	m_pPlayer;
@@ -151,7 +152,6 @@ private:
 	int m_nCurEnemyId;
 	int m_nCurJumpPointId;
 
-	bool m_bIsTrying;
 	bool m_bIsAutoTrying;
 	bool m_bIsTouchEnemy;
 	Vec2 m_touchOffset;

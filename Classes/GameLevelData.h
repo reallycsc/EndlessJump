@@ -1,11 +1,14 @@
 #pragma once
 #include "CommonHeader.h"
+#include "Enemy.h"
 
 typedef struct tagEnemyData
 {
 	int		id;
+	int		type;
 	Size	size;
 	Vec2	position;
+	float	rotateTime;
 }EnemyData;
 
 typedef struct tagRoomData

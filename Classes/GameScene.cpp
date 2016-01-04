@@ -10,7 +10,7 @@ Scene* GameScene::createScene()
 	// open Debug
 	PhysicsWorld* world = scene->getPhysicsWorld();
 	world->setGravity(Vec2(0, 0));
-	//world->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
+	world->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
     
     // 'layer' is an autorelease object
     auto layer = GameScene::create();
@@ -58,27 +58,8 @@ bool GameScene::init()
 	m_pGameMediator->setCurGameRoom(1);
 	m_pCurRoomData = &roomsData->at(0);
 
-	// add all room that have been
-	int maxLevel = m_pGameMediator->getMaxGameLevel();
-	if (curLevel < maxLevel) // show all rooms
-	{
-		for (size_t i = 0, j = roomsData->size(); i < j; i++)
-		{
-			this->addRoom(&roomsData->at(i));
-		}
-	}
-	else if (curLevel == maxLevel) // show to max room
-	{
-		int maxRoom = m_pGameMediator->getMaxGameRoom();
-		for (size_t i = 0, j = maxRoom; i < j; i++)
-		{
-			this->addRoom(&roomsData->at(i));
-		}
-	}
-	else // should not be in here, show only 1 room
-	{
-		this->addRoom(m_pCurRoomData);
-	}
+	// add first room
+	this->addRoom(m_pCurRoomData);
 
 	// add player
 	this->addPlayer(m_pCurRoomData);
@@ -186,7 +167,16 @@ void GameScene::addRoom(RoomData* roomData)
 	for (size_t i = 0, j = enemysData->size(); i < j; i++)
 	{
 		auto enemyData = &enemysData->at(i);
-		auto enemy = Enemy::create(enemyData->size, roomData->enemy_color, i);
+		Enemy* enemy = NULL;
+		switch (enemyData->type)
+		{
+		case TYPE_ROTATE:
+			enemy = Enemy::createWithType(TYPE_ROTATE, enemyData->size, roomData->enemy_color, -1, enemyData->rotateTime);
+			break;
+		default:
+			enemy = Enemy::create(enemyData->size, roomData->enemy_color);
+			break;
+		}
 		enemy->setPosition(enemyData->position);
 		background->addChild(enemy);
 		m_vEnemys.pushBack(enemy);

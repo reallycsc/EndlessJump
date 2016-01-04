@@ -31,7 +31,6 @@ public:
 	CC_SYNTHESIZE(int, m_nCurGameLevel, CurGameLevel);
 	CC_SYNTHESIZE(int, m_nMaxGameLevel, MaxGameLevel);
 	CC_SYNTHESIZE(int, m_nCurGameRoom, CurGameRoom);
-	CC_SYNTHESIZE(int, m_nMaxGameRoom, MaxGameRoom);
 
 private:
 	vector<GameLevelData*>	m_vGameLevelData;
