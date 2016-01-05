@@ -7,6 +7,9 @@ Enemy::Enemy(void)
 	, m_color(Color4F::BLUE)
 	, m_bIsPlayerAdded(false)
 	, m_fRotateDuration(1.0f)
+	, m_StartPoint(Point::ZERO)
+	, m_DestPoint(Point::ZERO)
+	, m_fMoveDuration(1.0f)
 {
 }
 
@@ -37,6 +40,7 @@ bool Enemy::init(const Size &size, const Color3B &color, const int &id)
     {  
         CC_BREAK_IF(!Node::init());  
 
+		m_nType = TYPE_NORMAL;
 		m_size = size;
 		m_color = Color4F(color);
 		// draw enemy rect
@@ -58,12 +62,10 @@ bool Enemy::init(const Size &size, const Color3B &color, const int &id)
 #if DEBUG_FLAG == 1
 		if (id >= 0) // add id label
 		{
-			char buf[10];
-			sprintf(buf, "%d", id);
-			Text* text = Text::create(buf, "Arial", 20);
+			Text* text = Text::create(StringUtils::format("%d", id), "Arial", 20);
 			text->setAnchorPoint(Vec2(0.5f, 0.5f));
 			text->setPosition(m_size / 2);
-			this->addChild(text, 2);
+			this->addChild(text, 2, TAG_TEXT_ID);
 		}
 #endif // DEBUG_FLAG == 1
 
@@ -73,30 +75,44 @@ bool Enemy::init(const Size &size, const Color3B &color, const int &id)
     return bRet;
 }
 
-Enemy* Enemy::createWithType(const int type, const Size &size, const Color3B &color, const int &id, const float rotateDuration)
+Enemy* Enemy::createRotate(const Size &size, const Color3B &color, const int &id, const float &duration)
 {
 	Enemy* enemy = Enemy::create(size, color, id);
-	enemy->setType(type);
-	switch (type)
-	{
-	case TYPE_NORMAL:
-		break;
-	case TYPE_ROTATE:
-	{
-		enemy->setAnchorPoint(Vec2(0.5f, 0.5f));
-		enemy->setRotateDuration(rotateDuration);
-		auto action = RepeatForever::create(RotateBy::create(rotateDuration, -360));
-		action->setTag(TAG_ACTION_ROTATE);
-		enemy->runAction(action);
-		break;
-	}
-	default:
-		break;
-	}
+	enemy->setType(TYPE_ROTATE);
+	enemy->setAnchorPoint(Vec2(0.5f, 0.5f));
+	enemy->setRotateDuration(duration);
+	auto action = RepeatForever::create(RotateBy::create(duration, -360));
+	action->setTag(TAG_ACTION_ROTATE);
+	enemy->runAction(action);
 	return enemy;
 }
 
-void Enemy::updateSize(const Size& size)
+Enemy* Enemy::createMove(const Size& size, const Color3B& color, const int& id, const Point &start, const Point& dest, const float& duration)
+{
+	Enemy* enemy = Enemy::create(size, color, id);
+	enemy->setType(TYPE_MOVE);
+	enemy->setStartPoint(start);
+	enemy->setDestPoint(dest);
+	enemy->setMoveDuration(duration);
+	enemy->setPosition(start);
+	auto action = RepeatForever::create(Sequence::createWithTwoActions(
+		MoveTo::create(duration, dest),
+		MoveTo::create(duration, start)));
+	action->setTag(TAG_ACTION_MOVE);
+	enemy->runAction(action);
+	return enemy;
+}
+
+void Enemy::updateId(const int& id)
+{
+	this->removeChildByTag(TAG_TEXT_ID);
+	Text* text = Text::create(StringUtils::format("%d", id), "Arial", 20);
+	text->setAnchorPoint(Vec2(0.5f, 0.5f));
+	text->setPosition(m_size / 2);
+	this->addChild(text, 2, TAG_TEXT_ID);
+}
+
+void Enemy::updateSize(const Size &size)
 {
 	this->removeChildByTag(TAG_BLOCK);
 
@@ -120,9 +136,12 @@ void Enemy::updateSize(const Size& size)
 		this->removeChildByTag(TAG_SELECTED_BLOCK);
 		this->select();
 	}
+
+	// update id position
+	this->getChildByTag(TAG_TEXT_ID)->setPosition(m_size / 2);
 }
 
-void Enemy::updateColor(const Color3B& color)
+void Enemy::updateColor(const Color3B &color)
 {
 	this->removeChildByTag(TAG_BLOCK);
 
@@ -138,7 +157,7 @@ void Enemy::updateColor(const Color3B& color)
 	}
 }
 
-void Enemy::updateRotateDuration(const float duration)
+void Enemy::updateRotateDuration(const float &duration)
 {
 	m_fRotateDuration = duration;
 	if (m_nType == TYPE_ROTATE)
@@ -146,6 +165,48 @@ void Enemy::updateRotateDuration(const float duration)
 		this->stopActionByTag(TAG_ACTION_ROTATE);
 		auto action = RepeatForever::create(RotateBy::create(duration, -360));
 		action->setTag(TAG_ACTION_ROTATE);
+		this->runAction(action);
+	}
+}
+
+void Enemy::updateStartPoint(const Point& start)
+{
+	m_StartPoint = start;
+	if (m_nType == TYPE_MOVE)
+	{
+		this->stopActionByTag(TAG_ACTION_MOVE);
+		auto action = RepeatForever::create(Sequence::createWithTwoActions(
+			MoveTo::create(m_fMoveDuration, m_DestPoint),
+			MoveTo::create(m_fMoveDuration, start)));
+		action->setTag(TAG_ACTION_MOVE);
+		this->runAction(action);
+	}
+}
+
+void Enemy::updateDestPoint(const Point& dest)
+{
+	m_DestPoint = dest;
+	if (m_nType == TYPE_MOVE)
+	{
+		this->stopActionByTag(TAG_ACTION_MOVE);
+		auto action = RepeatForever::create(Sequence::createWithTwoActions(
+			MoveTo::create(m_fMoveDuration, dest),
+			MoveTo::create(m_fMoveDuration, m_StartPoint)));
+		action->setTag(TAG_ACTION_MOVE);
+		this->runAction(action);
+	}
+}
+
+void Enemy::updateMoveDuration(const float& duration)
+{
+	m_fMoveDuration = duration;
+	if (m_nType == TYPE_MOVE)
+	{
+		this->stopActionByTag(TAG_ACTION_MOVE);
+		auto action = RepeatForever::create(Sequence::createWithTwoActions(
+			MoveTo::create(duration, m_DestPoint),
+			MoveTo::create(duration, m_StartPoint)));
+		action->setTag(TAG_ACTION_MOVE);
 		this->runAction(action);
 	}
 }
@@ -193,12 +254,12 @@ void Enemy::addPlayerBlockForLevelMake(Size playerSize)
 		float longRadius = playerSize.width / sqrt2;
 		float longCenter = shortRadius / sqrt2;
 		// left 
-		drawNode->drawRect(Point::ZERO - playerSize, Point::ZERO, color);
-		//drawNode->drawCircle(Point(-shortRadius, -shortRadius), longRadius, 360, 20, false, color);
+		//drawNode->drawRect(Point::ZERO - playerSize, Point::ZERO, color);
+		drawNode->drawCircle(Point(-shortRadius, -shortRadius), longRadius, 360, 20, false, color);
 		//drawNode->drawCircle(Point(-longCenter, -longCenter), shortRadius, 360, 20, false, color);
 		// right
-		drawNode->drawRect(Point(m_size.width, -playerSize.height), Point(m_size.width + playerSize.width, 0), color);
-		//drawNode->drawCircle(Point(m_size.width + shortRadius, -shortRadius), longRadius, 360, 20, false, color);
+		//drawNode->drawRect(Point(m_size.width, -playerSize.height), Point(m_size.width + playerSize.width, 0), color);
+		drawNode->drawCircle(Point(m_size.width + shortRadius, -shortRadius), longRadius, 360, 20, false, color);
 		//drawNode->drawCircle(Point(m_size.width + longCenter, -longCenter), shortRadius, 360, 20, false, color);
 
 		this->addChild(drawNode, 1, TAG_PLAYER_BLOCK);

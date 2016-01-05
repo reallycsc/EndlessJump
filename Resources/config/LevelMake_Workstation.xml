@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GameLevel>
-    <Level level="1" name="Morning" deadTime="10">
+    <Level level="1" name="Morning" deadTime="1000">
         <Room id="1" width="768" height="204" x="0" y="0" color_r="250" color_g="245" color_b="197">
             <Player speed="300" jumpTime="0.6" color_r="95" color_g="102" color_b="120"/>
             <Enemys color_r="95" color_g="102" color_b="120">
@@ -29,7 +29,7 @@
             </Enemys>
         </Room>
     </Level>
-    <Level level="2" name="Spring" deadTime="20">
+    <Level level="2" name="Spring" deadTime="2000">
         <Room id="1" width="768" height="204" x="0" y="0" color_r="202" color_g="230" color_b="189">
             <Player speed="300" jumpTime="0.6" color_r="43" color_g="79" color_b="63"/>
             <Enemys color_r="43" color_g="79" color_b="63">
@@ -62,7 +62,7 @@
             </Enemys>
         </Room>
     </Level>
-    <Level level="3" name="Summer" deadTime="30">
+    <Level level="3" name="Summer" deadTime="3000">
         <Room id="1" width="768" height="204" x="0" y="0" color_r="233" color_g="240" color_b="34">
             <Player speed="300" jumpTime="0.6" color_r="107" color_g="146" color_b="232"/>
             <Enemys color_r="107" color_g="146" color_b="232">
@@ -97,7 +97,7 @@
             </Enemys>
         </Room>
     </Level>
-    <Level level="4" name="Autumn" deadTime="40">
+    <Level level="4" name="Autumn" deadTime="4000">
         <Room id="1" width="768" height="204" x="0" y="0" color_r="167" color_g="141" color_b="62">
             <Player speed="300" jumpTime="0.6" color_r="242" color_g="204" color_b="3"/>
             <Enemys color_r="242" color_g="204" color_b="3">
@@ -133,7 +133,7 @@
             </Enemys>
         </Room>
     </Level>
-    <Level level="5" name="Winter" deadTime="50">
+    <Level level="5" name="Winter" deadTime="5000">
         <Room id="1" width="768" height="204" x="0" y="0" color_r="83" color_g="109" color_b="138">
             <Player speed="300" jumpTime="0.6" color_r="173" color_g="185" color_b="190"/>
             <Enemys color_r="173" color_g="185" color_b="190">
@@ -167,6 +167,39 @@
                 <Enemy id="4" type="2" width="50" height="50" x="492" y="17" rotateTime="1"/>
                 <Enemy id="5" type="1" width="115" height="20" x="705" y="19"/>
             </Enemys>
+        </Room>
+    </Level>
+    <Level level="6" name="Alive" deadTime="6000">
+        <Room id="1" width="768" height="204" x="0" y="0" color_r="255" color_g="46" color_b="88">
+            <Player speed="300" jumpTime="0.6" color_r="91" color_g="237" color_b="55"/>
+            <Enemys color_r="91" color_g="237" color_b="55">
+                <Enemy id="1" type="3" width="50" height="30" x="500" y="0" dx="200" dy="0" moveTime="1"/>
+            </Enemys>
+        </Room>
+        <Room id="2" width="768" height="204" x="0" y="204" color_r="255" color_g="251" color_b="10">
+            <Player speed="300" jumpTime="0.6" color_r="255" color_g="46" color_b="88"/>
+            <Enemys color_r="255" color_g="46" color_b="88">
+                <Enemy id="1" type="3" width="50" height="80" x="200" y="0" dx="200" dy="-80" moveTime="0.5"/>
+                <Enemy id="2" type="3" width="50" height="80" x="500" y="-80" dx="500" dy="0" moveTime="0.5"/>
+            </Enemys>
+        </Room>
+        <Room id="3" width="768" height="204" x="0" y="408" color_r="255" color_g="87" color_b="154">
+            <Player speed="300" jumpTime="0.6" color_r="255" color_g="251" color_b="0"/>
+            <Enemys color_r="255" color_g="251" color_b="0">
+                <Enemy id="1" type="3" width="240" height="30" x="320" y="50" dx="370" dy="50" moveTime="0.8"/>
+                <Enemy id="2" type="1" width="50" height="50" x="515" y="0"/>
+                <Enemy id="3" type="3" width="50" height="50" x="175" y="-25" dx="175" dy="0" moveTime="1"/>
+            </Enemys>
+        </Room>
+        <Room id="4" width="768" height="204" x="0" y="612" color_r="87" color_g="160" color_b="255">
+            <Player speed="300" jumpTime="0.6" color_r="255" color_g="87" color_b="154"/>
+            <Enemys color_r="255" color_g="87" color_b="154">
+                <Enemy id="1" type="3" width="50" height="30" x="200" y="0" dx="500" dy="0" moveTime="0.6"/>
+                <Enemy id="2" type="3" width="38" height="75" x="150" y="0" dx="170" dy="0" moveTime="0.5"/>
+                <Enemy id="3" type="3" width="84" height="22" x="590" y="33" dx="500" dy="33" moveTime="1"/>
+                <Enemy id="4" type="3" width="50" height="80" x="702" y="0" dx="702" dy="-80" moveTime="0.5"/>
+            </Enemys>
+
         </Room>
     </Level>
 </GameLevel>

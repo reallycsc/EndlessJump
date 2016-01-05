@@ -27,6 +27,10 @@ LevelMakeScene::~LevelMakeScene()
 	m_vJumpPoints.clear();
 	m_vJumpPointsForAutoTrying.clear();
 	m_vAirPoints.clear();
+
+	_eventDispatcher->removeCustomEventListeners(CSCClass::EVENT_DROPDOWNLIST_SELECTED + "blockType");
+	_eventDispatcher->removeCustomEventListeners(CSCClass::EVENT_DROPDOWNLIST_SELECTED + "level");
+	_eventDispatcher->removeCustomEventListeners(CSCClass::EVENT_DROPDOWNLIST_SELECTED + "room");
 }
 
 Scene* LevelMakeScene::createScene()
@@ -36,7 +40,7 @@ Scene* LevelMakeScene::createScene()
 	// open Debug
 	PhysicsWorld* world = scene->getPhysicsWorld();
 	world->setGravity(Vec2(0, 0));
-	world->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
+	//world->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
     
     // 'layer' is an autorelease object
     auto layer = LevelMakeScene::create();
@@ -77,10 +81,8 @@ bool LevelMakeScene::init()
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
     /////////////////////////////
-
 	auto rootNode = CSLoader::createNode("LevelMakeScene.csb");
 	this->addChild(rootNode);
-
 	// get button
 	auto buttonReturn = dynamic_cast<Button*>(rootNode->getChildByName("Button_Return"));
 	auto buttonAddNewLevel = dynamic_cast<Button*>(rootNode->getChildByName("Button_AddNewLevel"));
@@ -105,7 +107,6 @@ bool LevelMakeScene::init()
 	buttonLoad->addClickEventListener(CC_CALLBACK_1(LevelMakeScene::buttonCallback_Load, this));
 	buttonExport->addClickEventListener(CC_CALLBACK_1(LevelMakeScene::buttonCallback_Export, this));
 	buttonImport->addClickEventListener(CC_CALLBACK_1(LevelMakeScene::buttonCallback_Import, this));
-
 	// get level panel
 	auto panelLevel = dynamic_cast<Layout*>(rootNode->getChildByName("Panel_Level"));
 	this->getLevelNode(dynamic_cast<Node*>(panelLevel->getChildByName("Node_Level_ID")), TAG_LEVEL_ID, false);
@@ -122,20 +123,23 @@ bool LevelMakeScene::init()
 	this->getLevelNode(dynamic_cast<Node*>(panelLevel->getChildByName("Node_Block_Color_R")), TAG_ENEMY_COLOR_R);
 	this->getLevelNode(dynamic_cast<Node*>(panelLevel->getChildByName("Node_Block_Color_G")), TAG_ENEMY_COLOR_G);
 	this->getLevelNode(dynamic_cast<Node*>(panelLevel->getChildByName("Node_Block_Color_B")), TAG_ENEMY_COLOR_B);
-
 	// get block panel
 	auto panelBlock = dynamic_cast<Layout*>(rootNode->getChildByName("Panel_Block"));
 	auto textType = dynamic_cast<Text*>(panelBlock->getChildByName("Text_Type"));
-	m_pDropDownListType = CSCClass::DropDownList::create(Label::createWithSystemFont("1", "Arial", 22), Size(80, 30), "type");
-	m_pDropDownListType->addLabel(Label::createWithSystemFont("2", "Arial", 22));
+	m_pDropDownListType = CSCClass::DropDownList::create(Label::createWithSystemFont("Normal", "Arial", 22), Size(80, 30), "blockType"); // TYPE_NORMAL
+	m_pDropDownListType->addLabel(Label::createWithSystemFont("Rotate", "Arial", 22)); // TYPE_ROTATE
+	m_pDropDownListType->addLabel(Label::createWithSystemFont("Move", "Arial", 22)); // TYPE_MOVE
 	m_pDropDownListType->setPosition(90, textType->getPositionY() - m_pDropDownListType->getContentSize().height / 2);
 	panelBlock->addChild(m_pDropDownListType);
+	_eventDispatcher->addCustomEventListener(CSCClass::EVENT_DROPDOWNLIST_SELECTED + "blockType", CC_CALLBACK_1(LevelMakeScene::onDropDownList_BlockType, this));
 	this->getLevelNode(dynamic_cast<Node*>(panelBlock->getChildByName("Node_Width")), TAG_ENEMY_WIDTH);
 	this->getLevelNode(dynamic_cast<Node*>(panelBlock->getChildByName("Node_Height")), TAG_ENEMY_HEIGHT);
 	this->getLevelNode(dynamic_cast<Node*>(panelBlock->getChildByName("Node_PositionX")), TAG_ENEMY_POSITION_X);
 	this->getLevelNode(dynamic_cast<Node*>(panelBlock->getChildByName("Node_PositionY")), TAG_ENEMY_POSITION_Y);
 	this->getLevelNode(dynamic_cast<Node*>(panelBlock->getChildByName("Node_RotateDuration")), TAG_ENEMY_ROTATE_TIME10);
-	
+	this->getLevelNode(dynamic_cast<Node*>(panelBlock->getChildByName("Node_DestinationX")), TAG_ENEMY_DESTINATION_X);
+	this->getLevelNode(dynamic_cast<Node*>(panelBlock->getChildByName("Node_DestinationY")), TAG_ENEMY_DESTINATION_Y);
+	this->getLevelNode(dynamic_cast<Node*>(panelBlock->getChildByName("Node_MoveDuration")), TAG_ENEMY_MOVE_TIME10);
 	// get player panel
 	auto panelPlayer = dynamic_cast<Layout*>(rootNode->getChildByName("Panel_Player"));
 	this->getLevelNode(dynamic_cast<Node*>(panelPlayer->getChildByName("Node_Speed")), TAG_PLAYER_SPEED);
@@ -144,43 +148,14 @@ bool LevelMakeScene::init()
 	// get level choose panel
 	auto panelLevelChoose = dynamic_cast<Layout*>(rootNode->getChildByName("Panel_LevelChoose"));
 	m_pDropDownListLevel = CSCClass::DropDownList::create(Label::createWithSystemFont("1", "Arial", 22), Size(80, 30), "level");
-	float pos_y = (panelLevelChoose->getContentSize().height - m_pDropDownListLevel->getContentSize().height) / 2;
-	m_pDropDownListLevel->setPosition(70, pos_y);
+	m_pDropDownListLevel->setPosition(70, (panelLevelChoose->getContentSize().height - m_pDropDownListLevel->getContentSize().height) / 2);
 	panelLevelChoose->addChild(m_pDropDownListLevel);
-	auto listener = EventListenerCustom::create(CSCClass::EVENT_DROPDOWNLIST_SELECTED + "level", [=](EventCustom* event) {
-		// after level selected
-		int index = m_pDropDownListLevel->getSelectedIndex();
-		int level = index + 1;
-		this->updateBlockTextFieldNumber(TAG_LEVEL_ID, level);
-
-		auto levelsData = GameMediator::getInstance()->getGameLevelData();
-		auto roomsData = levelsData->at(index)->getRoomsData();
-		char buf[10];
-		m_pDropDownListRoom->clearAllLabels();
-		for (size_t i = 0, j = roomsData->size(); i < j; i++)
-		{
-			sprintf(buf, "%d", i + 1);
-			m_pDropDownListRoom->addLabel(Label::createWithSystemFont(buf, "Arial", 22));
-		}
-
-		int room = 1;
-		this->updateBlockTextFieldNumber(TAG_LEVEL_ROOM_ID, room);
-		m_pDropDownListRoom->setSelectedIndex(room - 1);
-		this->loadDataFrom(level, room);
-	});
-	_eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
+	_eventDispatcher->addCustomEventListener(CSCClass::EVENT_DROPDOWNLIST_SELECTED + "level", CC_CALLBACK_1(LevelMakeScene::onDropDownList_Level, this));
 
 	m_pDropDownListRoom = CSCClass::DropDownList::create(Label::createWithSystemFont("1", "Arial", 22), Size(80, 30), "room");
-	m_pDropDownListRoom->setPosition(270, pos_y);
+	m_pDropDownListRoom->setPosition(270, (panelLevelChoose->getContentSize().height - m_pDropDownListRoom->getContentSize().height) / 2);
 	panelLevelChoose->addChild(m_pDropDownListRoom);
-	listener = EventListenerCustom::create(CSCClass::EVENT_DROPDOWNLIST_SELECTED + "room", [=](EventCustom* event) {
-		// after room selected
-		int level = m_mTextFieldStructs.at(TAG_LEVEL_ID).number;
-		int room = m_pDropDownListRoom->getSelectedIndex() + 1;
-		this->updateBlockTextFieldNumber(TAG_LEVEL_ROOM_ID, room);
-		this->loadDataFrom(level, room);
-	});
-	_eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
+	_eventDispatcher->addCustomEventListener(CSCClass::EVENT_DROPDOWNLIST_SELECTED + "room", CC_CALLBACK_1(LevelMakeScene::onDropDownList_Room, this));
 
 	// set initial number
 	int levelWidth = visibleSize.width / 2;
@@ -201,18 +176,22 @@ bool LevelMakeScene::init()
 	this->initStruct(&m_mTextFieldStructs.at(TAG_ENEMY_COLOR_B), 0, 153, 255);
 	this->initStruct(&m_mTextFieldStructs.at(TAG_ENEMY_WIDTH), 0, 50, levelWidth);
 	this->initStruct(&m_mTextFieldStructs.at(TAG_ENEMY_HEIGHT), 0, 50, levelHeight);
-	this->initStruct(&m_mTextFieldStructs.at(TAG_ENEMY_POSITION_X), 0, levelWidth*0.5, levelWidth);
-	this->initStruct(&m_mTextFieldStructs.at(TAG_ENEMY_POSITION_Y), 0, 0, levelHeight);
-	this->initStruct(&m_mTextFieldStructs.at(TAG_ENEMY_ROTATE_TIME10), 0, 10, 99);
+	this->initStruct(&m_mTextFieldStructs.at(TAG_ENEMY_POSITION_X), -levelWidth, levelWidth * 0.5, levelWidth);
+	this->initStruct(&m_mTextFieldStructs.at(TAG_ENEMY_POSITION_Y), -levelHeight, 0, levelHeight);
+	this->initStruct(&m_mTextFieldStructs.at(TAG_ENEMY_ROTATE_TIME10), 1, 10, 99);
+	this->initStruct(&m_mTextFieldStructs.at(TAG_ENEMY_DESTINATION_X), -levelWidth, levelWidth * 0.5, levelWidth * 2);
+	this->initStruct(&m_mTextFieldStructs.at(TAG_ENEMY_DESTINATION_Y), -levelHeight, 0, levelHeight * 2);
+	this->initStruct(&m_mTextFieldStructs.at(TAG_ENEMY_MOVE_TIME10), 1, 10, 99);
 
 	this->initStruct(&m_mTextFieldStructs.at(TAG_PLAYER_SPEED), 0, levelWidth*0.2, levelWidth);
-	this->initStruct(&m_mTextFieldStructs.at(TAG_PLAYER_JUMPTIME10), 0, 6, 20);
+	this->initStruct(&m_mTextFieldStructs.at(TAG_PLAYER_JUMPTIME10), 1, 6, 20);
 
 	// add line between gameplay screen & edit screen
 	DrawNode* line = DrawNode::create();
 	line->drawLine(Vec2(levelWidth, 0), Vec2(levelWidth, visibleSize.height), Color4F::WHITE);
 	this->addChild(line);
 
+	// add default level & room
 	auto levelsData = GameMediator::getInstance()->getGameLevelData();
 	if (levelsData->size() > 0)
 	{
@@ -225,7 +204,7 @@ bool LevelMakeScene::init()
 		this->addEnemy();
 		this->addPlayer();
 
-		this->calcFoothold();
+		//this->calcFoothold();
 	}
 
 	this->scheduleUpdate();
@@ -258,12 +237,32 @@ bool LevelMakeScene::onTouchBegan(Touch *touch, Event *event)
 				m_nCurEnemyId = i;
 
 				enemy->select();
-				m_pDropDownListType->setSelectedIndex(enemy->getType() - 1);
+				int type = enemy->getType();
+				m_pDropDownListType->setSelectedIndex(type - 1);
 				this->updateBlockTextFieldNumber(TAG_ENEMY_WIDTH, enemy->getContentSize().width);
 				this->updateBlockTextFieldNumber(TAG_ENEMY_HEIGHT, enemy->getContentSize().height);
 				this->updateBlockTextFieldNumber(TAG_ENEMY_POSITION_X, position.x);
 				this->updateBlockTextFieldNumber(TAG_ENEMY_POSITION_Y, position.y);
-				this->updateBlockTextFieldNumber(TAG_ENEMY_ROTATE_TIME10, enemy->getRotateDuration() * 10);
+				switch (type)
+				{
+				case TYPE_ROTATE:
+					this->updateBlockTextFieldNumber(TAG_ENEMY_ROTATE_TIME10, enemy->getRotateDuration() * 10);
+					break;
+				case TYPE_MOVE:
+				{
+					Point startPos = enemy->getStartPoint();
+					this->updateBlockTextFieldNumber(TAG_ENEMY_POSITION_X, startPos.x);
+					this->updateBlockTextFieldNumber(TAG_ENEMY_POSITION_Y, startPos.y);
+					Point destPos = enemy->getDestPoint();
+					this->updateBlockTextFieldNumber(TAG_ENEMY_DESTINATION_X, destPos.x);
+					this->updateBlockTextFieldNumber(TAG_ENEMY_DESTINATION_Y, destPos.y);
+					this->updateBlockTextFieldNumber(TAG_ENEMY_MOVE_TIME10, enemy->getMoveDuration() * 10);
+					break;
+				}
+				default:
+					break;
+				}
+				this->updateBlockType(type);
 			}
 		}
 	}
@@ -281,10 +280,13 @@ void LevelMakeScene::onTouchMoved(Touch *touch, Event *event)
 		int maxY = m_mTextFieldStructs.at(TAG_LEVEL_ROOM_HEIGHT).number;
 		position.x = MAX(MIN(position.x, maxX), minX);
 		position.y = MAX(MIN(position.y, maxY), 0);
-		m_vEnemys.at(m_nCurEnemyId)->setPosition(position);
-		updateBlockTextFieldNumber(TAG_ENEMY_POSITION_X, position.x);
-		updateBlockTextFieldNumber(TAG_ENEMY_POSITION_Y, position.y);
-		this->calcFoothold();
+		auto enemy = m_vEnemys.at(m_nCurEnemyId);
+		if (enemy->getType() == TYPE_MOVE)
+			enemy->updateStartPoint(position);
+		enemy->setPosition(position);
+		this->updateBlockTextFieldNumber(TAG_ENEMY_POSITION_X, position.x);
+		this->updateBlockTextFieldNumber(TAG_ENEMY_POSITION_Y, position.y);
+		//this->calcFoothold();
 	}
 }
 
@@ -304,7 +306,6 @@ void LevelMakeScene::onTextFieldEvent(Ref* pSender, TextField::EventType type)
 {
 	TextField* field = dynamic_cast<TextField*>(pSender);
 	int tag = field->getTag();
-	char buf[10];
 	bool isChanged = false;
 
 	switch (type)
@@ -321,12 +322,13 @@ void LevelMakeScene::onTextFieldEvent(Ref* pSender, TextField::EventType type)
 			// format input
 			string strHolder = field->getPlaceHolder();
 			int pos = strHolder.find("-");
-			sprintf(buf, "%d",
-				MAX(MIN(
+			if (field->getString().compare("-") == 0)
+				return;
+			int number = MAX(MIN(
 					atoi(CSCClass::eraseStringNonNumber(field->getString()).c_str()),
 					atoi(strHolder.substr(pos + 1, strHolder.size() - pos - 1).c_str())
-					), 0));
-			field->setString(buf);
+					), atoi(strHolder.substr(0, pos - 1).c_str()));
+			field->setString(StringUtils::format("%d", number));
 		}
 		
 		break;
@@ -341,17 +343,13 @@ void LevelMakeScene::onTextFieldEvent(Ref* pSender, TextField::EventType type)
 	{
 		// set attribute
 		if(tag == TAG_LEVEL_NAME)
-		{
 			m_sLevelName = field->getString();
-		}
 		else
 		{
 			TextFieldSliderBindInt* structTmp = &m_mTextFieldStructs.at(tag);
 			structTmp->number = atoi(field->getString().c_str());
 			if (structTmp->slider)
-			{
-				structTmp->slider->setPercent(structTmp->number * 100 / structTmp->max);
-			}
+				structTmp->slider->setPercent((structTmp->number - structTmp->min) * 100 / (structTmp->max - structTmp->min));
 			this->updateBlockByLevel(tag, structTmp->number);
 
 			// update object
@@ -359,7 +357,7 @@ void LevelMakeScene::onTextFieldEvent(Ref* pSender, TextField::EventType type)
 			this->updateCurEnemy(tag);
 			this->updatePlayer(tag);
 
-			this->calcFoothold();
+			//this->calcFoothold();
 		}
 	}
 }
@@ -375,9 +373,7 @@ void LevelMakeScene::onSliderEvent(Ref* pSender, Slider::EventType type)
 		int tag = slider->getTag();
 		TextFieldSliderBindInt* structTmp = &m_mTextFieldStructs.at(tag);
 		structTmp->number = percent * (structTmp->max - structTmp->min) / maxPercent + structTmp->min;
-		char buf[10];
-		sprintf(buf, "%d", structTmp->number);
-		structTmp->textField->setString(buf);
+		structTmp->textField->setString(StringUtils::format("%d", structTmp->number));
 		this->updateBlockByLevel(tag, structTmp->number);
 
 		// update object
@@ -385,8 +381,52 @@ void LevelMakeScene::onSliderEvent(Ref* pSender, Slider::EventType type)
 		this->updateCurEnemy(tag);
 		this->updatePlayer(tag);
 
-		this->calcFoothold();
+		//this->calcFoothold();
 	}
+}
+
+void LevelMakeScene::onDropDownList_BlockType(EventCustom* event)
+{
+	CS_RETURN_IF(m_vEnemys.size() == 0);
+
+	int type = m_pDropDownListType->getSelectedIndex() + 1;
+	Enemy* enemy = m_vEnemys.at(m_nCurEnemyId);
+	CS_RETURN_IF(type == enemy->getType());
+
+	this->updateBlockType(type);
+
+	// remove old enemy & add new enemy
+	m_vEnemys.at(m_nCurEnemyId)->removeFromParent();
+	m_vEnemys.erase(m_nCurEnemyId);
+	this->addEnemy();
+	for (size_t i = 0, length = m_vEnemys.size(); i < length; i++)
+		m_vEnemys.at(i)->updateId(i);
+}
+
+void LevelMakeScene::onDropDownList_Level(EventCustom* event)
+{
+	// update level id
+	int index = m_pDropDownListLevel->getSelectedIndex();
+	int level = index + 1;
+	this->updateBlockTextFieldNumber(TAG_LEVEL_ID, level);
+	// make new room id dropdownlist
+	auto roomsData = GameMediator::getInstance()->getGameLevelData()->at(index)->getRoomsData();
+	m_pDropDownListRoom->clearAllLabels();
+	for (size_t i = 0, length = roomsData->size(); i < length; i++)
+		m_pDropDownListRoom->addLabel(Label::createWithSystemFont(StringUtils::format("%d", i + 1), "Arial", 22));
+	// load room 1 from this level
+	this->updateBlockTextFieldNumber(TAG_LEVEL_ROOM_ID, 1);
+	m_pDropDownListRoom->setSelectedIndex(0);
+	this->loadDataFrom(level, 1);
+}
+
+void LevelMakeScene::onDropDownList_Room(EventCustom* event)
+{
+	// after room selected
+	int level = m_mTextFieldStructs.at(TAG_LEVEL_ID).number;
+	int room = m_pDropDownListRoom->getSelectedIndex() + 1;
+	this->updateBlockTextFieldNumber(TAG_LEVEL_ROOM_ID, room);
+	this->loadDataFrom(level, room);
 }
 
 bool LevelMakeScene::onContactBegin(const PhysicsContact& contact)
@@ -437,6 +477,7 @@ bool LevelMakeScene::onContactBegin(const PhysicsContact& contact)
 // schedule functions
 void LevelMakeScene::update(float dt)
 {
+	this->calcFoothold();
 	if (m_bIsAutoTrying && m_pPlayer)
 	{
 		if (m_nCurJumpPointId < m_vJumpPointsForAutoTrying.size())
@@ -481,9 +522,7 @@ void LevelMakeScene::buttonCallback_AddNewLevel(Ref* pSender)
 {
 	auto levelsData = GameMediator::getInstance()->getGameLevelData();
 	int newLevelIndex = levelsData->size() + 1;
-	char buf[10];
-	sprintf(buf, "%d", newLevelIndex);
-	m_pDropDownListLevel->addLabel(Label::createWithSystemFont(buf, "Arial", 22));
+	m_pDropDownListLevel->addLabel(Label::createWithSystemFont(StringUtils::format("%d", newLevelIndex), "Arial", 22));
 	m_pDropDownListLevel->setSelectedIndex(newLevelIndex - 1);
 	m_pDropDownListRoom->setSelectedIndex(0);
 	this->updateBlockTextFieldNumber(TAG_LEVEL_ID, newLevelIndex);
@@ -501,9 +540,7 @@ void LevelMakeScene::buttonCallback_AddNewRoom(Ref* pSender)
 	int level = m_mTextFieldStructs.at(TAG_LEVEL_ID).number;
 	auto roomsData = levelsData->at(level - 1)->getRoomsData();
 	int newRoomIndex = roomsData->size() + 1;
-	char buf[10];
-	sprintf(buf, "%d", newRoomIndex);
-	m_pDropDownListRoom->addLabel(Label::createWithSystemFont(buf, "Arial", 22));
+	m_pDropDownListRoom->addLabel(Label::createWithSystemFont(StringUtils::format("%d", newRoomIndex), "Arial", 22));
 	m_pDropDownListRoom->setSelectedIndex(newRoomIndex - 1);
 	this->updateBlockTextFieldNumber(TAG_LEVEL_ROOM_ID, newRoomIndex);
 	this->saveDataTo(level, newRoomIndex);
@@ -513,7 +550,7 @@ void LevelMakeScene::buttonCallback_AddNewRoom(Ref* pSender)
 void LevelMakeScene::buttonCallback_AddBlock(Ref* pSender)
 {
 	this->addEnemy();
-	this->calcFoothold();
+	//this->calcFoothold();
 }
 
 void LevelMakeScene::buttonCallback_RemoveBlock(Ref* pSender)
@@ -528,7 +565,9 @@ void LevelMakeScene::buttonCallback_RemoveBlock(Ref* pSender)
 			m_vEnemys.at(m_nCurEnemyId)->select();
 			m_pDropDownListType->setSelectedIndex(m_vEnemys.at(m_nCurEnemyId)->getType() - 1);
 		}
-		this->calcFoothold();
+		for (size_t i = 0, length = m_vEnemys.size(); i < length; i++)
+			m_vEnemys.at(i)->updateId(i);
+		//this->calcFoothold();
 	}
 }
 
@@ -614,21 +653,35 @@ void LevelMakeScene::addRoom()
 void LevelMakeScene::addEnemy()
 {
 	int type = m_pDropDownListType->getSelectedIndex() + 1;
-	int width = m_mTextFieldStructs.at(TAG_ENEMY_WIDTH).number;
-	int height = m_mTextFieldStructs.at(TAG_ENEMY_HEIGHT).number;
-	int color_r = m_mTextFieldStructs.at(TAG_ENEMY_COLOR_R).number;
-	int color_g = m_mTextFieldStructs.at(TAG_ENEMY_COLOR_G).number;
-	int color_b = m_mTextFieldStructs.at(TAG_ENEMY_COLOR_B).number;
-	float rotateT = m_mTextFieldStructs.at(TAG_ENEMY_ROTATE_TIME10).number / 10.0f;
+	Size size = Size(m_mTextFieldStructs.at(TAG_ENEMY_WIDTH).number, m_mTextFieldStructs.at(TAG_ENEMY_HEIGHT).number);
+	Color3B color = Color3B(m_mTextFieldStructs.at(TAG_ENEMY_COLOR_R).number, m_mTextFieldStructs.at(TAG_ENEMY_COLOR_G).number, m_mTextFieldStructs.at(TAG_ENEMY_COLOR_B).number);
+	Point position = Point(m_mTextFieldStructs.at(TAG_ENEMY_POSITION_X).number, m_mTextFieldStructs.at(TAG_ENEMY_POSITION_Y).number);
 
 	m_nCurEnemyId = m_vEnemys.size();
-
-	auto enemy = Enemy::createWithType(type, Size(width, height), Color3B(color_r, color_g, color_b), m_nCurEnemyId, rotateT);
-	enemy->setPosition(m_mTextFieldStructs.at(TAG_ENEMY_POSITION_X).number, m_mTextFieldStructs.at(TAG_ENEMY_POSITION_Y).number);
+	Enemy* enemy = NULL;
+	switch (type)
+	{
+	case TYPE_NORMAL:
+		enemy = Enemy::create(size, color, m_nCurEnemyId);
+		break;
+	case TYPE_ROTATE:
+		enemy = Enemy::createRotate(size, color, m_nCurEnemyId,
+			m_mTextFieldStructs.at(TAG_ENEMY_ROTATE_TIME10).number / 10.0f);
+		break;
+	case TYPE_MOVE:
+		enemy = Enemy::createMove(size, color, m_nCurEnemyId, position, 
+			Point(m_mTextFieldStructs.at(TAG_ENEMY_DESTINATION_X).number, m_mTextFieldStructs.at(TAG_ENEMY_DESTINATION_Y).number),
+			m_mTextFieldStructs.at(TAG_ENEMY_MOVE_TIME10).number / 10.0f);
+		break;
+	default:
+		break;
+	}
+	enemy->setPosition(position);
 	this->addChild(enemy, 1, TAG_ENEMY);
 	m_vEnemys.pushBack(enemy);
 	enemy->select();
-	m_pDropDownListType->setSelectedIndex(enemy->getType() - 1);
+	m_pDropDownListType->setSelectedIndex(type - 1);
+	this->updateBlockType(type);
 }
 
 void LevelMakeScene::addPlayer()
@@ -730,13 +783,26 @@ void LevelMakeScene::updateCurEnemy(int tag)
 		}
 		break;
 	case TAG_ENEMY_POSITION_X:
+		if (obj->getType() == TYPE_MOVE)
+			obj->updateStartPoint(Point(number, obj->getStartPoint().y));
 		obj->setPositionX(number);
 		break;
 	case TAG_ENEMY_POSITION_Y:
+		if (obj->getType() == TYPE_MOVE)
+			obj->updateStartPoint(Point(obj->getStartPoint().x, number));
 		obj->setPositionY(number);
 		break;
 	case TAG_ENEMY_ROTATE_TIME10:
 		obj->updateRotateDuration(number * 0.1f);
+		break;
+	case TAG_ENEMY_DESTINATION_X:
+		obj->updateDestPoint(Point(number, obj->getDestPoint().y));
+		break;
+	case TAG_ENEMY_DESTINATION_Y:
+		obj->updateDestPoint(Point(obj->getDestPoint().x, number));
+		break;
+	case TAG_ENEMY_MOVE_TIME10:
+		obj->updateMoveDuration(number * 0.1f);
 		break;
 	default:
 		break;
@@ -762,9 +828,8 @@ void LevelMakeScene::calcFoothold()
 	float jumpTime = m_pPlayer->getJumpDuration();
 	float speed = m_pPlayer->getSpeed();
 	Size playerSize = m_pPlayer->getContentSize();
-	float playerWidth = playerSize.width;
 	float jumpLength = jumpTime * speed;
-	float endOffsetX = jumpLength - playerWidth * 0.7; // this 0.82 is tryout
+	float endOffsetX = jumpLength - playerSize.width * 0.7; // this 0.7 is tryout
 
 	float ctlOffsetX = jumpLength / 2;
 	Vec2 vecCtlOffsetStart = Vec2(ctlOffsetX, jumpHeight);
@@ -806,8 +871,8 @@ void LevelMakeScene::calcFoothold()
 		{
 			obj->addPlayerBlockForLevelMake(playerSize);
 			// add left and right bottom point to air point for conflict calc
-			Point pBottomLeft = Point(enemyBottomPos.x - enemySize.width / 2 - playerWidth, enemyBottomPos.y - playerSize.height);
-			Point pBottomRight = Point(enemyBottomPos.x + enemySize.width / 2 + playerWidth, enemyBottomPos.y - playerSize.height);
+			Point pBottomLeft = Point(enemyBottomPos.x - enemySize.width / 2 - playerSize.width, enemyBottomPos.y - playerSize.height);
+			Point pBottomRight = Point(enemyBottomPos.x + enemySize.width / 2 + playerSize.width, enemyBottomPos.y - playerSize.height);
 			m_vAirPoints.push_back(pBottomLeft);
 			m_vAirPoints.push_back(pBottomRight);
 		}
@@ -839,7 +904,6 @@ void LevelMakeScene::calcFoothold()
 		draw->setLineWidth(lineWidth);
 
 		Node* textNode = Node::create();
-		char buf[10];
 		int frameRate = Director::getInstance()->getFrameRate();
 		// draw 0 - p1 first width one jump line
 		float p1 = m_vJumpPoints.at(0).pStart;
@@ -848,9 +912,9 @@ void LevelMakeScene::calcFoothold()
 		this->drawJumpLine(draw, vecStart, vecStart + vecCtlOffsetStart, vecStart + vecEndOffset, colorStart);
 		draw->drawLine(Vec2(0, lineWidth), Vec2(p1, lineWidth), colorStart);
 		// calc estimate time with frame number for start jump
-		this->AddEstimateFrameText(textNode, buf, 0, p1, frameRate, playerWidth, speed, 20, Color4B(colorStart));
+		this->AddEstimateFrameText(textNode, 0, p1, frameRate, playerSize.width, speed, 20, Color4B(colorStart));
 		float p2 = m_vJumpPoints.at(0).pEndStart;
-		this->AddEstimateFrameText(textNode, buf, 0, p2, frameRate, playerWidth, speed, 20, Color4B(colorEnd));
+		this->AddEstimateFrameText(textNode, 0, p2, frameRate, playerSize.width, speed, 20, Color4B(colorEnd));
 		// draw p1-p2 with two jump lines
 		Color4F color = colorStart;
 		for (size_t i = 1; i < length; i++)
@@ -860,7 +924,7 @@ void LevelMakeScene::calcFoothold()
 			float p2Start = m_vJumpPoints.at(i).pStart;
 			float p2EndStart = m_vJumpPoints.at(i).pEndStart;
 			// draw lines
-			float landLength = p2Start - p1End - playerWidth;
+			float landLength = p2Start - p1End - playerSize.width;
 			if (landLength < 0)
 				color = colorCollapse;
 			vecEnd = Vec2(p1End, 0);
@@ -869,10 +933,10 @@ void LevelMakeScene::calcFoothold()
 			vecStart = Vec2(p2Start, 0);
 			this->drawJumpLine(draw, vecStart, vecStart + vecCtlOffsetStart, vecStart + vecEndOffset, colorStart);
 			// calc estimate time with frame number for 4-combinations
-			this->AddEstimateFrameText(textNode, buf, p1End, p2Start, frameRate, playerWidth, speed, 20, Color4B(colorEnd));
-			this->AddEstimateFrameText(textNode, buf, p1StartEnd, p2Start, frameRate, playerWidth, speed, 40, Color4B(colorStart));
-			this->AddEstimateFrameText(textNode, buf, p1End, p2EndStart, frameRate, playerWidth, speed, 60, Color4B(colorEnd));
-			this->AddEstimateFrameText(textNode, buf, p1StartEnd, p2EndStart, frameRate, playerWidth, speed, 80, Color4B(colorStart));
+			this->AddEstimateFrameText(textNode, p1End, p2Start, frameRate, playerSize.width, speed, 20, Color4B(colorEnd));
+			this->AddEstimateFrameText(textNode, p1StartEnd, p2Start, frameRate, playerSize.width, speed, 40, Color4B(colorStart));
+			this->AddEstimateFrameText(textNode, p1End, p2EndStart, frameRate, playerSize.width, speed, 60, Color4B(colorEnd));
+			this->AddEstimateFrameText(textNode, p1StartEnd, p2EndStart, frameRate, playerSize.width, speed, 80, Color4B(colorStart));
 		}
 		this->addChild(textNode, 1, TAG_TIMETEXT);
 		// draw last p - width with one jump line
@@ -933,9 +997,24 @@ void LevelMakeScene::loadDataFrom(int level, int room)
 	auto enemys = &(roomData->enemysData);
 	for (size_t i = 0, j = enemys->size(); i < j; i++)
 	{
-		auto enemyData = &(enemys->at(i));
-		Enemy* enemy = Enemy::createWithType(enemyData->type, enemyData->size, roomData->enemy_color, enemyData->id, enemyData->rotateTime);
-		enemy->setPosition(enemyData->position);
+		auto enemyData = enemys->at(i);
+		Enemy* enemy = NULL;
+		int id = enemyData.id - 1;
+		switch (enemyData.type)
+		{
+		case TYPE_NORMAL:
+			enemy = Enemy::create(enemyData.size, roomData->enemy_color, id);
+			break;
+		case TYPE_ROTATE:
+			enemy = Enemy::createRotate(enemyData.size, roomData->enemy_color, id, enemyData.rotateTime);
+			break;
+		case TYPE_MOVE:
+			enemy = Enemy::createMove(enemyData.size, roomData->enemy_color, id, enemyData.position, enemyData.destination, enemyData.moveTime);
+			break;
+		default:
+			break;
+		}
+		enemy->setPosition(enemyData.position);
 		this->addChild(enemy, 1, TAG_ENEMY);
 		m_vEnemys.pushBack(enemy);
 	}
@@ -943,16 +1022,36 @@ void LevelMakeScene::loadDataFrom(int level, int room)
 	if (enemys->size() > 0)
 	{
 		auto enemy = *m_vEnemys.begin();
+		int type = enemy->getType();
 		Size enemySize = enemy->getContentSize();
 		this->updateBlockTextFieldNumber(TAG_ENEMY_WIDTH, enemySize.width);
 		this->updateBlockTextFieldNumber(TAG_ENEMY_HEIGHT, enemySize.height);
 		Point enemyPos = enemy->getPosition();
 		this->updateBlockTextFieldNumber(TAG_ENEMY_POSITION_X, enemyPos.x);
 		this->updateBlockTextFieldNumber(TAG_ENEMY_POSITION_Y, enemyPos.y);
-		this->updateBlockTextFieldNumber(TAG_ENEMY_ROTATE_TIME10, enemy->getRotateDuration() * 10);
+		switch (type)
+		{
+		case TYPE_ROTATE:
+			this->updateBlockTextFieldNumber(TAG_ENEMY_ROTATE_TIME10, enemy->getRotateDuration() * 10);
+			break;
+		case TYPE_MOVE:
+		{
+			Point startPos = enemy->getStartPoint();
+			this->updateBlockTextFieldNumber(TAG_ENEMY_POSITION_X, startPos.x);
+			this->updateBlockTextFieldNumber(TAG_ENEMY_POSITION_Y, startPos.y);
+			Point destPos = enemy->getDestPoint();
+			this->updateBlockTextFieldNumber(TAG_ENEMY_DESTINATION_X, destPos.x);
+			this->updateBlockTextFieldNumber(TAG_ENEMY_DESTINATION_Y, destPos.y);
+			this->updateBlockTextFieldNumber(TAG_ENEMY_MOVE_TIME10, enemy->getMoveDuration() * 10);
+			break;
+		}
+		default:
+			break;
+		}
 		enemy->select();
-		m_pDropDownListType->setSelectedIndex(enemy->getType() - 1);
-		this->calcFoothold();
+		m_pDropDownListType->setSelectedIndex(type - 1);
+		this->updateBlockType(type);
+		//this->calcFoothold();
 	}
 }
 
@@ -1027,28 +1126,33 @@ void LevelMakeScene::saveDataTo(int level, int room)
 		enemyData.type = enemy->getType();
 		enemyData.size = enemy->getContentSize();
 		enemyData.position = enemy->getPosition();
-		enemyData.rotateTime = enemy->getRotateDuration();
+		switch (enemyData.type)
+		{
+		case TYPE_ROTATE:
+			enemyData.rotateTime = enemy->getRotateDuration();
+			break;
+		case TYPE_MOVE:
+			enemyData.position = enemy->getStartPoint();
+			enemyData.destination = enemy->getDestPoint();
+			enemyData.moveTime = enemy->getMoveDuration();
+			break;
+		default:
+			break;
+		}
 		pRoomData->enemysData.push_back(enemyData);
 	}
 }
 
 void LevelMakeScene::setDropDownList(vector<GameLevelData*>* levelsData)
 {
-	char buf[10];
 	m_pDropDownListLevel->clearAllLabels();
 	for (size_t i = 0, j = levelsData->size(); i < j; i++)
-	{
-		sprintf(buf, "%d", i + 1);
-		m_pDropDownListLevel->addLabel(Label::createWithSystemFont(buf, "Arial", 22));
-	}
+		m_pDropDownListLevel->addLabel(Label::createWithSystemFont(StringUtils::format("%d", i + 1), "Arial", 22));
 
 	auto roomsData = levelsData->at(m_pDropDownListLevel->getSelectedIndex())->getRoomsData();
 	m_pDropDownListRoom->clearAllLabels();
 	for (size_t i = 0, j = roomsData->size(); i < j; i++)
-	{
-		sprintf(buf, "%d", i + 1);
-		m_pDropDownListRoom->addLabel(Label::createWithSystemFont(buf, "Arial", 22));
-	}
+		m_pDropDownListRoom->addLabel(Label::createWithSystemFont(StringUtils::format("%d", i + 1), "Arial", 22));
 }
 
 bool LevelMakeScene::isJumpLineConflict(const Vec2& origin, const Vec2& control, const Vec2& destination)
@@ -1064,9 +1168,7 @@ bool LevelMakeScene::isJumpLineConflict(const Vec2& origin, const Vec2& control,
 			float t = (p.x - origin.x) / dx;
 			float lineY = origin.y + 4 * control.y * t * (1 - t);
 			if (p.y < lineY)
-			{
 				return true;
-			}
 		}
 	}
 	return false;
@@ -1097,28 +1199,19 @@ void LevelMakeScene::initStruct(TextFieldSliderBindInt* structTmp, int min, int 
 	structTmp->min = min;
 	structTmp->number = number;
 	structTmp->max = max;
-	char buf[10];
-	sprintf(buf, "0-%d", static_cast<int>(max));
-	structTmp->textField->setPlaceHolder(buf);
-	sprintf(buf, "%d", static_cast<int>(number));
-	structTmp->textField->setString(buf);
+	structTmp->textField->setPlaceHolder(StringUtils::format("%d-%d", static_cast<int>(min), static_cast<int>(max)));
+	structTmp->textField->setString(StringUtils::format("%d", static_cast<int>(number)));
 	if (structTmp->slider)
-	{
-		structTmp->slider->setPercent(number * 100 / max);
-	}
+		structTmp->slider->setPercent((number - min) * 100 / (max - min));
 }
 
 void LevelMakeScene::updateBlockTextFieldNumber(int tag, int number)
 {
 	TextFieldSliderBindInt* structBlock = &m_mTextFieldStructs.at(tag);
 	structBlock->number = MAX(MIN(number, structBlock->max), structBlock->min);
-	char buf[10];
-	sprintf(buf, "%d", structBlock->number);
-	structBlock->textField->setString(buf);
+	structBlock->textField->setString(StringUtils::format("%d", structBlock->number));
 	if (structBlock->slider)
-	{
-		structBlock->slider->setPercent(structBlock->number * 100 / structBlock->max);
-	}
+		structBlock->slider->setPercent((structBlock->number - structBlock->min) * 100 / (structBlock->max - structBlock->min));
 }
 
 void LevelMakeScene::updateBlockTextFieldMax(int tag, int max)
@@ -1128,14 +1221,10 @@ void LevelMakeScene::updateBlockTextFieldMax(int tag, int max)
 	if (structBlock->number > structBlock->max)
 	{
 		structBlock->number = structBlock->max;
-		char buf[10];
-		sprintf(buf, "%d", structBlock->number);
-		structBlock->textField->setString(buf);
+		structBlock->textField->setString(StringUtils::format("%d", structBlock->number));
 	}
 	if (structBlock->slider)
-	{
-		structBlock->slider->setPercent(structBlock->number * 100 / structBlock->max);
-	}
+		structBlock->slider->setPercent((structBlock->number - structBlock->min) * 100 / (structBlock->max - structBlock->min));
 }
 
 void LevelMakeScene::updateBlockByLevel(int tag, int number)
@@ -1150,6 +1239,39 @@ void LevelMakeScene::updateBlockByLevel(int tag, int number)
 		this->updateBlockTextFieldMax(TAG_ENEMY_HEIGHT, number);
 		this->updateBlockTextFieldMax(TAG_ENEMY_POSITION_Y, number);
 		break;
+	default:
+		break;
+	}
+}
+
+void LevelMakeScene::updateBlockType(int type)
+{
+	switch (type)
+	{
+	case TYPE_NORMAL:
+	{
+		this->setTextFieldStructEnable(TAG_ENEMY_ROTATE_TIME10, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_DESTINATION_X, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_DESTINATION_Y, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_MOVE_TIME10, false);
+		break;
+	}
+	case TYPE_ROTATE:
+	{
+		this->setTextFieldStructEnable(TAG_ENEMY_ROTATE_TIME10, true);
+		this->setTextFieldStructEnable(TAG_ENEMY_DESTINATION_X, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_DESTINATION_Y, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_MOVE_TIME10, false);
+		break;
+	}
+	case TYPE_MOVE:
+	{
+		this->setTextFieldStructEnable(TAG_ENEMY_ROTATE_TIME10, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_DESTINATION_X, true);
+		this->setTextFieldStructEnable(TAG_ENEMY_DESTINATION_Y, true);
+		this->setTextFieldStructEnable(TAG_ENEMY_MOVE_TIME10, true);
+		break;
+	}
 	default:
 		break;
 	}
@@ -1181,15 +1303,21 @@ void LevelMakeScene::drawJumpLine(DrawNode* draw, const Vec2 &origin, const Vec2
 	CC_SAFE_DELETE_ARRAY(vertices);
 }
 
-void LevelMakeScene::AddEstimateFrameText(Node* parent, char* buf, float p1, float p2,
+void LevelMakeScene::AddEstimateFrameText(Node* parent, float p1, float p2,
 	int frameRate, float playerWidth, float speed, float posY, Color4B color) const
 {
 	int frameNumber = static_cast<int>(frameRate * (p2 - p1 - playerWidth) / speed);
-	sprintf(buf, "%d", frameNumber);
-	Text* text = Text::create(buf, "Arial", 16);
+	Text* text = Text::create(StringUtils::format("%d", frameNumber), "Arial", 16);
 	if (frameNumber <= 0)
 		color = Color4B::RED;
 	text->setTextColor(color);
 	text->setPosition(Point(p1 + (p2 - p1) / 2, posY));
 	parent->addChild(text);
+}
+
+void LevelMakeScene::setTextFieldStructEnable(int tag, bool isEnable)
+{
+	auto p = &m_mTextFieldStructs.at(tag);
+	p->slider->setEnabled(isEnable);
+	p->textField->setEnabled(isEnable);
 }

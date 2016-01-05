@@ -29,6 +29,9 @@ enum TextFieldTag
 	TAG_ENEMY_POSITION_X,
 	TAG_ENEMY_POSITION_Y,
 	TAG_ENEMY_ROTATE_TIME10,
+	TAG_ENEMY_DESTINATION_X,
+	TAG_ENEMY_DESTINATION_Y,
+	TAG_ENEMY_MOVE_TIME10,
 	TAG_ENEMY_MAX,
 
 	TAG_PLAYER_MIN,
@@ -88,15 +91,18 @@ public:
 
 private:
 	void onEnter();
+	void update(float dt);
+
 	virtual bool onTouchBegan(Touch* touch, Event* event);
 	virtual void onTouchMoved(Touch* touch, Event* event);
 	virtual void onTouchEnded(Touch* touch, Event* event);
+	bool onContactBegin(const PhysicsContact& contact);
 
 	void onTextFieldEvent(Ref *pSender, TextField::EventType type);
 	void onSliderEvent(Ref *pSender, Slider::EventType type);
-	bool onContactBegin(const PhysicsContact& contact);
-
-	void update(float dt);
+	void onDropDownList_BlockType(EventCustom* event);
+	void onDropDownList_Level(EventCustom* event);
+	void onDropDownList_Room(EventCustom* event);
 
 	void buttonCallback_MainMenu(Ref* pSender);
 	void buttonCallback_AddNewLevel(Ref* pSender);
@@ -130,9 +136,11 @@ private:
 	inline void updateBlockTextFieldNumber(int tag, int number);
 	inline void updateBlockTextFieldMax(int tag, int max);
 	inline void updateBlockByLevel(int tag, int number);
+	inline void updateBlockType(int type);
 	inline void drawJumpLine(DrawNode* draw, const Vec2 &origin, const Vec2 &control, const Vec2 &destination, const Color4F &color);
-	inline void AddEstimateFrameText(Node* parent, char* buf, float p1, float p2,
+	inline void AddEstimateFrameText(Node* parent, float p1, float p2,
 		int frameRate, float playerWidth, float speed, float posY, Color4B color) const;
+	inline void setTextFieldStructEnable(int tag, bool isEnable);
 private:
 	map<int, tagTextFieldSliderBindInt> m_mTextFieldStructs;
 	TextField*	m_pTextFieldLevelName;

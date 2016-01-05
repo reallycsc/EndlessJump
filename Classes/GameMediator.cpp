@@ -44,7 +44,6 @@ bool GameMediator::init()
 			user->setBoolForKey("isHaveSaveFileXml", true);
 			user->setIntegerForKey("CurLevel", 1);
 			user->setIntegerForKey("MaxLevel", 1);
-			user->setIntegerForKey("MaxRoom", 1);
 			for (size_t i = 0; i < m_nGameLevelCount; i++)
 			{
 				string key = StringUtils::format("Level%d-DeadCount", i + 1);
@@ -166,20 +165,24 @@ bool GameMediator::saveGameLevelFile()
 				auto enemysData = &(iter2->enemysData);
 				for (size_t i1 = 0, j1 = enemysData->size(); i1 < j1; i1++)
 				{
-					int type = enemysData->at(i1).type;
+					auto data = enemysData->at(i1);
 					XMLElement *surface4 = document->NewElement("Enemy");
 					surface4->SetAttribute("id", i1 + 1);
-					surface4->SetAttribute("type", type);
-					Size size = enemysData->at(i1).size;
-					surface4->SetAttribute("width", size.width);
-					surface4->SetAttribute("height", size.height);
-					Point pos = enemysData->at(i1).position;
-					surface4->SetAttribute("x", static_cast<int>(pos.x));
-					surface4->SetAttribute("y", static_cast<int>(pos.y));
-					switch (type)
+					surface4->SetAttribute("type", data.type);
+					surface4->SetAttribute("width", data.size.width);
+					surface4->SetAttribute("height", data.size.height);
+					surface4->SetAttribute("x", static_cast<int>(data.position.x));
+					surface4->SetAttribute("y", static_cast<int>(data.position.y));
+					switch (data.type)
 					{
 					case TYPE_ROTATE:
-						surface4->SetAttribute("rotateTime", enemysData->at(i1).rotateTime);
+						surface4->SetAttribute("rotateTime", data.rotateTime);
+						break;
+					case TYPE_MOVE:
+						surface4->SetAttribute("dx", static_cast<int>(data.destination.x));
+						surface4->SetAttribute("dy", static_cast<int>(data.destination.y));
+						surface4->SetAttribute("moveTime", data.moveTime);
+						break;
 					default:
 						break;
 					}

@@ -9,6 +9,8 @@ typedef struct tagEnemyData
 	Size	size;
 	Vec2	position;
 	float	rotateTime;
+	Vec2	destination;
+	float	moveTime;
 }EnemyData;
 
 typedef struct tagRoomData

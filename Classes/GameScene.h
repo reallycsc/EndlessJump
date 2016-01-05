@@ -25,13 +25,10 @@ private:
 
 	void buttonCallback_MainMenu(Ref* pSender);
 
-	void setPhyWorld(PhysicsWorld* world) { m_pWorld = world; }
-
 	void addRoom(RoomData* roomData);
 	void addPlayer(RoomData* roomData);
 
 private:
-	PhysicsWorld*	m_pWorld;
 	GameMediator*	m_pGameMediator;
 
 	GameLevelData*	m_pCurLevelData;

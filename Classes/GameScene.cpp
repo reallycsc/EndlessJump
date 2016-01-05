@@ -10,11 +10,10 @@ Scene* GameScene::createScene()
 	// open Debug
 	PhysicsWorld* world = scene->getPhysicsWorld();
 	world->setGravity(Vec2(0, 0));
-	world->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
+	//world->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
     
     // 'layer' is an autorelease object
     auto layer = GameScene::create();
-	layer->setPhyWorld(world);
 
     // add layer as a child to scene
     scene->addChild(layer);
@@ -136,7 +135,7 @@ bool GameScene::onContactBegin(const PhysicsContact& contact)
 		particle->setLife(0.5f);
 		particle->setLifeVar(0.2f);
 		particle->setPosition(contact.getContactData()->points[0]);
-		this->addChild(particle);
+		this->addChild(particle, 5);
 
 		m_pPlayer->die();
 		m_pPlayer = NULL;
@@ -160,7 +159,7 @@ void GameScene::addRoom(RoomData* roomData)
 	DrawNode* background = DrawNode::create();
 	background->drawSolidRect(Point::ZERO, roomData->size, Color4F(roomData->color));
 	background->setPosition(roomData->position);
-	this->addChild(background);
+	this->addChild(background, 4 - roomData->id);
 
 	// enemys
 	auto enemysData = &roomData->enemysData;
@@ -170,8 +169,14 @@ void GameScene::addRoom(RoomData* roomData)
 		Enemy* enemy = NULL;
 		switch (enemyData->type)
 		{
+		case TYPE_NORMAL:
+			enemy = Enemy::create(enemyData->size, roomData->enemy_color);
+			break;
 		case TYPE_ROTATE:
-			enemy = Enemy::createWithType(TYPE_ROTATE, enemyData->size, roomData->enemy_color, -1, enemyData->rotateTime);
+			enemy = Enemy::createRotate(enemyData->size, roomData->enemy_color, -1, enemyData->rotateTime);
+			break;
+		case TYPE_MOVE:
+			enemy = Enemy::createMove(enemyData->size, roomData->enemy_color, -1, enemyData->position, enemyData->destination, enemyData->moveTime);
 			break;
 		default:
 			enemy = Enemy::create(enemyData->size, roomData->enemy_color);
@@ -227,5 +232,5 @@ void GameScene::addPlayer(RoomData* roomData)
 			Director::getInstance()->replaceScene(GameOverScene::createScene(m_nDeadNumber));
 		}
 	})));
-	this->addChild(m_pPlayer);
+	this->addChild(m_pPlayer, 4);
 }
