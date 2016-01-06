@@ -14,12 +14,14 @@ enum enemyType
 	TYPE_NORMAL = 1,
 	TYPE_ROTATE,
 	TYPE_MOVE,
+	TYPE_BLINK,
 };
 
 enum actionTag
 {
 	TAG_ACTION_ROTATE,
 	TAG_ACTION_MOVE,
+	TAG_ACTION_BLINK,
 };
 
 class Enemy :
@@ -36,6 +38,8 @@ public:
 		const float &duration = 1.0f);
 	static Enemy* createMove(const Size &size = Size(50, 50), const Color3B &color = Color3B::BLUE, const int &id = -1, 
 		const Point &start = Point::ZERO, const Point &dest = Point::ZERO, const float &duration = 1.0f);
+	static Enemy* createBlink(const Size &size = Size(50, 50), const Color3B &color = Color3B::BLUE, const int &id = -1,
+		const float &duration_blink = 1.0f, const float &duration_hide = 1.0f);
 
 	void updateId(const int &id);
 	void updateSize(const Size &size);
@@ -44,6 +48,8 @@ public:
 	void updateStartPoint(const Point &start);
 	void updateDestPoint(const Point &dest);
 	void updateMoveDuration(const float &duration);
+	void updateBlinkDuration(const float &duration);
+	void updateBlinkHideDuration(const float &duration);
 
 	void select();
 	void unSelect();
@@ -59,6 +65,9 @@ public:
 	CC_SYNTHESIZE(Point, m_StartPoint, StartPoint);
 	CC_SYNTHESIZE(Point, m_DestPoint, DestPoint);
 	CC_SYNTHESIZE(float, m_fMoveDuration, MoveDuration);
+
+	CC_SYNTHESIZE(float, m_fBlinkDuration, BlinkDuration);
+	CC_SYNTHESIZE(float, m_fBlinkHideDuration, BlinkHideDuration);
 
 	CC_SYNTHESIZE(bool, m_bIsSelected, IsSelected);
 	CC_SYNTHESIZE(bool, m_bIsPlayerAdded, IsPlayerAdded);

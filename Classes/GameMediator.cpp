@@ -116,7 +116,8 @@ bool GameMediator::saveGameLevelFile()
 		XMLElement *root = document->NewElement("GameLevel");
 		document->LinkEndChild(root);
 
-		for (size_t i = 0, j = m_vGameLevelData.size(); i < j; i++)
+		m_nGameLevelCount = m_vGameLevelData.size();
+		for (size_t i = 0; i < m_nGameLevelCount; i++)
 		{
 			XMLElement *surface1 = document->NewElement("Level");
 			surface1->SetAttribute("level", m_vGameLevelData.at(i)->getLevel());
@@ -183,6 +184,10 @@ bool GameMediator::saveGameLevelFile()
 						surface4->SetAttribute("dy", static_cast<int>(data.destination.y));
 						surface4->SetAttribute("moveTime", data.moveTime);
 						break;
+					case TYPE_BLINK:
+						surface4->SetAttribute("blinkTime", data.blinkTime);
+						surface4->SetAttribute("blinkHideTime", data.blinkHideTime);
+						break;
 					default:
 						break;
 					}
@@ -195,6 +200,19 @@ bool GameMediator::saveGameLevelFile()
 		document->SaveFile(filename1.c_str());
 		string filename2 = FileUtils::getInstance()->fullPathForFilename("../../Resources/config/LevelMake_Workstation.xml");
 		document->SaveFile(filename2.c_str());
+
+		// if has new level than update save file
+		UserDefault* user = UserDefault::getInstance();
+		for (size_t i = 0; i < m_nGameLevelCount; i++)
+		{
+			string key = StringUtils::format("Level%d-DeadCount", i + 1);
+			if (user->getIntegerForKey(key.c_str(), -100) == -100)
+				user->setIntegerForKey(key.c_str(), -1);
+		}
+		// if has new level than add new dead count
+		for (size_t i = m_vLevelMinDeadCount.size(); i < m_nGameLevelCount; i++)
+			m_vLevelMinDeadCount.push_back(-1);
+
 		bRet = true;
 	} while (false);
 

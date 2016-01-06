@@ -10,6 +10,8 @@ Enemy::Enemy(void)
 	, m_StartPoint(Point::ZERO)
 	, m_DestPoint(Point::ZERO)
 	, m_fMoveDuration(1.0f)
+	, m_fBlinkDuration(1.0f)
+	, m_fBlinkHideDuration(1.0f)
 {
 }
 
@@ -62,7 +64,7 @@ bool Enemy::init(const Size &size, const Color3B &color, const int &id)
 #if DEBUG_FLAG == 1
 		if (id >= 0) // add id label
 		{
-			Text* text = Text::create(StringUtils::format("%d", id), "Arial", 20);
+			Text* text = Text::create(StringUtils::format("%d", id), "fonts/arial.ttf", 20);
 			text->setAnchorPoint(Vec2(0.5f, 0.5f));
 			text->setPosition(m_size / 2);
 			this->addChild(text, 2, TAG_TEXT_ID);
@@ -103,10 +105,25 @@ Enemy* Enemy::createMove(const Size& size, const Color3B& color, const int& id, 
 	return enemy;
 }
 
+Enemy* Enemy::createBlink(const Size& size, const Color3B& color, const int& id, const float &duration_blink, const float &duration_hide)
+{
+	Enemy* enemy = Enemy::create(size, color, id);
+	enemy->setType(TYPE_BLINK);
+	enemy->setBlinkDuration(duration_blink);
+	enemy->setBlinkHideDuration(duration_hide);
+	enemy->setVisible(false); // need this so after blink it's hidden
+	auto action = RepeatForever::create(Sequence::createWithTwoActions(
+		Blink::create(duration_blink, 1),
+		DelayTime::create(duration_hide)));
+	action->setTag(TAG_ACTION_BLINK);
+	enemy->runAction(action);
+	return enemy;
+}
+
 void Enemy::updateId(const int& id)
 {
 	this->removeChildByTag(TAG_TEXT_ID);
-	Text* text = Text::create(StringUtils::format("%d", id), "Arial", 20);
+	Text* text = Text::create(StringUtils::format("%d", id), "fonts/arial.ttf", 20);
 	text->setAnchorPoint(Vec2(0.5f, 0.5f));
 	text->setPosition(m_size / 2);
 	this->addChild(text, 2, TAG_TEXT_ID);
@@ -207,6 +224,34 @@ void Enemy::updateMoveDuration(const float& duration)
 			MoveTo::create(duration, m_DestPoint),
 			MoveTo::create(duration, m_StartPoint)));
 		action->setTag(TAG_ACTION_MOVE);
+		this->runAction(action);
+	}
+}
+
+void Enemy::updateBlinkDuration(const float& duration)
+{
+	m_fBlinkDuration = duration;
+	if (m_nType == TYPE_BLINK)
+	{
+		this->stopActionByTag(TAG_ACTION_BLINK);
+		auto action = RepeatForever::create(Sequence::createWithTwoActions(
+			Blink::create(duration, 1),
+			DelayTime::create(m_fBlinkHideDuration)));
+		action->setTag(TAG_ACTION_BLINK);
+		this->runAction(action);
+	}
+}
+
+void Enemy::updateBlinkHideDuration(const float& duration)
+{
+	m_fBlinkHideDuration = duration;
+	if (m_nType == TYPE_BLINK)
+	{
+		this->stopActionByTag(TAG_ACTION_BLINK);
+		auto action = RepeatForever::create(Sequence::createWithTwoActions(
+			Blink::create(m_fBlinkDuration, 1),
+			DelayTime::create(duration)));
+		action->setTag(TAG_ACTION_BLINK);
 		this->runAction(action);
 	}
 }

@@ -11,6 +11,8 @@ typedef struct tagEnemyData
 	float	rotateTime;
 	Vec2	destination;
 	float	moveTime;
+	float	blinkTime;
+	float	blinkHideTime;
 }EnemyData;
 
 typedef struct tagRoomData

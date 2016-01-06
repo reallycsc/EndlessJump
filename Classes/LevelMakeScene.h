@@ -32,6 +32,8 @@ enum TextFieldTag
 	TAG_ENEMY_DESTINATION_X,
 	TAG_ENEMY_DESTINATION_Y,
 	TAG_ENEMY_MOVE_TIME10,
+	TAG_ENEMY_BLINK_TIME10,
+	TAG_ENEMY_BLINKHIDE_TIME10,
 	TAG_ENEMY_MAX,
 
 	TAG_PLAYER_MIN,
@@ -120,6 +122,7 @@ private:
 	void addEnemy();
 	void addPlayer();
 	void addPlayerForTrying();
+	void selectEnemy(Enemy* enemy);
 	void updateLevelOrEnemys(int tag);
 	void updateCurEnemy(int tag);
 	void updatePlayer(int tag);

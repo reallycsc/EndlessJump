@@ -123,7 +123,6 @@ bool GameScene::onContactBegin(const PhysicsContact& contact)
 
 		auto particle = ParticleExplosion::createWithTotalParticles(130);
 		particle->setTexture(Director::getInstance()->getTextureCache()->getTextureForKey("playerImage"));
-		//particle->setBlendAdditive(true);
 		particle->setStartSize(5);
 		particle->setStartSizeVar(5);
 		particle->setStartColor(m_pPlayer->getPlayerColor());
@@ -177,6 +176,9 @@ void GameScene::addRoom(RoomData* roomData)
 			break;
 		case TYPE_MOVE:
 			enemy = Enemy::createMove(enemyData->size, roomData->enemy_color, -1, enemyData->position, enemyData->destination, enemyData->moveTime);
+			break;
+		case TYPE_BLINK:
+			enemy = Enemy::createBlink(enemyData->size, roomData->enemy_color, -1, enemyData->blinkTime, enemyData->blinkHideTime);
 			break;
 		default:
 			enemy = Enemy::create(enemyData->size, roomData->enemy_color);

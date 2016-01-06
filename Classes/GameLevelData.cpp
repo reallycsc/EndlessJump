@@ -102,10 +102,16 @@ bool GameLevelData::setRoomDataWithFile(XMLElement* surface)
 					enemy.destination = Point(surface3->IntAttribute("dx"), surface3->IntAttribute("dy"));
 					enemy.moveTime = surface3->FloatAttribute("moveTime");
 					break;
+				case TYPE_BLINK:
+					enemy.blinkTime = surface3->FloatAttribute("blinkTime");
+					enemy.blinkHideTime = surface3->FloatAttribute("blinkHideTime");
+					break;
 				default:
 					enemy.rotateTime = 0.0f;
 					enemy.destination = Point::ZERO;
 					enemy.moveTime = 0.0f;
+					enemy.blinkTime = 0.0f;
+					enemy.blinkHideTime = 0.0f;
 					break;
 				}
 				room.enemysData.push_back(enemy);
