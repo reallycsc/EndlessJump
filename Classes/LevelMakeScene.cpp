@@ -40,10 +40,10 @@ Scene* LevelMakeScene::createScene()
 	// open Debug
 	PhysicsWorld* world = scene->getPhysicsWorld();
 	world->setGravity(Vec2(0, 0));
-	//world->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
     
     // 'layer' is an autorelease object
     auto layer = LevelMakeScene::create();
+	layer->setWorld(world);
 
     // add layer as a child to scene
     scene->addChild(layer);
@@ -89,9 +89,8 @@ bool LevelMakeScene::init()
 	auto buttonAddNewRoom = dynamic_cast<Button*>(rootNode->getChildByName("Button_AddNewRoom"));
 	auto buttonAddBlock = dynamic_cast<Button*>(rootNode->getChildByName("Button_AddBlock"));
 	auto buttonRemoveBlock = dynamic_cast<Button*>(rootNode->getChildByName("Button_RemoveBlock"));
-	auto buttonCalcFoothold = dynamic_cast<Button*>(rootNode->getChildByName("Button_CalcFoothold"));
+	auto buttonShowHideDebug = dynamic_cast<Button*>(rootNode->getChildByName("Button_ShowHideDebug"));
 	auto buttonTry = dynamic_cast<Button*>(rootNode->getChildByName("Button_Try"));
-	auto buttonTryAuto = dynamic_cast<Button*>(rootNode->getChildByName("Button_Try_Auto"));
 	auto buttonSave = dynamic_cast<Button*>(rootNode->getChildByName("Button_SaveLevel")); 
 	auto buttonLoad = dynamic_cast<Button*>(rootNode->getChildByName("Button_LoadLevel"));
 	auto buttonExport = dynamic_cast<Button*>(rootNode->getChildByName("Button_ExportLevel"));
@@ -101,7 +100,7 @@ bool LevelMakeScene::init()
 	buttonAddNewRoom->addClickEventListener(CC_CALLBACK_1(LevelMakeScene::buttonCallback_AddNewRoom, this));
 	buttonAddBlock->addClickEventListener(CC_CALLBACK_1(LevelMakeScene::buttonCallback_AddBlock, this));
 	buttonRemoveBlock->addClickEventListener(CC_CALLBACK_1(LevelMakeScene::buttonCallback_RemoveBlock, this));
-	buttonCalcFoothold->addClickEventListener(CC_CALLBACK_1(LevelMakeScene::buttonCallback_CalcFoothold, this));
+	buttonShowHideDebug->addClickEventListener(CC_CALLBACK_1(LevelMakeScene::buttonCallback_ShowHideDebug, this));
 	buttonTry->addClickEventListener(CC_CALLBACK_1(LevelMakeScene::buttonCallback_Try, this));
 	buttonSave->addClickEventListener(CC_CALLBACK_1(LevelMakeScene::buttonCallback_Save, this));
 	buttonLoad->addClickEventListener(CC_CALLBACK_1(LevelMakeScene::buttonCallback_Load, this));
@@ -130,6 +129,7 @@ bool LevelMakeScene::init()
 	m_pDropDownListType->addLabel(Label::createWithSystemFont("Rotate", "fonts/arial.ttf", 22)); // TYPE_ROTATE
 	m_pDropDownListType->addLabel(Label::createWithSystemFont("Move", "fonts/arial.ttf", 22)); // TYPE_MOVE
 	m_pDropDownListType->addLabel(Label::createWithSystemFont("Blink", "fonts/arial.ttf", 22)); // TYPE_BLINK
+	m_pDropDownListType->addLabel(Label::createWithSystemFont("RotateR", "fonts/arial.ttf", 22)); // TYPE_ROTATE_REVERSE
 	m_pDropDownListType->setPosition(90, textType->getPositionY() - m_pDropDownListType->getContentSize().height / 2);
 	panelBlock->addChild(m_pDropDownListType);
 	_eventDispatcher->addCustomEventListener(CSCClass::EVENT_DROPDOWNLIST_SELECTED + "blockType", CC_CALLBACK_1(LevelMakeScene::onDropDownList_BlockType, this));
@@ -547,9 +547,19 @@ void LevelMakeScene::buttonCallback_RemoveBlock(Ref* pSender)
 	}
 }
 
-void LevelMakeScene::buttonCallback_CalcFoothold(Ref* pSender)
+void LevelMakeScene::buttonCallback_ShowHideDebug(Ref* pSender)
 {
-	this->calcFoothold();
+	Button* button = static_cast<Button*>(pSender);
+	if (m_pWorld->getDebugDrawMask() == PhysicsWorld::DEBUGDRAW_ALL)
+	{
+		m_pWorld->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_NONE);
+		button->setTitleText("Show Debug");
+	}
+	else
+	{
+		m_pWorld->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
+		button->setTitleText("Hide Debug");
+	}
 }
 
 void LevelMakeScene::buttonCallback_Try(Ref* pSender)
@@ -644,6 +654,10 @@ void LevelMakeScene::addEnemy()
 		enemy = Enemy::createRotate(size, color, m_nCurEnemyId,
 			m_mTextFieldStructs.at(TAG_ENEMY_ROTATE_TIME10).number * 0.1f);
 		break;
+	case TYPE_ROTATE_REVERSE:
+		enemy = Enemy::createRotate(size, color, m_nCurEnemyId,
+			m_mTextFieldStructs.at(TAG_ENEMY_ROTATE_TIME10).number * 0.1f, true);
+		break;
 	case TYPE_MOVE:
 		enemy = Enemy::createMove(size, color, m_nCurEnemyId, position, 
 			Point(m_mTextFieldStructs.at(TAG_ENEMY_DESTINATION_X).number, m_mTextFieldStructs.at(TAG_ENEMY_DESTINATION_Y).number),
@@ -733,6 +747,11 @@ void LevelMakeScene::selectEnemy(Enemy* enemy)
 	switch (type)
 	{
 	case TYPE_ROTATE:
+	{
+		this->updateBlockTextFieldNumber(TAG_ENEMY_ROTATE_TIME10, enemy->getRotateDuration() * 10);
+		break;
+	}
+	case TYPE_ROTATE_REVERSE:
 	{
 		this->updateBlockTextFieldNumber(TAG_ENEMY_ROTATE_TIME10, enemy->getRotateDuration() * 10);
 		break;
@@ -872,6 +891,20 @@ void LevelMakeScene::calcFoothold()
 	{
 		Size enemySize = obj->getContentSize();
 		Vec2 enemyBottomPos = Vec2(obj->getPositionX(), obj->getPositionY() - obj->getAnchorPoint().y * enemySize.height);
+		if (enemyBottomPos.y >= playerSize.height)
+		{
+			obj->addPlayerBlockForLevelMake(playerSize);
+			// add left and right bottom point to air point for conflict calc
+			Point pBottomLeft = Point(enemyBottomPos.x - enemySize.width / 2 - playerSize.width, enemyBottomPos.y - playerSize.height);
+			Point pBottomRight = Point(enemyBottomPos.x + enemySize.width / 2 + playerSize.width, enemyBottomPos.y - playerSize.height);
+			m_vAirPoints.push_back(pBottomLeft);
+			m_vAirPoints.push_back(pBottomRight);
+		}
+	}
+	for (auto obj : m_vEnemys)
+	{
+		Size enemySize = obj->getContentSize();
+		Vec2 enemyBottomPos = Vec2(obj->getPositionX(), obj->getPositionY() - obj->getAnchorPoint().y * enemySize.height);
 		if (enemyBottomPos.y < playerSize.height)
 		{
 			obj->removePlayerBlockForLevelMake();
@@ -894,15 +927,6 @@ void LevelMakeScene::calcFoothold()
 			vecStart = Vec2(pEndStart, 0);
 			if (!this->isJumpLineConflict(vecStart, vecStart + vecCtlOffsetStart, vecStart + vecEndOffset))
 				m_vJumpPointsForAutoTrying.push_back(pair<float, bool>(pEndStart, false));
-		}
-		else
-		{
-			obj->addPlayerBlockForLevelMake(playerSize);
-			// add left and right bottom point to air point for conflict calc
-			Point pBottomLeft = Point(enemyBottomPos.x - enemySize.width / 2 - playerSize.width, enemyBottomPos.y - playerSize.height);
-			Point pBottomRight = Point(enemyBottomPos.x + enemySize.width / 2 + playerSize.width, enemyBottomPos.y - playerSize.height);
-			m_vAirPoints.push_back(pBottomLeft);
-			m_vAirPoints.push_back(pBottomRight);
 		}
 	}
 	std::sort(m_vJumpPoints.begin(), m_vJumpPoints.end(), sortJumpPoints);
@@ -1038,6 +1062,9 @@ void LevelMakeScene::loadDataFrom(int level, int room)
 		case TYPE_ROTATE:
 			enemy = Enemy::createRotate(enemyData.size, roomData->enemy_color, id, enemyData.rotateTime);
 			break;
+		case TYPE_ROTATE_REVERSE:
+			enemy = Enemy::createRotate(enemyData.size, roomData->enemy_color, id, enemyData.rotateTime, true);
+			break;
 		case TYPE_MOVE:
 			enemy = Enemy::createMove(enemyData.size, roomData->enemy_color, id, enemyData.position, enemyData.destination, enemyData.moveTime);
 			break;
@@ -1131,6 +1158,9 @@ void LevelMakeScene::saveDataTo(int level, int room)
 		switch (enemyData.type)
 		{
 		case TYPE_ROTATE:
+			enemyData.rotateTime = enemy->getRotateDuration();
+			break;
+		case TYPE_ROTATE_REVERSE:
 			enemyData.rotateTime = enemy->getRotateDuration();
 			break;
 		case TYPE_MOVE:
@@ -1265,6 +1295,16 @@ void LevelMakeScene::updateBlockType(int type)
 		break;
 	}
 	case TYPE_ROTATE:
+	{
+		this->setTextFieldStructEnable(TAG_ENEMY_ROTATE_TIME10, true);
+		this->setTextFieldStructEnable(TAG_ENEMY_DESTINATION_X, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_DESTINATION_Y, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_MOVE_TIME10, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_BLINK_TIME10, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_BLINKHIDE_TIME10, false);
+		break;
+	}
+	case TYPE_ROTATE_REVERSE:
 	{
 		this->setTextFieldStructEnable(TAG_ENEMY_ROTATE_TIME10, true);
 		this->setTextFieldStructEnable(TAG_ENEMY_DESTINATION_X, false);

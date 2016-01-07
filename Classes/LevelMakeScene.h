@@ -111,7 +111,7 @@ private:
 	void buttonCallback_AddNewRoom(Ref* pSender);
 	void buttonCallback_AddBlock(Ref* pSender);
 	void buttonCallback_RemoveBlock(Ref* pSender);
-	void buttonCallback_CalcFoothold(Ref* pSender);
+	void buttonCallback_ShowHideDebug(Ref* pSender);
 	void buttonCallback_Try(Ref* pSender);
 	void buttonCallback_Save(Ref* pSender);
 	void buttonCallback_Load(Ref* pSender);
@@ -144,6 +144,10 @@ private:
 	inline void AddEstimateFrameText(Node* parent, float p1, float p2,
 		int frameRate, float playerWidth, float speed, float posY, Color4B color) const;
 	inline void setTextFieldStructEnable(int tag, bool isEnable);
+
+public:
+	CC_SYNTHESIZE(PhysicsWorld*, m_pWorld, World);
+
 private:
 	map<int, tagTextFieldSliderBindInt> m_mTextFieldStructs;
 	TextField*	m_pTextFieldLevelName;

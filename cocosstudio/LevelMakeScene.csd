@@ -81,7 +81,7 @@
             <OutlineColor A="255" R="255" G="0" B="0" />
             <ShadowColor A="255" R="110" G="110" B="110" />
           </AbstractNodeData>
-          <AbstractNodeData Name="Button_CalcFoothold" ActionTag="1446528310" Tag="3" IconVisible="False" LeftMargin="1160.0000" RightMargin="256.0000" TopMargin="904.0000" BottomMargin="80.0000" TouchEnable="True" FontSize="16" ButtonText="Calc Foothold" Scale9Enable="True" LeftEage="15" RightEage="15" TopEage="11" BottomEage="11" Scale9OriginX="15" Scale9OriginY="11" Scale9Width="16" Scale9Height="14" ShadowOffsetX="2.0000" ShadowOffsetY="-2.0000" ctype="ButtonObjectData">
+          <AbstractNodeData Name="Button_ShowHideDebug" ActionTag="1446528310" Tag="3" IconVisible="False" LeftMargin="1160.0000" RightMargin="256.0000" TopMargin="904.0000" BottomMargin="80.0000" TouchEnable="True" FontSize="16" ButtonText="Show Debug" Scale9Enable="True" LeftEage="15" RightEage="15" TopEage="11" BottomEage="11" Scale9OriginX="15" Scale9OriginY="11" Scale9Width="16" Scale9Height="14" ShadowOffsetX="2.0000" ShadowOffsetY="-2.0000" ctype="ButtonObjectData">
             <Size X="120.0000" Y="40.0000" />
             <AnchorPoint ScaleY="1.0000" />
             <Position X="1160.0000" Y="120.0000" />

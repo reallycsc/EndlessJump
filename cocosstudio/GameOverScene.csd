@@ -45,7 +45,7 @@
                 <OutlineColor A="255" R="255" G="0" B="0" />
                 <ShadowColor A="255" R="0" G="0" B="0" />
               </AbstractNodeData>
-              <AbstractNodeData Name="Node_EnlargeAnimation" ActionTag="-1437730575" Tag="158" IconVisible="True" PositionPercentXEnabled="True" LeftMargin="300.0000" RightMargin="300.0000" TopMargin="150.0000" BottomMargin="300.0000" ctype="SingleNodeObjectData">
+              <AbstractNodeData Name="Node_EnlargeAnimation" ActionTag="-1437730575" Tag="158" IconVisible="True" PositionPercentXEnabled="True" LeftMargin="300.0000" RightMargin="300.0000" TopMargin="170.0000" BottomMargin="280.0000" ctype="SingleNodeObjectData">
                 <Size X="0.0000" Y="0.0000" />
                 <Children>
                   <AbstractNodeData Name="Text_DeadNumber" ActionTag="2106556479" Tag="159" IconVisible="False" LeftMargin="-171.0000" RightMargin="-171.0000" TopMargin="-46.0000" BottomMargin="10.0000" FontSize="36" LabelText="0 deads this level." HorizontalAlignmentType="HT_Center" OutlineSize="2" ShadowOffsetX="2.0000" ShadowOffsetY="-2.0000" ctype="TextObjectData">
@@ -72,10 +72,10 @@
                   </AbstractNodeData>
                 </Children>
                 <AnchorPoint />
-                <Position X="300.0000" Y="300.0000" />
-                <Scale ScaleX="0.5000" ScaleY="0.5000" />
+                <Position X="300.0000" Y="280.0000" />
+                <Scale ScaleX="1.0000" ScaleY="1.0000" />
                 <CColor A="255" R="255" G="255" B="255" />
-                <PrePosition X="0.5000" Y="0.6667" />
+                <PrePosition X="0.5000" Y="0.6222" />
                 <PreSize X="0.0000" Y="0.0000" />
               </AbstractNodeData>
               <AbstractNodeData Name="Button_Next" ActionTag="-1267946466" Tag="160" IconVisible="False" PositionPercentXEnabled="True" LeftMargin="240.0000" RightMargin="240.0000" TopMargin="300.0000" BottomMargin="110.0000" TouchEnable="True" FontSize="24" ButtonText="Next" Scale9Enable="True" LeftEage="15" RightEage="15" TopEage="11" BottomEage="11" Scale9OriginX="15" Scale9OriginY="11" Scale9Width="16" Scale9Height="14" ShadowOffsetX="2.0000" ShadowOffsetY="-2.0000" ctype="ButtonObjectData">

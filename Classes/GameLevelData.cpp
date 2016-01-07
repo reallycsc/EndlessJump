@@ -97,6 +97,9 @@ bool GameLevelData::setRoomDataWithFile(XMLElement* surface)
 				{
 				case TYPE_ROTATE:
 					enemy.rotateTime = surface3->FloatAttribute("rotateTime");
+					break;				
+				case TYPE_ROTATE_REVERSE:
+					enemy.rotateTime = surface3->FloatAttribute("rotateTime");
 					break;
 				case TYPE_MOVE:
 					enemy.destination = Point(surface3->IntAttribute("dx"), surface3->IntAttribute("dy"));

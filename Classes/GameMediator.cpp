@@ -179,6 +179,9 @@ bool GameMediator::saveGameLevelFile()
 					case TYPE_ROTATE:
 						surface4->SetAttribute("rotateTime", data.rotateTime);
 						break;
+					case TYPE_ROTATE_REVERSE:
+						surface4->SetAttribute("rotateTime", data.rotateTime);
+						break;
 					case TYPE_MOVE:
 						surface4->SetAttribute("dx", static_cast<int>(data.destination.x));
 						surface4->SetAttribute("dy", static_cast<int>(data.destination.y));

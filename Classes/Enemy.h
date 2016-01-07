@@ -15,6 +15,7 @@ enum enemyType
 	TYPE_ROTATE,
 	TYPE_MOVE,
 	TYPE_BLINK,
+	TYPE_ROTATE_REVERSE,
 };
 
 enum actionTag
@@ -35,7 +36,7 @@ public:
 	bool init(const Size &size, const Color3B &color, const int &id);
 
 	static Enemy* createRotate(const Size &size = Size(50, 50), const Color3B &color = Color3B::BLUE, const int &id = -1, 
-		const float &duration = 1.0f);
+		const float &duration = 1.0f, const bool &isReverse = false);
 	static Enemy* createMove(const Size &size = Size(50, 50), const Color3B &color = Color3B::BLUE, const int &id = -1, 
 		const Point &start = Point::ZERO, const Point &dest = Point::ZERO, const float &duration = 1.0f);
 	static Enemy* createBlink(const Size &size = Size(50, 50), const Color3B &color = Color3B::BLUE, const int &id = -1,

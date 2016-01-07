@@ -30,6 +30,7 @@ private:
 
 private:
 	GameMediator*	m_pGameMediator;
+	ActionTimeline*	m_pAnimate;
 
 	GameLevelData*	m_pCurLevelData;
 	RoomData*	m_pCurRoomData;

@@ -35,6 +35,7 @@ bool MainMenuScene::init()
 	// get text
 	auto textTotalDead = dynamic_cast<Text*>(rootNode->getChildByName("Text_TotalDead"));
 	int maxLevel = pGameMediator->getMaxGameLevel();
+	int curLevel = pGameMediator->getCurGameLevel();
 	int totalDead = pGameMediator->getDeadCountAll(maxLevel);
 	textTotalDead->setString(StringUtils::format("Total Dead: %d", totalDead));
 
@@ -45,8 +46,10 @@ bool MainMenuScene::init()
 	auto levelDeadCounts = pGameMediator->getLevelMinDeadCount();
 	int innerHeight = 0;
 	int maxLevelHeight = 0;
-	for (size_t i = 0, j = pGameMediator->getGameLevelCount(); i < j; i++)
+	auto levelsData = pGameMediator->getGameLevelData();
+	for (size_t i = 0, length = pGameMediator->getGameLevelCount(); i < length; i++)
 	{
+		auto levelData = levelsData->at(i);
 		auto levelNode = CSLoader::createNode("MainMenuScene_NodeLevel.csb");
 		scrollView->addChild(levelNode);
 		// button
@@ -55,9 +58,17 @@ bool MainMenuScene::init()
 		levelNode->setPosition(scrollWidth / 2 , posY);
 		innerHeight = posY + buttonLevel->getContentSize().height / 2;
 		buttonLevel->setTitleText(StringUtils::format("%d", i + 1));
+		buttonLevel->setColor(levelData->getRoomsData()->at(0).color);
 		buttonLevel->setTag(i + 1);
 		buttonLevel->addClickEventListener(CC_CALLBACK_1(MainMenuScene::buttonCallback_LevelPlay, this));
-		if (i > maxLevel - 1)
+		// if the next level of curLevel open condition < total dead, need open the next level (when update new level will have this situation)
+		if (i > 0 && i == curLevel && 
+			levelDeadCounts->at(i - 1) >= 0 && 
+			totalDead < levelData->getMaxDeadTime())
+		{
+			pGameMediator->gotoNextGameLevel();
+		}
+		else if (i > maxLevel - 1)
 		{
 			buttonLevel->setEnabled(false);
 			buttonLevel->setColor(Color3B::GRAY);
@@ -68,11 +79,8 @@ bool MainMenuScene::init()
 		auto textDeadCount = dynamic_cast<Text*>(levelNode->getChildByName("Text_DeadTime"));
 		int deadCount = levelDeadCounts->at(i);
 		if (deadCount < 0)
-		{
 			textDeadCount->setVisible(false);
-		}
 		else
-		{
 			if (deadCount == 0)
 			{
 				textDeadCount->setString(StringUtils::format("perfect"));
@@ -82,7 +90,6 @@ bool MainMenuScene::init()
 				textDeadCount->setString(StringUtils::format("%d dead", deadCount));
 			else
 				textDeadCount->setString(StringUtils::format("%d deads", deadCount));
-		}
 	}
 	int scrollInnerHeight = scrollView->getInnerContainerSize().height;
 	innerHeight = MAX(scrollInnerHeight, innerHeight + 100);
@@ -90,7 +97,7 @@ bool MainMenuScene::init()
 	//scrollView->setInnerContainerPosition(Point::ZERO);
 	scrollView->setInnerContainerPosition(Point(0,-maxLevelHeight + scrollInnerHeight / 2));
 
-#if (DEBUG_FLAG == 0)
+#ifndef DEBUG_MODE
 	buttonEditor->setEnabled(false);
 	buttonEditor->setVisible(false);
 #endif

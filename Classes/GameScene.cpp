@@ -10,7 +10,9 @@ Scene* GameScene::createScene()
 	// open Debug
 	PhysicsWorld* world = scene->getPhysicsWorld();
 	world->setGravity(Vec2(0, 0));
+#ifdef DEBUG_MODE
 	//world->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
+#endif
     
     // 'layer' is an autorelease object
     auto layer = GameScene::create();
@@ -57,8 +59,16 @@ bool GameScene::init()
 	m_pGameMediator->setCurGameRoom(1);
 	m_pCurRoomData = &roomsData->at(0);
 
+#ifdef DEBUG_MODE
+	// add all room
+	for (size_t i = 0, length = roomsData->size(); i < length; i++)
+	{
+		this->addRoom(&roomsData->at(i));
+	}
+#else
 	// add first room
 	this->addRoom(m_pCurRoomData);
+#endif
 
 	// add player
 	this->addPlayer(m_pCurRoomData);
@@ -68,6 +78,9 @@ bool GameScene::init()
 
 	// load scene
 	auto rootNode = CSLoader::createNode("GameScene.csb");
+	m_pAnimate = CSLoader::createTimeline("GameScene.csb");
+	rootNode->runAction(m_pAnimate);
+	m_pAnimate->pause();
 	this->addChild(rootNode);
 	// get button
 	auto buttonReturn = dynamic_cast<Button*>(rootNode->getChildByName("Button_Return"));
@@ -140,6 +153,7 @@ bool GameScene::onContactBegin(const PhysicsContact& contact)
 		m_pPlayer = NULL;
 		m_nDeadNumber++;
 		m_pTextDeadNum->setString(StringUtils::format("%d", m_nDeadNumber));
+		m_pAnimate->play("DeadTextEnlarge", false);
 
 		this->runAction(Sequence::createWithTwoActions(
 			DelayTime::create(0.5f),
@@ -174,6 +188,9 @@ void GameScene::addRoom(RoomData* roomData)
 		case TYPE_ROTATE:
 			enemy = Enemy::createRotate(enemyData->size, roomData->enemy_color, -1, enemyData->rotateTime);
 			break;
+		case TYPE_ROTATE_REVERSE:
+			enemy = Enemy::createRotate(enemyData->size, roomData->enemy_color, -1, enemyData->rotateTime, true);
+			break;
 		case TYPE_MOVE:
 			enemy = Enemy::createMove(enemyData->size, roomData->enemy_color, -1, enemyData->position, enemyData->destination, enemyData->moveTime);
 			break;
@@ -196,7 +213,7 @@ void GameScene::addPlayer(RoomData* roomData)
 
 	Size visibleSize = Director::getInstance()->getVisibleSize();
 	auto screenWidth = visibleSize.width;
-#if (DEBUG_FLAG == 1)
+#ifdef DEBUG_MODE
 	screenWidth = screenWidth / 2;
 #endif
 	float duration = screenWidth / roomData->player_speed;
@@ -215,7 +232,9 @@ void GameScene::addPlayer(RoomData* roomData)
 			// next room
 			m_pCurRoomData = &m_pCurLevelData->getRoomsData()->at(roomIndex++);
 			m_pGameMediator->gotoNextGameRoom();
+#ifndef DEBUG_MODE
 			this->addRoom(m_pCurRoomData);
+#endif
 			this->addPlayer(m_pCurRoomData);
 		}
 		else

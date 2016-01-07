@@ -39,7 +39,7 @@ static int register_all_packages()
 bool AppDelegate::applicationDidFinishLaunching() {
     // initialize director
 
-#if (DEBUG_FLAG == 1)
+#ifdef DEBUG_MODE
 	designResolutionSize = Size(designResolutionSize.width * 2, designResolutionSize.height);
 	smallResolutionSize = Size(smallResolutionSize.width * 2, smallResolutionSize.height);
 	mediumResolutionSize = Size(mediumResolutionSize.width * 2, mediumResolutionSize.height);
@@ -57,7 +57,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
         director->setOpenGLView(glview);
     }
 
-#if (DEBUG_FLAG == 1)
+#ifdef DEBUG_MODE
     // turn on display FPS
     director->setDisplayStats(true);
 #endif

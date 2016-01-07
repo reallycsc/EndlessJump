@@ -3,7 +3,7 @@
 Enemy::Enemy(void)
 	: m_nType(TYPE_NORMAL)
 	, m_bIsSelected(false)
-	, m_size(Size(50,50))
+	, m_size(Size(50, 50))
 	, m_color(Color4F::BLUE)
 	, m_bIsPlayerAdded(false)
 	, m_fRotateDuration(1.0f)
@@ -61,7 +61,7 @@ bool Enemy::init(const Size &size, const Color3B &color, const int &id)
 		body->setContactTestBitmask(MASK_PLAYER);
 		this->setPhysicsBody(body);
 
-#if DEBUG_FLAG == 1
+#ifdef DEBUG_MODE
 		if (id >= 0) // add id label
 		{
 			Text* text = Text::create(StringUtils::format("%d", id), "fonts/arial.ttf", 20);
@@ -69,7 +69,7 @@ bool Enemy::init(const Size &size, const Color3B &color, const int &id)
 			text->setPosition(m_size / 2);
 			this->addChild(text, 2, TAG_TEXT_ID);
 		}
-#endif // DEBUG_FLAG == 1
+#endif // DEBUG_MODE
 
         bRet = true;
     } while (0);
@@ -77,13 +77,19 @@ bool Enemy::init(const Size &size, const Color3B &color, const int &id)
     return bRet;
 }
 
-Enemy* Enemy::createRotate(const Size &size, const Color3B &color, const int &id, const float &duration)
+Enemy* Enemy::createRotate(const Size &size, const Color3B &color, const int &id, const float &duration, const bool &isReverse)
 {
 	Enemy* enemy = Enemy::create(size, color, id);
 	enemy->setType(TYPE_ROTATE);
 	enemy->setAnchorPoint(Vec2(0.5f, 0.5f));
 	enemy->setRotateDuration(duration);
-	auto action = RepeatForever::create(RotateBy::create(duration, -360));
+	float angle = 360;
+	if (isReverse)
+	{
+		enemy->setType(TYPE_ROTATE_REVERSE);
+		angle = -360;
+	}
+	auto action = RepeatForever::create(RotateBy::create(duration, angle));
 	action->setTag(TAG_ACTION_ROTATE);
 	enemy->runAction(action);
 	return enemy;
@@ -111,10 +117,12 @@ Enemy* Enemy::createBlink(const Size& size, const Color3B& color, const int& id,
 	enemy->setType(TYPE_BLINK);
 	enemy->setBlinkDuration(duration_blink);
 	enemy->setBlinkHideDuration(duration_hide);
-	enemy->setVisible(false); // need this so after blink it's hidden
-	auto action = RepeatForever::create(Sequence::createWithTwoActions(
-		Blink::create(duration_blink, 1),
-		DelayTime::create(duration_hide)));
+	auto action = RepeatForever::create(Sequence::create(
+		DelayTime::create(duration_blink),
+		CallFunc::create([=] {enemy->setVisible(false); }),
+		DelayTime::create(duration_hide),
+		CallFunc::create([=] {enemy->setVisible(true); }),
+		NULL));
 	action->setTag(TAG_ACTION_BLINK);
 	enemy->runAction(action);
 	return enemy;
@@ -180,6 +188,13 @@ void Enemy::updateRotateDuration(const float &duration)
 	if (m_nType == TYPE_ROTATE)
 	{
 		this->stopActionByTag(TAG_ACTION_ROTATE);
+		auto action = RepeatForever::create(RotateBy::create(duration, 360));
+		action->setTag(TAG_ACTION_ROTATE);
+		this->runAction(action);
+	}
+	else if (m_nType == TYPE_ROTATE_REVERSE)
+	{
+		this->stopActionByTag(TAG_ACTION_ROTATE);
 		auto action = RepeatForever::create(RotateBy::create(duration, -360));
 		action->setTag(TAG_ACTION_ROTATE);
 		this->runAction(action);
@@ -234,9 +249,12 @@ void Enemy::updateBlinkDuration(const float& duration)
 	if (m_nType == TYPE_BLINK)
 	{
 		this->stopActionByTag(TAG_ACTION_BLINK);
-		auto action = RepeatForever::create(Sequence::createWithTwoActions(
-			Blink::create(duration, 1),
-			DelayTime::create(m_fBlinkHideDuration)));
+		auto action = RepeatForever::create(Sequence::create(
+			DelayTime::create(duration),
+			CallFunc::create([=] {this->setVisible(false); }),
+			DelayTime::create(m_fBlinkHideDuration),
+			CallFunc::create([=] {this->setVisible(true); }),
+			NULL));
 		action->setTag(TAG_ACTION_BLINK);
 		this->runAction(action);
 	}
@@ -248,9 +266,12 @@ void Enemy::updateBlinkHideDuration(const float& duration)
 	if (m_nType == TYPE_BLINK)
 	{
 		this->stopActionByTag(TAG_ACTION_BLINK);
-		auto action = RepeatForever::create(Sequence::createWithTwoActions(
-			Blink::create(m_fBlinkDuration, 1),
-			DelayTime::create(duration)));
+		auto action = RepeatForever::create(Sequence::create(
+			DelayTime::create(m_fBlinkDuration),
+			CallFunc::create([=] {this->setVisible(false); }),
+			DelayTime::create(duration),
+			CallFunc::create([=] {this->setVisible(true); }),
+			NULL));
 		action->setTag(TAG_ACTION_BLINK);
 		this->runAction(action);
 	}
@@ -285,7 +306,7 @@ void Enemy::unSelect()
 
 void Enemy::addPlayerBlockForLevelMake(Size playerSize)
 {
-	CS_RETURN_IF(m_nType == TYPE_ROTATE);
+	CS_RETURN_IF(m_nType == TYPE_ROTATE || m_nType == TYPE_ROTATE_REVERSE);
 
 	if (!m_bIsPlayerAdded)
 	{
