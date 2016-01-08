@@ -15,7 +15,6 @@ enum enemyType
 	TYPE_ROTATE,
 	TYPE_MOVE,
 	TYPE_BLINK,
-	TYPE_ROTATE_REVERSE,
 };
 
 enum actionTag
@@ -36,19 +35,24 @@ public:
 	bool init(const Size &size, const Color3B &color, const int &id);
 
 	static Enemy* createRotate(const Size &size = Size(50, 50), const Color3B &color = Color3B::BLUE, const int &id = -1, 
-		const float &duration = 1.0f, const bool &isReverse = false);
+		const float &delay = 0.0f, const float &duration = 1.0f, const float &angle = 360.0f);
 	static Enemy* createMove(const Size &size = Size(50, 50), const Color3B &color = Color3B::BLUE, const int &id = -1, 
-		const Point &start = Point::ZERO, const Point &dest = Point::ZERO, const float &duration = 1.0f);
+		const Point &start = Point::ZERO, const Point &dest = Point::ZERO, const float &delay = 0.0f, const float &duration = 1.0f);
 	static Enemy* createBlink(const Size &size = Size(50, 50), const Color3B &color = Color3B::BLUE, const int &id = -1,
 		const float &duration_blink = 1.0f, const float &duration_hide = 1.0f);
 
 	void updateId(const int &id);
 	void updateSize(const Size &size);
 	void updateColor(const Color3B &color);
-	void updateRotateDuration(const float &duration);
+	void updateDelayTime(const float &delay);
+	// TYPE_MOVE
 	void updateStartPoint(const Point &start);
 	void updateDestPoint(const Point &dest);
 	void updateMoveDuration(const float &duration);
+	// TYPE_ROTATE
+	void updateRotateDuration(const float &duration);
+	void updateRotateAngle(const float &angle);
+	// TYPE_BLINK
 	void updateBlinkDuration(const float &duration);
 	void updateBlinkHideDuration(const float &duration);
 
@@ -59,9 +63,12 @@ public:
 	void removePlayerBlockForLevelMake();
 
 public:
+	CC_SYNTHESIZE(int, m_nID, ID);
 	CC_SYNTHESIZE(int, m_nType, Type);
 
+	CC_SYNTHESIZE(float, m_fDelayTime, DelayTime);
 	CC_SYNTHESIZE(float, m_fRotateDuration, RotateDuration);
+	CC_SYNTHESIZE(float, m_fRotateAngle, RotateAngle);
 
 	CC_SYNTHESIZE(Point, m_StartPoint, StartPoint);
 	CC_SYNTHESIZE(Point, m_DestPoint, DestPoint);

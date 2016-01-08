@@ -177,14 +177,16 @@ bool GameMediator::saveGameLevelFile()
 					switch (data.type)
 					{
 					case TYPE_ROTATE:
-						surface4->SetAttribute("rotateTime", data.rotateTime);
-						break;
-					case TYPE_ROTATE_REVERSE:
+						surface4->SetAttribute("anchor_x", data.anchorPoint.x);
+						surface4->SetAttribute("anchor_y", data.anchorPoint.y);
+						surface4->SetAttribute("angle", data.angle);
+						surface4->SetAttribute("delayTime", data.delayTime);
 						surface4->SetAttribute("rotateTime", data.rotateTime);
 						break;
 					case TYPE_MOVE:
 						surface4->SetAttribute("dx", static_cast<int>(data.destination.x));
 						surface4->SetAttribute("dy", static_cast<int>(data.destination.y));
+						surface4->SetAttribute("delayTime", data.delayTime);
 						surface4->SetAttribute("moveTime", data.moveTime);
 						break;
 					case TYPE_BLINK:

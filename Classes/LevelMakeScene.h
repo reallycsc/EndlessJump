@@ -28,9 +28,13 @@ enum TextFieldTag
 	TAG_ENEMY_HEIGHT,
 	TAG_ENEMY_POSITION_X,
 	TAG_ENEMY_POSITION_Y,
-	TAG_ENEMY_ROTATE_TIME10,
 	TAG_ENEMY_DESTINATION_X,
 	TAG_ENEMY_DESTINATION_Y,
+	TAG_ENEMY_ANCHOR_X10,
+	TAG_ENEMY_ANCHOR_Y10,
+	TAG_ENEMY_ANGLE,
+	TAG_ENEMY_DELAY_TIME10,
+	TAG_ENEMY_ROTATE_TIME10,
 	TAG_ENEMY_MOVE_TIME10,
 	TAG_ENEMY_BLINK_TIME10,
 	TAG_ENEMY_BLINKHIDE_TIME10,
@@ -52,6 +56,7 @@ enum NodeTag
 
 typedef struct tagTextFieldSliderBindInt
 {
+	Node*	node;
 	TextField*	textField;
 	Slider*	slider;
 	int	number;
@@ -103,6 +108,7 @@ private:
 	void onTextFieldEvent(Ref *pSender, TextField::EventType type);
 	void onSliderEvent(Ref *pSender, Slider::EventType type);
 	void onDropDownList_BlockType(EventCustom* event);
+	void onDropDownList_BlockId(EventCustom* event);
 	void onDropDownList_Level(EventCustom* event);
 	void onDropDownList_Room(EventCustom* event);
 
@@ -156,6 +162,7 @@ private:
 	CSCClass::DropDownList* m_pDropDownListLevel;
 	CSCClass::DropDownList* m_pDropDownListRoom;
 	CSCClass::DropDownList* m_pDropDownListType;
+	CSCClass::DropDownList* m_pDropDownListBlockId;
 
 	Vector<Enemy*>	m_vEnemys;
 	Player*	m_pPlayer;

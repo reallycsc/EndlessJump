@@ -1,12 +1,15 @@
 #include "Enemy.h"
 
 Enemy::Enemy(void)
-	: m_nType(TYPE_NORMAL)
+	: m_nID(0)
+	, m_nType(TYPE_NORMAL)
 	, m_bIsSelected(false)
 	, m_size(Size(50, 50))
 	, m_color(Color4F::BLUE)
 	, m_bIsPlayerAdded(false)
+	, m_fDelayTime(0.0f)
 	, m_fRotateDuration(1.0f)
+	, m_fRotateAngle(0.0f)
 	, m_StartPoint(Point::ZERO)
 	, m_DestPoint(Point::ZERO)
 	, m_fMoveDuration(1.0f)
@@ -42,6 +45,7 @@ bool Enemy::init(const Size &size, const Color3B &color, const int &id)
     {  
         CC_BREAK_IF(!Node::init());  
 
+		m_nID = id;
 		m_nType = TYPE_NORMAL;
 		m_size = size;
 		m_color = Color4F(color);
@@ -77,35 +81,50 @@ bool Enemy::init(const Size &size, const Color3B &color, const int &id)
     return bRet;
 }
 
-Enemy* Enemy::createRotate(const Size &size, const Color3B &color, const int &id, const float &duration, const bool &isReverse)
+Enemy* Enemy::createRotate(const Size &size, const Color3B &color, const int &id, const float &delay, const float &duration, const float &angle)
 {
 	Enemy* enemy = Enemy::create(size, color, id);
 	enemy->setType(TYPE_ROTATE);
 	enemy->setAnchorPoint(Vec2(0.5f, 0.5f));
+	enemy->setDelayTime(delay);
 	enemy->setRotateDuration(duration);
-	float angle = 360;
-	if (isReverse)
+	float mAngle = MIN(MAX(angle, -360), 360);
+	enemy->setRotateAngle(mAngle);
+	if (mAngle >= 360 || mAngle <= -360)
 	{
-		enemy->setType(TYPE_ROTATE_REVERSE);
-		angle = -360;
+		auto action = RepeatForever::create(Sequence::createWithTwoActions(
+			DelayTime::create(delay),
+			RotateBy::create(duration, mAngle)));
+		action->setTag(TAG_ACTION_ROTATE);
+		enemy->runAction(action);
 	}
-	auto action = RepeatForever::create(RotateBy::create(duration, angle));
-	action->setTag(TAG_ACTION_ROTATE);
-	enemy->runAction(action);
+	else
+	{
+		auto action = RepeatForever::create(Sequence::create(
+			DelayTime::create(delay),
+			RotateBy::create(duration, mAngle),
+			RotateBy::create(duration, -mAngle),
+			NULL));
+		action->setTag(TAG_ACTION_ROTATE);
+		enemy->runAction(action);
+	}
 	return enemy;
 }
 
-Enemy* Enemy::createMove(const Size& size, const Color3B& color, const int& id, const Point &start, const Point& dest, const float& duration)
+Enemy* Enemy::createMove(const Size& size, const Color3B& color, const int& id, const Point &start, const Point& dest, const float &delay, const float& duration)
 {
 	Enemy* enemy = Enemy::create(size, color, id);
 	enemy->setType(TYPE_MOVE);
 	enemy->setStartPoint(start);
 	enemy->setDestPoint(dest);
+	enemy->setDelayTime(delay);
 	enemy->setMoveDuration(duration);
 	enemy->setPosition(start);
-	auto action = RepeatForever::create(Sequence::createWithTwoActions(
+	auto action = RepeatForever::create(Sequence::create(
+		DelayTime::create(delay),
 		MoveTo::create(duration, dest),
-		MoveTo::create(duration, start)));
+		MoveTo::create(duration, start),
+		NULL));
 	action->setTag(TAG_ACTION_MOVE);
 	enemy->runAction(action);
 	return enemy;
@@ -188,16 +207,51 @@ void Enemy::updateRotateDuration(const float &duration)
 	if (m_nType == TYPE_ROTATE)
 	{
 		this->stopActionByTag(TAG_ACTION_ROTATE);
-		auto action = RepeatForever::create(RotateBy::create(duration, 360));
-		action->setTag(TAG_ACTION_ROTATE);
-		this->runAction(action);
+		if (m_fRotateAngle >= 360 || m_fRotateAngle <= -360)
+		{
+			auto action = RepeatForever::create(Sequence::createWithTwoActions(
+				DelayTime::create(m_fDelayTime),
+				RotateBy::create(duration, m_fRotateAngle)));
+			action->setTag(TAG_ACTION_ROTATE);
+			this->runAction(action);
+		}
+		else
+		{
+			auto action = RepeatForever::create(Sequence::create(
+				DelayTime::create(m_fDelayTime),
+				RotateBy::create(duration, m_fRotateAngle),
+				RotateBy::create(duration, -m_fRotateAngle),
+				NULL));
+			action->setTag(TAG_ACTION_ROTATE);
+			this->runAction(action);
+		}
 	}
-	else if (m_nType == TYPE_ROTATE_REVERSE)
+}
+
+void Enemy::updateRotateAngle(const float& angle)
+{
+	m_fRotateAngle = MIN(MAX(angle, -360), 360);
+	if (m_nType == TYPE_ROTATE)
 	{
 		this->stopActionByTag(TAG_ACTION_ROTATE);
-		auto action = RepeatForever::create(RotateBy::create(duration, -360));
-		action->setTag(TAG_ACTION_ROTATE);
-		this->runAction(action);
+		if (m_fRotateAngle >= 360 || m_fRotateAngle <= -360)
+		{
+			auto action = RepeatForever::create(Sequence::createWithTwoActions(
+				DelayTime::create(m_fDelayTime),
+				RotateBy::create(m_fRotateDuration, m_fRotateAngle)));
+			action->setTag(TAG_ACTION_ROTATE);
+			this->runAction(action);
+		}
+		else
+		{
+			auto action = RepeatForever::create(Sequence::create(
+				DelayTime::create(m_fDelayTime),
+				RotateBy::create(m_fRotateDuration, m_fRotateAngle),
+				RotateBy::create(m_fRotateDuration, -m_fRotateAngle),
+				NULL));
+			action->setTag(TAG_ACTION_ROTATE);
+			this->runAction(action);
+		}
 	}
 }
 
@@ -207,9 +261,11 @@ void Enemy::updateStartPoint(const Point& start)
 	if (m_nType == TYPE_MOVE)
 	{
 		this->stopActionByTag(TAG_ACTION_MOVE);
-		auto action = RepeatForever::create(Sequence::createWithTwoActions(
+		auto action = RepeatForever::create(Sequence::create(
+			DelayTime::create(m_fDelayTime),
 			MoveTo::create(m_fMoveDuration, m_DestPoint),
-			MoveTo::create(m_fMoveDuration, start)));
+			MoveTo::create(m_fMoveDuration, start),
+			NULL));
 		action->setTag(TAG_ACTION_MOVE);
 		this->runAction(action);
 	}
@@ -221,11 +277,51 @@ void Enemy::updateDestPoint(const Point& dest)
 	if (m_nType == TYPE_MOVE)
 	{
 		this->stopActionByTag(TAG_ACTION_MOVE);
-		auto action = RepeatForever::create(Sequence::createWithTwoActions(
+		auto action = RepeatForever::create(Sequence::create(
+			DelayTime::create(m_fDelayTime),
 			MoveTo::create(m_fMoveDuration, dest),
-			MoveTo::create(m_fMoveDuration, m_StartPoint)));
+			MoveTo::create(m_fMoveDuration, m_StartPoint),
+			NULL));
 		action->setTag(TAG_ACTION_MOVE);
 		this->runAction(action);
+	}
+}
+
+void Enemy::updateDelayTime(const float& delay)
+{
+	m_fDelayTime = delay;
+	if (m_nType == TYPE_MOVE)
+	{
+		this->stopActionByTag(TAG_ACTION_MOVE);
+		auto action = RepeatForever::create(Sequence::create(
+			DelayTime::create(delay),
+			MoveTo::create(m_fMoveDuration, m_DestPoint),
+			MoveTo::create(m_fMoveDuration, m_StartPoint),
+			NULL));
+		action->setTag(TAG_ACTION_MOVE);
+		this->runAction(action);
+	}
+	else if (m_nType == TYPE_ROTATE)
+	{
+		this->stopActionByTag(TAG_ACTION_ROTATE);
+		if (m_fRotateAngle >= 360 || m_fRotateAngle <= -360)
+		{
+			auto action = RepeatForever::create(Sequence::createWithTwoActions(
+				DelayTime::create(delay),
+				RotateBy::create(m_fRotateDuration, m_fRotateAngle)));
+			action->setTag(TAG_ACTION_ROTATE);
+			this->runAction(action);
+		}
+		else
+		{
+			auto action = RepeatForever::create(Sequence::create(
+				DelayTime::create(delay),
+				RotateBy::create(m_fRotateDuration, m_fRotateAngle),
+				RotateBy::create(m_fRotateDuration, -m_fRotateAngle),
+				NULL));
+			action->setTag(TAG_ACTION_ROTATE);
+			this->runAction(action);
+		}
 	}
 }
 
@@ -235,9 +331,11 @@ void Enemy::updateMoveDuration(const float& duration)
 	if (m_nType == TYPE_MOVE)
 	{
 		this->stopActionByTag(TAG_ACTION_MOVE);
-		auto action = RepeatForever::create(Sequence::createWithTwoActions(
+		auto action = RepeatForever::create(Sequence::create(
+			DelayTime::create(m_fDelayTime),
 			MoveTo::create(duration, m_DestPoint),
-			MoveTo::create(duration, m_StartPoint)));
+			MoveTo::create(duration, m_StartPoint),
+			NULL));
 		action->setTag(TAG_ACTION_MOVE);
 		this->runAction(action);
 	}
@@ -306,7 +404,7 @@ void Enemy::unSelect()
 
 void Enemy::addPlayerBlockForLevelMake(Size playerSize)
 {
-	CS_RETURN_IF(m_nType == TYPE_ROTATE || m_nType == TYPE_ROTATE_REVERSE);
+	CS_RETURN_IF(m_nType == TYPE_ROTATE);
 
 	if (!m_bIsPlayerAdded)
 	{
@@ -335,6 +433,8 @@ void Enemy::addPlayerBlockForLevelMake(Size playerSize)
 
 void Enemy::removePlayerBlockForLevelMake()
 {
+	CS_RETURN_IF(m_nType == TYPE_ROTATE);
+
 	if (m_bIsPlayerAdded)
 	{
 		this->removeChildByTag(TAG_PLAYER_BLOCK);

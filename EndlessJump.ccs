@@ -4,7 +4,9 @@
     <Group ctype="ResourceGroup">
       <RootFolder Name=".">
         <Project Name="MainMenuScene.csd" Type="Scene" />
-        <Folder Name="Resource" />
+        <Folder Name="Resource">
+          <TTF Name="fzzj.ttf" />
+        </Folder>
         <Project Name="LevelMakeScene.csd" Type="Scene" />
         <Project Name="GameScene.csd" Type="Scene" />
         <Project Name="GameOverScene.csd" Type="Scene" />

@@ -47,6 +47,7 @@ bool MainMenuScene::init()
 	int innerHeight = 0;
 	int maxLevelHeight = 0;
 	auto levelsData = pGameMediator->getGameLevelData();
+	int interval = 50;
 	for (size_t i = 0, length = pGameMediator->getGameLevelCount(); i < length; i++)
 	{
 		auto levelData = levelsData->at(i);
@@ -54,7 +55,7 @@ bool MainMenuScene::init()
 		scrollView->addChild(levelNode);
 		// button
 		auto buttonLevel = dynamic_cast<Button*>(levelNode->getChildByName("Button_Level"));
-		int posY = (buttonLevel->getContentSize().height / 2 + 100) * i + 100;
+		int posY = (buttonLevel->getContentSize().height / 2 + interval) * i + interval;
 		levelNode->setPosition(scrollWidth / 2 , posY);
 		innerHeight = posY + buttonLevel->getContentSize().height / 2;
 		buttonLevel->setTitleText(StringUtils::format("%d", i + 1));
@@ -92,7 +93,7 @@ bool MainMenuScene::init()
 				textDeadCount->setString(StringUtils::format("%d deads", deadCount));
 	}
 	int scrollInnerHeight = scrollView->getInnerContainerSize().height;
-	innerHeight = MAX(scrollInnerHeight, innerHeight + 100);
+	innerHeight = MAX(scrollInnerHeight, innerHeight + interval);
 	scrollView->setInnerContainerSize(Size(scrollView->getInnerContainerSize().width, innerHeight));
 	//scrollView->setInnerContainerPosition(Point::ZERO);
 	scrollView->setInnerContainerPosition(Point(0,-maxLevelHeight + scrollInnerHeight / 2));

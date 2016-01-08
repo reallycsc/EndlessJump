@@ -7,6 +7,8 @@ LevelMakeScene::LevelMakeScene()
 	: m_pPlayer(nullptr)
 	, m_pDropDownListLevel(nullptr)
 	, m_pDropDownListRoom(nullptr)
+	, m_pDropDownListType(nullptr)
+	, m_pDropDownListBlockId(nullptr)
 	, m_nCurEnemyId(0)
 	, m_nCurJumpPointId(0)
 	, m_bIsAutoTrying(false)
@@ -133,16 +135,26 @@ bool LevelMakeScene::init()
 	m_pDropDownListType->setPosition(90, textType->getPositionY() - m_pDropDownListType->getContentSize().height / 2);
 	panelBlock->addChild(m_pDropDownListType);
 	_eventDispatcher->addCustomEventListener(CSCClass::EVENT_DROPDOWNLIST_SELECTED + "blockType", CC_CALLBACK_1(LevelMakeScene::onDropDownList_BlockType, this));
+	auto textBlock = dynamic_cast<Text*>(panelBlock->getChildByName("Text_Block"));
+	m_pDropDownListBlockId = CSCClass::DropDownList::create(Label::createWithSystemFont("0", "fonts/arial.ttf", 22), Size(80, 30), "blockId");
+	m_pDropDownListBlockId->setPosition(260, textBlock->getPositionY() - m_pDropDownListBlockId->getContentSize().height / 2);
+	panelBlock->addChild(m_pDropDownListBlockId);
+	_eventDispatcher->addCustomEventListener(CSCClass::EVENT_DROPDOWNLIST_SELECTED + "blockId", CC_CALLBACK_1(LevelMakeScene::onDropDownList_BlockId, this));
+
 	this->getLevelNode(dynamic_cast<Node*>(panelBlock->getChildByName("Node_Width")), TAG_ENEMY_WIDTH);
 	this->getLevelNode(dynamic_cast<Node*>(panelBlock->getChildByName("Node_Height")), TAG_ENEMY_HEIGHT);
 	this->getLevelNode(dynamic_cast<Node*>(panelBlock->getChildByName("Node_PositionX")), TAG_ENEMY_POSITION_X);
 	this->getLevelNode(dynamic_cast<Node*>(panelBlock->getChildByName("Node_PositionY")), TAG_ENEMY_POSITION_Y);
-	this->getLevelNode(dynamic_cast<Node*>(panelBlock->getChildByName("Node_RotateDuration")), TAG_ENEMY_ROTATE_TIME10);
 	this->getLevelNode(dynamic_cast<Node*>(panelBlock->getChildByName("Node_DestinationX")), TAG_ENEMY_DESTINATION_X);
 	this->getLevelNode(dynamic_cast<Node*>(panelBlock->getChildByName("Node_DestinationY")), TAG_ENEMY_DESTINATION_Y);
-	this->getLevelNode(dynamic_cast<Node*>(panelBlock->getChildByName("Node_MoveDuration")), TAG_ENEMY_MOVE_TIME10);
-	this->getLevelNode(dynamic_cast<Node*>(panelBlock->getChildByName("Node_BlinkDuration")), TAG_ENEMY_BLINK_TIME10);
-	this->getLevelNode(dynamic_cast<Node*>(panelBlock->getChildByName("Node_BlinkHideDuration")), TAG_ENEMY_BLINKHIDE_TIME10);
+	this->getLevelNode(dynamic_cast<Node*>(panelBlock->getChildByName("Node_AnchorX")), TAG_ENEMY_ANCHOR_X10);
+	this->getLevelNode(dynamic_cast<Node*>(panelBlock->getChildByName("Node_AnchorY")), TAG_ENEMY_ANCHOR_Y10);
+	this->getLevelNode(dynamic_cast<Node*>(panelBlock->getChildByName("Node_Angle")), TAG_ENEMY_ANGLE);
+	this->getLevelNode(dynamic_cast<Node*>(panelBlock->getChildByName("Node_Delay")), TAG_ENEMY_DELAY_TIME10, false);
+	this->getLevelNode(dynamic_cast<Node*>(panelBlock->getChildByName("Node_RotateDuration")), TAG_ENEMY_ROTATE_TIME10, false);
+	this->getLevelNode(dynamic_cast<Node*>(panelBlock->getChildByName("Node_MoveDuration")), TAG_ENEMY_MOVE_TIME10, false);
+	this->getLevelNode(dynamic_cast<Node*>(panelBlock->getChildByName("Node_BlinkDuration")), TAG_ENEMY_BLINK_TIME10, false);
+	this->getLevelNode(dynamic_cast<Node*>(panelBlock->getChildByName("Node_BlinkHideDuration")), TAG_ENEMY_BLINKHIDE_TIME10, false);
 	// get player panel
 	auto panelPlayer = dynamic_cast<Layout*>(rootNode->getChildByName("Panel_Player"));
 	this->getLevelNode(dynamic_cast<Node*>(panelPlayer->getChildByName("Node_Speed")), TAG_PLAYER_SPEED);
@@ -181,9 +193,13 @@ bool LevelMakeScene::init()
 	this->initStruct(&m_mTextFieldStructs.at(TAG_ENEMY_HEIGHT), 0, 50, levelHeight);
 	this->initStruct(&m_mTextFieldStructs.at(TAG_ENEMY_POSITION_X), -levelWidth, levelWidth * 0.5, levelWidth);
 	this->initStruct(&m_mTextFieldStructs.at(TAG_ENEMY_POSITION_Y), -levelHeight, 0, levelHeight);
-	this->initStruct(&m_mTextFieldStructs.at(TAG_ENEMY_ROTATE_TIME10), 1, 10, 99);
 	this->initStruct(&m_mTextFieldStructs.at(TAG_ENEMY_DESTINATION_X), -levelWidth, levelWidth * 0.5, levelWidth * 2);
 	this->initStruct(&m_mTextFieldStructs.at(TAG_ENEMY_DESTINATION_Y), -levelHeight, 0, levelHeight * 2);
+	this->initStruct(&m_mTextFieldStructs.at(TAG_ENEMY_ANCHOR_X10), 0, 5, 10);
+	this->initStruct(&m_mTextFieldStructs.at(TAG_ENEMY_ANCHOR_Y10), 0, 5, 10);
+	this->initStruct(&m_mTextFieldStructs.at(TAG_ENEMY_ANGLE), -360, -360, 360);
+	this->initStruct(&m_mTextFieldStructs.at(TAG_ENEMY_DELAY_TIME10), 0, 10, 99);
+	this->initStruct(&m_mTextFieldStructs.at(TAG_ENEMY_ROTATE_TIME10), 1, 10, 99);
 	this->initStruct(&m_mTextFieldStructs.at(TAG_ENEMY_MOVE_TIME10), 1, 10, 99);
 	this->initStruct(&m_mTextFieldStructs.at(TAG_ENEMY_BLINK_TIME10), 1, 10, 99);
 	this->initStruct(&m_mTextFieldStructs.at(TAG_ENEMY_BLINKHIDE_TIME10), 1, 10, 99);
@@ -208,8 +224,6 @@ bool LevelMakeScene::init()
 		this->addRoom();
 		this->addEnemy();
 		this->addPlayer();
-
-		//this->calcFoothold();
 	}
 
 	this->scheduleUpdate();
@@ -238,7 +252,6 @@ bool LevelMakeScene::onTouchBegan(Touch *touch, Event *event)
 				m_bIsTouchEnemy = true;
 				m_touchOffset = enemy->getPosition() - point;
 				m_vEnemys.at(m_nCurEnemyId)->unSelect();
-				m_nCurEnemyId = i;
 
 				this->selectEnemy(enemy);
 			}
@@ -379,6 +392,15 @@ void LevelMakeScene::onDropDownList_BlockType(EventCustom* event)
 	this->addEnemy();
 	for (size_t i = 0, length = m_vEnemys.size(); i < length; i++)
 		m_vEnemys.at(i)->updateId(i);
+}
+
+void LevelMakeScene::onDropDownList_BlockId(EventCustom* event)
+{
+	CS_RETURN_IF(m_vEnemys.size() == 0);
+
+	int id = m_pDropDownListBlockId->getSelectedIndex();
+	m_vEnemys.at(m_nCurEnemyId)->unSelect();
+	this->selectEnemy(m_vEnemys.at(id));
 }
 
 void LevelMakeScene::onDropDownList_Level(EventCustom* event)
@@ -652,16 +674,14 @@ void LevelMakeScene::addEnemy()
 		break;
 	case TYPE_ROTATE:
 		enemy = Enemy::createRotate(size, color, m_nCurEnemyId,
-			m_mTextFieldStructs.at(TAG_ENEMY_ROTATE_TIME10).number * 0.1f);
-		break;
-	case TYPE_ROTATE_REVERSE:
-		enemy = Enemy::createRotate(size, color, m_nCurEnemyId,
-			m_mTextFieldStructs.at(TAG_ENEMY_ROTATE_TIME10).number * 0.1f, true);
+			m_mTextFieldStructs.at(TAG_ENEMY_DELAY_TIME10).number * 0.1f, m_mTextFieldStructs.at(TAG_ENEMY_ROTATE_TIME10).number * 0.1f,
+			m_mTextFieldStructs.at(TAG_ENEMY_ANGLE).number);
+		enemy->setAnchorPoint(Vec2(m_mTextFieldStructs.at(TAG_ENEMY_ANCHOR_X10).number * 0.1f, m_mTextFieldStructs.at(TAG_ENEMY_ANCHOR_Y10).number * 0.1f));
 		break;
 	case TYPE_MOVE:
 		enemy = Enemy::createMove(size, color, m_nCurEnemyId, position, 
 			Point(m_mTextFieldStructs.at(TAG_ENEMY_DESTINATION_X).number, m_mTextFieldStructs.at(TAG_ENEMY_DESTINATION_Y).number),
-			m_mTextFieldStructs.at(TAG_ENEMY_MOVE_TIME10).number * 0.1f);
+			m_mTextFieldStructs.at(TAG_ENEMY_DELAY_TIME10).number * 0.1f, m_mTextFieldStructs.at(TAG_ENEMY_MOVE_TIME10).number * 0.1f);
 		break;
 	case TYPE_BLINK:
 		enemy = Enemy::createBlink(size, color, m_nCurEnemyId, 
@@ -681,11 +701,7 @@ void LevelMakeScene::addEnemy()
 
 void LevelMakeScene::addPlayer()
 {
-	if (m_pPlayer)
-	{
-		m_pPlayer->die();
-		m_pPlayer = nullptr;
-	}
+	CS_RETURN_IF(m_pPlayer); // in case there will be more than one player
 
 	int color_r = m_mTextFieldStructs.at(TAG_ENEMY_COLOR_R).number;
 	int color_g = m_mTextFieldStructs.at(TAG_ENEMY_COLOR_G).number;
@@ -700,11 +716,7 @@ void LevelMakeScene::addPlayer()
 
 void LevelMakeScene::addPlayerForTrying()
 {
-	if (m_pPlayer)
-	{
-		m_pPlayer->die();
-		m_pPlayer = nullptr;
-	}
+	CS_RETURN_IF(m_pPlayer); // in case there will be more than one player
 
 	m_nCurJumpPointId = 0;
 
@@ -738,22 +750,24 @@ void LevelMakeScene::selectEnemy(Enemy* enemy)
 	enemy->select();
 	int type = enemy->getType();
 	m_pDropDownListType->setSelectedIndex(type - 1);
+	m_nCurEnemyId = enemy->getID();
+	m_pDropDownListBlockId->setSelectedIndex(m_nCurEnemyId);
 	Size size = enemy->getContentSize();
 	this->updateBlockTextFieldNumber(TAG_ENEMY_WIDTH, size.width);
 	this->updateBlockTextFieldNumber(TAG_ENEMY_HEIGHT, size.height);
 	Point position = enemy->getPosition();
 	this->updateBlockTextFieldNumber(TAG_ENEMY_POSITION_X, position.x);
 	this->updateBlockTextFieldNumber(TAG_ENEMY_POSITION_Y, position.y);
+	Vec2 anchor = enemy->getAnchorPoint();
+	this->updateBlockTextFieldNumber(TAG_ENEMY_ANCHOR_X10, anchor.x * 10);
+	this->updateBlockTextFieldNumber(TAG_ENEMY_ANCHOR_Y10, anchor.y * 10);
 	switch (type)
 	{
 	case TYPE_ROTATE:
 	{
+		this->updateBlockTextFieldNumber(TAG_ENEMY_DELAY_TIME10, enemy->getDelayTime() * 10);
 		this->updateBlockTextFieldNumber(TAG_ENEMY_ROTATE_TIME10, enemy->getRotateDuration() * 10);
-		break;
-	}
-	case TYPE_ROTATE_REVERSE:
-	{
-		this->updateBlockTextFieldNumber(TAG_ENEMY_ROTATE_TIME10, enemy->getRotateDuration() * 10);
+		this->updateBlockTextFieldNumber(TAG_ENEMY_ANGLE, enemy->getRotateAngle());
 		break;
 	}
 	case TYPE_MOVE:
@@ -764,6 +778,7 @@ void LevelMakeScene::selectEnemy(Enemy* enemy)
 		Point destPos = enemy->getDestPoint();
 		this->updateBlockTextFieldNumber(TAG_ENEMY_DESTINATION_X, destPos.x);
 		this->updateBlockTextFieldNumber(TAG_ENEMY_DESTINATION_Y, destPos.y);
+		this->updateBlockTextFieldNumber(TAG_ENEMY_DELAY_TIME10, enemy->getDelayTime() * 10);
 		this->updateBlockTextFieldNumber(TAG_ENEMY_MOVE_TIME10, enemy->getMoveDuration() * 10);
 		break;
 	}
@@ -841,6 +856,18 @@ void LevelMakeScene::updateCurEnemy(int tag)
 		break;
 	case TAG_ENEMY_DESTINATION_Y:
 		obj->updateDestPoint(Point(obj->getDestPoint().x, number));
+		break;
+	case TAG_ENEMY_ANCHOR_X10:
+		obj->setAnchorPoint(Vec2(number * 0.1f, obj->getAnchorPoint().y));
+		break;
+	case TAG_ENEMY_ANCHOR_Y10:
+		obj->setAnchorPoint(Vec2(obj->getAnchorPoint().x, number * 0.1f));
+		break;
+	case TAG_ENEMY_ANGLE:
+		obj->updateRotateAngle(number);
+		break;
+	case TAG_ENEMY_DELAY_TIME10:
+		obj->updateDelayTime(number * 0.1f);
 		break;
 	case TAG_ENEMY_MOVE_TIME10:
 		obj->updateMoveDuration(number * 0.1f);
@@ -1049,6 +1076,7 @@ void LevelMakeScene::loadDataFrom(int level, int room)
 	m_nCurEnemyId = 0;
 	// add enemys
 	auto enemys = &(roomData->enemysData);
+	m_pDropDownListBlockId->clearAllLabels();
 	for (size_t i = 0, j = enemys->size(); i < j; i++)
 	{
 		auto enemyData = enemys->at(i);
@@ -1060,13 +1088,11 @@ void LevelMakeScene::loadDataFrom(int level, int room)
 			enemy = Enemy::create(enemyData.size, roomData->enemy_color, id);
 			break;
 		case TYPE_ROTATE:
-			enemy = Enemy::createRotate(enemyData.size, roomData->enemy_color, id, enemyData.rotateTime);
-			break;
-		case TYPE_ROTATE_REVERSE:
-			enemy = Enemy::createRotate(enemyData.size, roomData->enemy_color, id, enemyData.rotateTime, true);
+			enemy = Enemy::createRotate(enemyData.size, roomData->enemy_color, id, enemyData.delayTime, enemyData.rotateTime, enemyData.angle);
+			enemy->setAnchorPoint(enemyData.anchorPoint);
 			break;
 		case TYPE_MOVE:
-			enemy = Enemy::createMove(enemyData.size, roomData->enemy_color, id, enemyData.position, enemyData.destination, enemyData.moveTime);
+			enemy = Enemy::createMove(enemyData.size, roomData->enemy_color, id, enemyData.position, enemyData.destination, enemyData.delayTime, enemyData.moveTime);
 			break;
 		case TYPE_BLINK:
 			enemy = Enemy::createBlink(enemyData.size, roomData->enemy_color, id, enemyData.blinkTime, enemyData.blinkHideTime);
@@ -1078,6 +1104,7 @@ void LevelMakeScene::loadDataFrom(int level, int room)
 		enemy->setPosition(enemyData.position);
 		this->addChild(enemy, 1, TAG_ENEMY);
 		m_vEnemys.pushBack(enemy);
+		m_pDropDownListBlockId->addLabel(Label::createWithSystemFont(StringUtils::format("%d", i), "fonts/arial.ttf", 22));
 	}
 	// select the first one
 	if (enemys->size() > 0)
@@ -1158,14 +1185,15 @@ void LevelMakeScene::saveDataTo(int level, int room)
 		switch (enemyData.type)
 		{
 		case TYPE_ROTATE:
-			enemyData.rotateTime = enemy->getRotateDuration();
-			break;
-		case TYPE_ROTATE_REVERSE:
+			enemyData.anchorPoint = enemy->getAnchorPoint();
+			enemyData.angle = enemy->getRotateAngle();
+			enemyData.delayTime = enemy->getDelayTime();
 			enemyData.rotateTime = enemy->getRotateDuration();
 			break;
 		case TYPE_MOVE:
 			enemyData.position = enemy->getStartPoint();
 			enemyData.destination = enemy->getDestPoint();
+			enemyData.delayTime = enemy->getDelayTime();
 			enemyData.moveTime = enemy->getMoveDuration();
 			break;
 		case TYPE_BLINK:
@@ -1214,6 +1242,7 @@ bool LevelMakeScene::isJumpLineConflict(const Vec2& origin, const Vec2& control,
 void LevelMakeScene::getLevelNode(Node* root, int tag, bool isWithSlider)
 {
 	TextFieldSliderBindInt structTmp;
+	structTmp.node = root;
 	structTmp.textField = dynamic_cast<TextField*>(root->getChildByName("TextField"));
 	structTmp.textField->addEventListener(CC_CALLBACK_2(LevelMakeScene::onTextFieldEvent, this));
 	structTmp.textField->setTag(tag);
@@ -1286,9 +1315,13 @@ void LevelMakeScene::updateBlockType(int type)
 	{
 	case TYPE_NORMAL:
 	{
-		this->setTextFieldStructEnable(TAG_ENEMY_ROTATE_TIME10, false);
 		this->setTextFieldStructEnable(TAG_ENEMY_DESTINATION_X, false);
 		this->setTextFieldStructEnable(TAG_ENEMY_DESTINATION_Y, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_ANCHOR_X10, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_ANCHOR_Y10, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_ANGLE, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_DELAY_TIME10, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_ROTATE_TIME10, false);
 		this->setTextFieldStructEnable(TAG_ENEMY_MOVE_TIME10, false);
 		this->setTextFieldStructEnable(TAG_ENEMY_BLINK_TIME10, false);
 		this->setTextFieldStructEnable(TAG_ENEMY_BLINKHIDE_TIME10, false);
@@ -1296,19 +1329,13 @@ void LevelMakeScene::updateBlockType(int type)
 	}
 	case TYPE_ROTATE:
 	{
-		this->setTextFieldStructEnable(TAG_ENEMY_ROTATE_TIME10, true);
 		this->setTextFieldStructEnable(TAG_ENEMY_DESTINATION_X, false);
 		this->setTextFieldStructEnable(TAG_ENEMY_DESTINATION_Y, false);
-		this->setTextFieldStructEnable(TAG_ENEMY_MOVE_TIME10, false);
-		this->setTextFieldStructEnable(TAG_ENEMY_BLINK_TIME10, false);
-		this->setTextFieldStructEnable(TAG_ENEMY_BLINKHIDE_TIME10, false);
-		break;
-	}
-	case TYPE_ROTATE_REVERSE:
-	{
+		this->setTextFieldStructEnable(TAG_ENEMY_ANCHOR_X10, true);
+		this->setTextFieldStructEnable(TAG_ENEMY_ANCHOR_Y10, true);
+		this->setTextFieldStructEnable(TAG_ENEMY_ANGLE, true);
+		this->setTextFieldStructEnable(TAG_ENEMY_DELAY_TIME10, true);
 		this->setTextFieldStructEnable(TAG_ENEMY_ROTATE_TIME10, true);
-		this->setTextFieldStructEnable(TAG_ENEMY_DESTINATION_X, false);
-		this->setTextFieldStructEnable(TAG_ENEMY_DESTINATION_Y, false);
 		this->setTextFieldStructEnable(TAG_ENEMY_MOVE_TIME10, false);
 		this->setTextFieldStructEnable(TAG_ENEMY_BLINK_TIME10, false);
 		this->setTextFieldStructEnable(TAG_ENEMY_BLINKHIDE_TIME10, false);
@@ -1316,9 +1343,13 @@ void LevelMakeScene::updateBlockType(int type)
 	}
 	case TYPE_MOVE:
 	{
-		this->setTextFieldStructEnable(TAG_ENEMY_ROTATE_TIME10, false);
 		this->setTextFieldStructEnable(TAG_ENEMY_DESTINATION_X, true);
 		this->setTextFieldStructEnable(TAG_ENEMY_DESTINATION_Y, true);
+		this->setTextFieldStructEnable(TAG_ENEMY_ANCHOR_X10, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_ANCHOR_Y10, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_ANGLE, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_DELAY_TIME10, true);
+		this->setTextFieldStructEnable(TAG_ENEMY_ROTATE_TIME10, false);
 		this->setTextFieldStructEnable(TAG_ENEMY_MOVE_TIME10, true);
 		this->setTextFieldStructEnable(TAG_ENEMY_BLINK_TIME10, false);
 		this->setTextFieldStructEnable(TAG_ENEMY_BLINKHIDE_TIME10, false);
@@ -1326,9 +1357,13 @@ void LevelMakeScene::updateBlockType(int type)
 	}
 	case TYPE_BLINK:
 	{
-		this->setTextFieldStructEnable(TAG_ENEMY_ROTATE_TIME10, false);
 		this->setTextFieldStructEnable(TAG_ENEMY_DESTINATION_X, false);
 		this->setTextFieldStructEnable(TAG_ENEMY_DESTINATION_Y, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_ANCHOR_X10, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_ANCHOR_Y10, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_ANGLE, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_DELAY_TIME10, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_ROTATE_TIME10, false);
 		this->setTextFieldStructEnable(TAG_ENEMY_MOVE_TIME10, false);
 		this->setTextFieldStructEnable(TAG_ENEMY_BLINK_TIME10, true);
 		this->setTextFieldStructEnable(TAG_ENEMY_BLINKHIDE_TIME10, true);
@@ -1380,6 +1415,10 @@ void LevelMakeScene::AddEstimateFrameText(Node* parent, float p1, float p2,
 void LevelMakeScene::setTextFieldStructEnable(int tag, bool isEnable)
 {
 	auto p = &m_mTextFieldStructs.at(tag);
-	p->slider->setEnabled(isEnable);
+	p->node->setVisible(isEnable);
 	p->textField->setEnabled(isEnable);
+	if (p->slider)
+	{
+		p->slider->setEnabled(isEnable);
+	}
 }

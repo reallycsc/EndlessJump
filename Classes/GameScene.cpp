@@ -51,6 +51,9 @@ bool GameScene::init()
     }
     /////////////////////////////
 	m_pGameMediator = GameMediator::getInstance();
+	m_nDeadNumber = 0;
+	m_pPlayer = nullptr;
+
 	// get level data
 	auto levelsData = m_pGameMediator->getGameLevelData();
 	int curLevel = m_pGameMediator->getCurGameLevel();
@@ -62,29 +65,24 @@ bool GameScene::init()
 #ifdef DEBUG_MODE
 	// add all room
 	for (size_t i = 0, length = roomsData->size(); i < length; i++)
-	{
 		this->addRoom(&roomsData->at(i));
-	}
 #else
 	// add first room
 	this->addRoom(m_pCurRoomData);
 #endif
 
-	// add player
-	this->addPlayer(m_pCurRoomData);
-
-	// get dead count
-	m_nDeadNumber = 0;
-
 	// load scene
 	auto rootNode = CSLoader::createNode("GameScene.csb");
 	m_pAnimate = CSLoader::createTimeline("GameScene.csb");
+	m_pAnimate->setFrameEventCallFunc(CC_CALLBACK_1(GameScene::onFrameEvent, this));
 	rootNode->runAction(m_pAnimate);
 	m_pAnimate->pause();
 	this->addChild(rootNode);
 	// get button
 	auto buttonReturn = dynamic_cast<Button*>(rootNode->getChildByName("Button_Return"));
 	buttonReturn->addClickEventListener(CC_CALLBACK_1(GameScene::buttonCallback_MainMenu, this));
+	auto buttonRetry = dynamic_cast<Button*>(rootNode->getChildByName("Button_Retry"));
+	buttonRetry->addClickEventListener(CC_CALLBACK_1(GameScene::buttonCallback_Retry, this));
 	// get text
 	m_pTextDeadNum = dynamic_cast<Text*>(rootNode->getChildByName("Text_DeadNumber"));
 	m_pTextDeadNum->setString(StringUtils::format("%d", m_nDeadNumber));
@@ -93,16 +91,31 @@ bool GameScene::init()
 	Text* levelNumber = dynamic_cast<Text*>(rootNode->getChildByName("Text_LevelNumber"));
 	levelNumber->setString(StringUtils::format("%d/%d", curLevel, m_pGameMediator->getGameLevelCount()));
 
+	// play animate
+	m_pAnimate->play("Scene_Start", false);
+
     return true;
+}
+
+void GameScene::onFrameEvent(Frame* frame)
+{
+	EventFrame* event = dynamic_cast<EventFrame*>(frame);
+	if (!event)
+		return;
+
+	string str = event->getEvent();
+	if (str == "Scene_Start_End")
+	{
+		// add player
+		this->addPlayer(m_pCurRoomData);
+	}
 }
 
 bool GameScene::onTouchBegan(Touch *touch, Event *event)
 {
 	//Point point = touch->getLocation();
 	if (m_pPlayer)
-	{
 		m_pPlayer->jump();
-	}
 	return true;
 }
 
@@ -120,14 +133,46 @@ void GameScene::buttonCallback_MainMenu(Ref* pSender)
 	Director::getInstance()->replaceScene(MainMenuScene::createScene());
 }
 
+void GameScene::buttonCallback_Retry(Ref* pSender)
+{
+	// clear all data
+	m_nDeadNumber = 0;
+	if (m_pPlayer)
+	{
+		m_pPlayer->die();
+		m_pPlayer = nullptr;
+	}
+	this->removeChildByName("room");
+	m_vEnemys.clear();
+
+	// get room data
+	auto roomsData = m_pCurLevelData->getRoomsData();
+	m_pGameMediator->setCurGameRoom(1);
+	m_pCurRoomData = &roomsData->at(0);
+
+#ifdef DEBUG_MODE
+	// add all room
+	for (size_t i = 0, length = roomsData->size(); i < length; i++)
+		this->addRoom(&roomsData->at(i));
+#else
+	// add first room
+	this->addRoom(m_pCurRoomData);
+#endif
+
+	m_pTextDeadNum->setString(StringUtils::format("%d", m_nDeadNumber));
+	// add player
+	this->addPlayer(m_pCurRoomData);
+}
+
 bool GameScene::onContactBegin(const PhysicsContact& contact)
 {
+	if (!m_pPlayer)
+		return false;
+
 	auto body1 = contact.getShapeA()->getBody();
 	auto body2 = contact.getShapeB()->getBody();
 	if (!body1->getNode() || !body2->getNode())
-	{
 		return false;
-	}
 
 	if ((body1->getCategoryBitmask() & MASK_PLAYER) == MASK_PLAYER ||
 		(body2->getCategoryBitmask() & MASK_PLAYER) == MASK_PLAYER)
@@ -150,7 +195,7 @@ bool GameScene::onContactBegin(const PhysicsContact& contact)
 		this->addChild(particle, 5);
 
 		m_pPlayer->die();
-		m_pPlayer = NULL;
+		m_pPlayer = nullptr;
 		m_nDeadNumber++;
 		m_pTextDeadNum->setString(StringUtils::format("%d", m_nDeadNumber));
 		m_pAnimate->play("DeadTextEnlarge", false);
@@ -172,7 +217,7 @@ void GameScene::addRoom(RoomData* roomData)
 	DrawNode* background = DrawNode::create();
 	background->drawSolidRect(Point::ZERO, roomData->size, Color4F(roomData->color));
 	background->setPosition(roomData->position);
-	this->addChild(background, 4 - roomData->id);
+	this->addChild(background, 4 - roomData->id, "room");
 
 	// enemys
 	auto enemysData = &roomData->enemysData;
@@ -186,13 +231,11 @@ void GameScene::addRoom(RoomData* roomData)
 			enemy = Enemy::create(enemyData->size, roomData->enemy_color);
 			break;
 		case TYPE_ROTATE:
-			enemy = Enemy::createRotate(enemyData->size, roomData->enemy_color, -1, enemyData->rotateTime);
-			break;
-		case TYPE_ROTATE_REVERSE:
-			enemy = Enemy::createRotate(enemyData->size, roomData->enemy_color, -1, enemyData->rotateTime, true);
+			enemy = Enemy::createRotate(enemyData->size, roomData->enemy_color, -1, enemyData->delayTime, enemyData->rotateTime, enemyData->angle);
+			enemy->setAnchorPoint(enemyData->anchorPoint);
 			break;
 		case TYPE_MOVE:
-			enemy = Enemy::createMove(enemyData->size, roomData->enemy_color, -1, enemyData->position, enemyData->destination, enemyData->moveTime);
+			enemy = Enemy::createMove(enemyData->size, roomData->enemy_color, -1, enemyData->position, enemyData->destination, enemyData->delayTime, enemyData->moveTime);
 			break;
 		case TYPE_BLINK:
 			enemy = Enemy::createBlink(enemyData->size, roomData->enemy_color, -1, enemyData->blinkTime, enemyData->blinkHideTime);
@@ -209,6 +252,8 @@ void GameScene::addRoom(RoomData* roomData)
 
 void GameScene::addPlayer(RoomData* roomData)
 {
+	CS_RETURN_IF(m_pPlayer); // in case there will be more than one player
+
 	m_pPlayer = Player::create(roomData->player_color, roomData->player_speed, roomData->player_jumpTime);
 
 	Size visibleSize = Director::getInstance()->getVisibleSize();
@@ -226,6 +271,7 @@ void GameScene::addPlayer(RoomData* roomData)
 		CallFuncN::create([=](Ref* pSender)->void
 	{
 		m_pPlayer->die();
+		m_pPlayer = nullptr;
 		int roomIndex = m_pGameMediator->getCurGameRoom();
 		if (roomIndex < m_pCurLevelData->getRoomsData()->size())
 		{

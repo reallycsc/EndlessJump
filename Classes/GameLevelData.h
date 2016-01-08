@@ -8,8 +8,11 @@ typedef struct tagEnemyData
 	int		type;
 	Size	size;
 	Vec2	position;
-	float	rotateTime;
 	Vec2	destination;
+	Vec2	anchorPoint;
+	float	angle;
+	float	delayTime;
+	float	rotateTime;
 	float	moveTime;
 	float	blinkTime;
 	float	blinkHideTime;

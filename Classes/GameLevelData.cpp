@@ -96,13 +96,14 @@ bool GameLevelData::setRoomDataWithFile(XMLElement* surface)
 				switch (enemy.type)
 				{
 				case TYPE_ROTATE:
+					enemy.anchorPoint = Point(surface3->FloatAttribute("anchor_x"), surface3->FloatAttribute("anchor_y"));
+					enemy.angle = surface3->FloatAttribute("angle");
+					enemy.delayTime = surface3->FloatAttribute("delayTime");
 					enemy.rotateTime = surface3->FloatAttribute("rotateTime");
 					break;				
-				case TYPE_ROTATE_REVERSE:
-					enemy.rotateTime = surface3->FloatAttribute("rotateTime");
-					break;
 				case TYPE_MOVE:
 					enemy.destination = Point(surface3->IntAttribute("dx"), surface3->IntAttribute("dy"));
+					enemy.delayTime = surface3->FloatAttribute("delayTime");
 					enemy.moveTime = surface3->FloatAttribute("moveTime");
 					break;
 				case TYPE_BLINK:
@@ -112,6 +113,9 @@ bool GameLevelData::setRoomDataWithFile(XMLElement* surface)
 				default:
 					enemy.rotateTime = 0.0f;
 					enemy.destination = Point::ZERO;
+					enemy.anchorPoint = Point(0.5f, 0.5f);
+					enemy.angle = 0.0f;
+					enemy.delayTime = 0.0f;
 					enemy.moveTime = 0.0f;
 					enemy.blinkTime = 0.0f;
 					enemy.blinkHideTime = 0.0f;

@@ -18,12 +18,14 @@ public:
 
 private:
 	void onEnter() override;
+	void onFrameEvent(Frame* frame);
 	virtual bool onTouchBegan(Touch* touch, Event* event) override;
 	virtual void onTouchMoved(Touch* touch, Event* event) override;
 	virtual void onTouchEnded(Touch* touch, Event* event) override;
 	bool onContactBegin(const PhysicsContact& contact);
 
 	void buttonCallback_MainMenu(Ref* pSender);
+	void buttonCallback_Retry(Ref* pSender);
 
 	void addRoom(RoomData* roomData);
 	void addPlayer(RoomData* roomData);
