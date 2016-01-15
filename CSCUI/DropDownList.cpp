@@ -81,12 +81,12 @@ void DropDownList::setSelectedIndex(int index)
 	{
 		if (i == m_nLastSelectedIndex)
 		{
-			m_vBgLayers[i]->setColor(DROPDOWNLIST_HIGHLIGHT_COLOR3);
-			m_pShowLabel->setString(m_vSelectLabels[i]->getString());
+			m_vBgLayers.at(i)->setColor(DROPDOWNLIST_HIGHLIGHT_COLOR3);
+			m_pShowLabel->setString(m_vSelectLabels.at(i)->getString());
 		}
 		else
 		{
-			m_vBgLayers[i]->setColor(DROPDOWNLIST_NORMAL_COLOR3);
+			m_vBgLayers.at(i)->setColor(DROPDOWNLIST_NORMAL_COLOR3);
 		}
 	}
 }
@@ -103,12 +103,14 @@ void DropDownList::onEnter()
 
 bool DropDownList::onTouchBegan(Touch* touch, Event* event)
 {
-	if (!m_bIsShow)
+	if (m_vSelectLabels.size() > 0)
 	{
 		Rect rect(Vec2(0, 0), this->getContentSize());
+		Size listSize = m_pListView->getContentSize();
+		Rect rect2(Vec2(0, -listSize.height), Size(listSize.width, 0));
 		Point position = this->convertToNodeSpace(touch->getLocation());
 
-		if (rect.containsPoint(position))
+		if (!m_bIsShow && rect.containsPoint(position))
 		{
 			m_bIsShow = true;
 			// show list menus  
@@ -119,11 +121,15 @@ bool DropDownList::onTouchBegan(Touch* touch, Event* event)
 
 			for (int i = 0, j = static_cast<int>(m_vSelectLabels.size()); i < j; ++i)
 				if (i == m_nLastSelectedIndex)
-					m_vBgLayers[i]->setColor(DROPDOWNLIST_HIGHLIGHT_COLOR3);
+					m_vBgLayers.at(i)->setColor(DROPDOWNLIST_HIGHLIGHT_COLOR3);
 				else
-					m_vBgLayers[i]->setColor(DROPDOWNLIST_NORMAL_COLOR3);
+					m_vBgLayers.at(i)->setColor(DROPDOWNLIST_NORMAL_COLOR3);
 
 			return true;
+		}
+		else if (m_bIsShow && !rect2.containsPoint(position))
+		{
+			this->onClose(); // close the list
 		}
 	}
 	return false;
@@ -139,7 +145,7 @@ void DropDownList::selectedItemEvent(Ref *pSender, ListView::EventType type)
 
 		int index = listView->getCurSelectedIndex();
 		m_nLastSelectedIndex = index;
-		m_pShowLabel->setString(m_vSelectLabels[index]->getString());
+		m_pShowLabel->setString(m_vSelectLabels.at(index)->getString());
 
 		Director::getInstance()->getEventDispatcher()->dispatchCustomEvent(EVENT_DROPDOWNLIST_SELECTED + m_sSuffix); // dispatch event
 
@@ -157,8 +163,8 @@ void DropDownList::addLabel(Label* label)
 
 	LayerColor* normal = LayerColor::create(Color4B(DROPDOWNLIST_NORMAL_COLOR3), size.width, size.height);
 
-	m_vBgLayers.push_back(normal);
-	m_vSelectLabels.push_back(label);
+	m_vBgLayers.pushBack(normal);
+	m_vSelectLabels.pushBack(label);
 
 	Layout *layout = Layout::create();
 	layout->setTouchEnabled(true);
@@ -176,6 +182,7 @@ void DropDownList::clearAllLabels()
 	m_vBgLayers.clear();
 	m_vSelectLabels.clear();
 	m_pListView->removeAllChildren();
+	m_pShowLabel->setString("None");
 }
 
 void DropDownList::onClose()

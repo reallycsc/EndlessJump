@@ -43,8 +43,8 @@ private:
 	ListView* m_pListView; // list
 	Label* m_pShowLabel;  // show what is be selected  
 
-	vector<Label*> m_vSelectLabels;  // labels for list  
-	vector<LayerColor*> m_vBgLayers; // background for list  
+	Vector<Label*> m_vSelectLabels;  // labels for list  
+	Vector<LayerColor*> m_vBgLayers; // background for list  
 
 	string m_sSuffix;
 	bool m_bIsShow;  // is list show or not  
