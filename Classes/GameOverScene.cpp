@@ -80,7 +80,7 @@ bool GameOverScene::init(int deadCount)
 	else
 		textDeadNumber->setString(StringUtils::format("%d deads this level.", deadCount));
 	auto textDeadNumberAll = dynamic_cast<Text*>(nodeEnlargeAnimation->getChildByName("Text_DeadNumberAll"));
-	if (deadCountAll == 0)
+	if (deadCountAll == 0 && curLevel > 1)
 	{
 		textDeadNumberAll->setString(StringUtils::format("Perfect till now!"));
 		textDeadNumberAll->setTextColor(Color4B::ORANGE);

@@ -1,5 +1,4 @@
 #include "GameLevelData.h"
-#include "CSCClass/CommonFunctions.h"
 
 GameLevelData::GameLevelData(void)
 {
@@ -90,36 +89,53 @@ bool GameLevelData::setRoomDataWithFile(XMLElement* surface)
 			{
 				EnemyData enemy;
 				enemy.id = surface3->IntAttribute("id");
-				enemy.type = surface3->IntAttribute("type");
 				enemy.size = Size(surface3->IntAttribute("width"), surface3->IntAttribute("height"));
 				enemy.position = Point(surface3->IntAttribute("x"), surface3->IntAttribute("y"));
-				switch (enemy.type)
+				for (XMLElement* surface4 = surface3->FirstChildElement("Action"); surface4 != NULL; surface4 = surface4->NextSiblingElement("Action"))
 				{
-				case TYPE_ROTATE:
-					enemy.anchorPoint = Point(surface3->FloatAttribute("anchor_x"), surface3->FloatAttribute("anchor_y"));
-					enemy.angle = surface3->FloatAttribute("angle");
-					enemy.delayTime = surface3->FloatAttribute("delayTime");
-					enemy.rotateTime = surface3->FloatAttribute("rotateTime");
-					break;				
-				case TYPE_MOVE:
-					enemy.destination = Point(surface3->IntAttribute("dx"), surface3->IntAttribute("dy"));
-					enemy.delayTime = surface3->FloatAttribute("delayTime");
-					enemy.moveTime = surface3->FloatAttribute("moveTime");
-					break;
-				case TYPE_BLINK:
-					enemy.blinkTime = surface3->FloatAttribute("blinkTime");
-					enemy.blinkHideTime = surface3->FloatAttribute("blinkHideTime");
-					break;
-				default:
-					enemy.rotateTime = 0.0f;
-					enemy.destination = Point::ZERO;
-					enemy.anchorPoint = Point(0.5f, 0.5f);
-					enemy.angle = 0.0f;
-					enemy.delayTime = 0.0f;
-					enemy.moveTime = 0.0f;
-					enemy.blinkTime = 0.0f;
-					enemy.blinkHideTime = 0.0f;
-					break;
+					int type = surface4->IntAttribute("type");
+					switch (type)
+					{
+					case TYPE_ROTATE:
+					{
+						auto delay = surface4->FloatAttribute("delay");
+						auto duration = surface4->FloatAttribute("rotateDuration");
+						auto angle = surface4->FloatAttribute("angle");
+						auto anchor = Point(surface4->FloatAttribute("anchor_x"), surface4->FloatAttribute("anchor_y"));
+						auto actionData = RotateActionData::create(delay, duration, angle, anchor);
+						enemy.actionsData.pushBack(actionData);
+						break;
+					}
+					case TYPE_MOVE:
+					{
+						auto delay = surface4->FloatAttribute("delay");
+						auto duration = surface4->FloatAttribute("moveDuration");
+						auto dest = Point(surface4->IntAttribute("dest_x"), surface4->IntAttribute("dest_y"));
+						auto actionData = MoveActionData::create(delay, duration, enemy.position, dest);
+						enemy.actionsData.pushBack(actionData);
+						break;
+					}
+					case TYPE_BLINK:
+					{
+						auto delay = surface4->FloatAttribute("delay");
+						auto duration = surface4->FloatAttribute("blinkDuration");
+						auto post_delay = surface4->FloatAttribute("postDelay");
+						auto actionData = BlinkActionData::create(delay, duration, post_delay);
+						enemy.actionsData.pushBack(actionData);
+						break;
+					}
+					case TYPE_MOVE_ONEWAY:
+					{
+						auto delay = surface4->FloatAttribute("delay");
+						auto duration = surface4->FloatAttribute("moveDuration");
+						auto dest = Point(surface4->IntAttribute("dest_x"), surface4->IntAttribute("dest_y"));
+						auto actionData = MoveOnewayActionData::create(delay, duration, enemy.position, dest);
+						enemy.actionsData.pushBack(actionData);
+						break;
+					}
+					default:
+						break;
+					}
 				}
 				room.enemysData.push_back(enemy);
 			}

@@ -90,10 +90,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
 	//glEnable(GL_LINE_SMOOTH);
 	FileUtils::getInstance()->addSearchPath("res");
 	// set random seed
-	struct timeval tv;
-	gettimeofday(&tv, NULL);
-	unsigned int time = ((unsigned int)tv.tv_sec) * 1000 + tv.tv_usec / 1000;
-	srand(time);
+	srand(timeGetTime());
 
 	GameMediator::getInstance();
 

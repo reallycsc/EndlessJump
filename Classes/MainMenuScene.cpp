@@ -6,7 +6,7 @@ Scene* MainMenuScene::createScene()
 {
     // 'scene' is an autorelease object
     auto scene = Scene::create();
-    
+
     // 'layer' is an autorelease object
     auto layer = MainMenuScene::create();
 
@@ -26,6 +26,10 @@ bool MainMenuScene::init()
         return false;
     }
 	auto pGameMediator = GameMediator::getInstance();
+	// add color layer
+	m_pColorLayer = LayerColor::create(Color4B::BLACK);
+	this->addChild(m_pColorLayer);
+
 	// load csb
 	auto rootNode = CSLoader::createNode("MainMenuScene.csb");
 	this->addChild(rootNode);
@@ -48,6 +52,8 @@ bool MainMenuScene::init()
 	int maxLevelHeight = 0;
 	auto levelsData = pGameMediator->getGameLevelData();
 	int interval = 50;
+	m_vLevelColors.clear();
+	m_vLevelDeadCount.clear();
 	for (size_t i = 0, length = pGameMediator->getGameLevelCount(); i < length; i++)
 	{
 		auto levelData = levelsData->at(i);
@@ -59,7 +65,10 @@ bool MainMenuScene::init()
 		levelNode->setPosition(scrollWidth / 2 , posY);
 		innerHeight = posY + buttonLevel->getContentSize().height / 2;
 		buttonLevel->setTitleText(StringUtils::format("%d", i + 1));
-		buttonLevel->setColor(levelData->getRoomsData()->at(0).color);
+		auto roomData = levelData->getRoomsData()->at(0);
+		auto levelColor = roomData.color;
+		m_vLevelColors.push_back(pair<Color3B, Color3B>(levelColor, roomData.enemy_color));
+		buttonLevel->setColor(levelColor);
 		buttonLevel->setTag(i + 1);
 		buttonLevel->addClickEventListener(CC_CALLBACK_1(MainMenuScene::buttonCallback_LevelPlay, this));
 		// if the next level of curLevel open condition < total dead, need open the next level (when update new level will have this situation)
@@ -82,6 +91,7 @@ bool MainMenuScene::init()
 		if (deadCount < 0)
 			textDeadCount->setVisible(false);
 		else
+		{
 			if (deadCount == 0)
 			{
 				textDeadCount->setString(StringUtils::format("perfect"));
@@ -91,17 +101,27 @@ bool MainMenuScene::init()
 				textDeadCount->setString(StringUtils::format("%d dead", deadCount));
 			else
 				textDeadCount->setString(StringUtils::format("%d deads", deadCount));
+		}
+		m_vLevelDeadCount.pushBack(textDeadCount);
 	}
 	int scrollInnerHeight = scrollView->getInnerContainerSize().height;
 	innerHeight = MAX(scrollInnerHeight, innerHeight + interval);
 	scrollView->setInnerContainerSize(Size(scrollView->getInnerContainerSize().width, innerHeight));
-	//scrollView->setInnerContainerPosition(Point::ZERO);
 	scrollView->setInnerContainerPosition(Point(0,-maxLevelHeight + scrollInnerHeight / 2));
 
 #ifndef DEBUG_MODE
 	buttonEditor->setEnabled(false);
 	buttonEditor->setVisible(false);
 #endif
+
+	if (m_vLevelColors.size() > 0)
+	{
+		random_shuffle(m_vLevelColors.begin(), m_vLevelColors.end());
+
+		m_pColorLayer->runAction(TintTo::create(1.5f, m_vLevelColors.at(0).first));
+		this->schedule(CC_CALLBACK_1(MainMenuScene::schedule_changeColor, this),
+			2.0f, "change_color");
+	}
 
     return true;
 }
@@ -118,4 +138,11 @@ void MainMenuScene::buttonCallback_LevelPlay(Ref* pSender)
 void MainMenuScene::buttonCallback_LevelEditor(Ref* pSender)
 {
 	Director::getInstance()->replaceScene(LevelMakeScene::createScene());
+}
+
+void MainMenuScene::schedule_changeColor(float dt)
+{
+	random_shuffle(m_vLevelColors.begin(), m_vLevelColors.end());
+
+	m_pColorLayer->runAction(TintTo::create(1.5f, m_vLevelColors.at(0).first));
 }

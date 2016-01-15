@@ -88,7 +88,7 @@ bool GameMediator::loadGameLevelFile()
 			GameLevelData* data = GameLevelData::create();
 			data->setLevel(surface1->IntAttribute("level"));
 			data->setLevelName(surface1->Attribute("name"));
-			data->setMaxDeadTime(surface1->IntAttribute("deadTime"));
+			data->setMaxDeadTime(surface1->IntAttribute("deadCount"));
 
 			CC_BREAK_IF(!data->setRoomDataWithFile(surface1));
 
@@ -122,7 +122,7 @@ bool GameMediator::saveGameLevelFile()
 			XMLElement *surface1 = document->NewElement("Level");
 			surface1->SetAttribute("level", m_vGameLevelData.at(i)->getLevel());
 			surface1->SetAttribute("name", m_vGameLevelData.at(i)->getLevelName().c_str());
-			surface1->SetAttribute("deadTime", m_vGameLevelData.at(i)->getMaxDeadTime());
+			surface1->SetAttribute("deadCount", m_vGameLevelData.at(i)->getMaxDeadTime());
 			root->LinkEndChild(surface1);
 
 			auto roomsData = m_vGameLevelData.at(i)->getRoomsData();
@@ -164,37 +164,73 @@ bool GameMediator::saveGameLevelFile()
 				surface3->SetAttribute("color_b", iter2->enemy_color.b);
 				surface2->LinkEndChild(surface3);
 				auto enemysData = &(iter2->enemysData);
-				for (size_t i1 = 0, j1 = enemysData->size(); i1 < j1; i1++)
+				for (size_t i1 = 0, length1 = enemysData->size(); i1 < length1; i1++)
 				{
-					auto data = enemysData->at(i1);
+					auto enemy_data = enemysData->at(i1);
 					XMLElement *surface4 = document->NewElement("Enemy");
 					surface4->SetAttribute("id", i1 + 1);
-					surface4->SetAttribute("type", data.type);
-					surface4->SetAttribute("width", data.size.width);
-					surface4->SetAttribute("height", data.size.height);
-					surface4->SetAttribute("x", static_cast<int>(data.position.x));
-					surface4->SetAttribute("y", static_cast<int>(data.position.y));
-					switch (data.type)
+					surface4->SetAttribute("width", enemy_data.size.width);
+					surface4->SetAttribute("height", enemy_data.size.height);
+					surface4->SetAttribute("x", static_cast<int>(enemy_data.position.x));
+					surface4->SetAttribute("y", static_cast<int>(enemy_data.position.y));
+					auto actionsData = &enemy_data.actionsData;
+					for (size_t i2 = 0, length2 = actionsData->size(); i2 < length2; i2++)
 					{
-					case TYPE_ROTATE:
-						surface4->SetAttribute("anchor_x", data.anchorPoint.x);
-						surface4->SetAttribute("anchor_y", data.anchorPoint.y);
-						surface4->SetAttribute("angle", data.angle);
-						surface4->SetAttribute("delayTime", data.delayTime);
-						surface4->SetAttribute("rotateTime", data.rotateTime);
-						break;
-					case TYPE_MOVE:
-						surface4->SetAttribute("dx", static_cast<int>(data.destination.x));
-						surface4->SetAttribute("dy", static_cast<int>(data.destination.y));
-						surface4->SetAttribute("delayTime", data.delayTime);
-						surface4->SetAttribute("moveTime", data.moveTime);
-						break;
-					case TYPE_BLINK:
-						surface4->SetAttribute("blinkTime", data.blinkTime);
-						surface4->SetAttribute("blinkHideTime", data.blinkHideTime);
-						break;
-					default:
-						break;
+						auto action_data = actionsData->at(i2);
+						auto action_type = action_data->getType();
+						switch (action_type)
+						{
+						case TYPE_ROTATE:
+						{
+							auto rotate_data = dynamic_cast<RotateActionData*>(action_data);
+							XMLElement *surface5 = document->NewElement("Action");
+							surface5->SetAttribute("type", action_type);
+							surface5->SetAttribute("delay", rotate_data->getDelay());
+							surface5->SetAttribute("rotateDuration", rotate_data->getDuration());
+							surface5->SetAttribute("angle", rotate_data->getAngle());
+							surface5->SetAttribute("anchor_x", rotate_data->getAnchor().x);
+							surface5->SetAttribute("anchor_y", rotate_data->getAnchor().y);
+							surface4->LinkEndChild(surface5);
+							break;
+						}
+						case TYPE_MOVE:
+						{
+							auto move_data = dynamic_cast<MoveActionData*>(action_data);
+							XMLElement *surface5 = document->NewElement("Action");
+							surface5->SetAttribute("type", action_type);
+							surface5->SetAttribute("delay", move_data->getDelay());
+							surface5->SetAttribute("moveDuration", move_data->getDuration());
+							surface5->SetAttribute("dest_x", static_cast<int>(move_data->getDestination().x));
+							surface5->SetAttribute("dest_y", static_cast<int>(move_data->getDestination().y));
+							surface4->LinkEndChild(surface5);
+							break;
+						}
+						case TYPE_BLINK:
+						{
+							auto blink_data = dynamic_cast<BlinkActionData*>(action_data);
+							XMLElement *surface5 = document->NewElement("Action");
+							surface5->SetAttribute("type", action_type);
+							surface5->SetAttribute("delay", blink_data->getDelay());
+							surface5->SetAttribute("blinkDuration", blink_data->getDuration());
+							surface5->SetAttribute("postDelay", blink_data->getPostDelay());
+							surface4->LinkEndChild(surface5);
+							break;
+						}
+						case TYPE_MOVE_ONEWAY:
+						{
+							auto move_data = dynamic_cast<MoveOnewayActionData*>(action_data);
+							XMLElement *surface5 = document->NewElement("Action");
+							surface5->SetAttribute("type", action_type);
+							surface5->SetAttribute("delay", move_data->getDelay());
+							surface5->SetAttribute("moveDuration", move_data->getDuration());
+							surface5->SetAttribute("dest_x", static_cast<int>(move_data->getDestination().x));
+							surface5->SetAttribute("dest_y", static_cast<int>(move_data->getDestination().y));
+							surface4->LinkEndChild(surface5);
+							break;
+						}
+						default:
+							break;
+						}
 					}
 					surface3->LinkEndChild(surface4);
 				}

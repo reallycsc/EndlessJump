@@ -30,9 +30,9 @@
         <OpenedDocuments>
           <FilePathData Path="LevelMakeScene.csd" />
           <FilePathData Path="MainMenuScene.csd" />
-          <FilePathData Path="GameScene.csd" />
-          <FilePathData Path="GameOverScene.csd" />
           <FilePathData Path="MainMenuScene_NodeLevel.csd" />
+          <FilePathData Path="GamePauseScene.csd" />
+          <FilePathData Path="GameScene.csd" />
         </OpenedDocuments>
         <ActiveDocument Path="LevelMakeScene.csd" />
       </Value>

@@ -17,6 +17,8 @@ public:
     CREATE_FUNC(GameScene);
 
 private:
+	void update(float dt);
+
 	void onEnter() override;
 	void onFrameEvent(Frame* frame);
 	virtual bool onTouchBegan(Touch* touch, Event* event) override;
@@ -24,7 +26,7 @@ private:
 	virtual void onTouchEnded(Touch* touch, Event* event) override;
 	bool onContactBegin(const PhysicsContact& contact);
 
-	void buttonCallback_MainMenu(Ref* pSender);
+	void buttonCallback_Pause(Ref* pSender);
 	void buttonCallback_Retry(Ref* pSender);
 
 	void addRoom(RoomData* roomData);
@@ -36,12 +38,18 @@ private:
 
 	GameLevelData*	m_pCurLevelData;
 	RoomData*	m_pCurRoomData;
+	int	m_nRoomCount;
 
 	Player*	m_pPlayer;
 	Vector<Enemy*>	m_vEnemys;
 
+	Button*	m_pButtonPause;
+	Button*	m_pButtonRetry;
 	Text*	m_pTextDeadNum;
 	int	m_nDeadNumber;
+	int m_nDeadNumberMin;
+
+	ParticleMeteor*	m_pParticleTail;
 };
 
 #endif // __GAME_SCENE_H__

@@ -1,6 +1,7 @@
 #include "GameScene.h"
 #include "CSCClass\CSCAction\Shake.h"
 #include "MainMenuScene.h"
+#include "GamePauseScene.h"
 #include "GameOverScene.h"
 
 Scene* GameScene::createScene()
@@ -51,26 +52,16 @@ bool GameScene::init()
     }
     /////////////////////////////
 	m_pGameMediator = GameMediator::getInstance();
+	m_nRoomCount = 0;
 	m_nDeadNumber = 0;
 	m_pPlayer = nullptr;
+	m_pParticleTail = nullptr;
 
 	// get level data
 	auto levelsData = m_pGameMediator->getGameLevelData();
 	int curLevel = m_pGameMediator->getCurGameLevel();
 	m_pCurLevelData = levelsData->at(curLevel - 1);
-	auto roomsData = m_pCurLevelData->getRoomsData();
-	m_pGameMediator->setCurGameRoom(1);
-	m_pCurRoomData = &roomsData->at(0);
-
-#ifdef DEBUG_MODE
-	// add all room
-	for (size_t i = 0, length = roomsData->size(); i < length; i++)
-		this->addRoom(&roomsData->at(i));
-#else
-	// add first room
-	this->addRoom(m_pCurRoomData);
-#endif
-
+	
 	// load scene
 	auto rootNode = CSLoader::createNode("GameScene.csb");
 	m_pAnimate = CSLoader::createTimeline("GameScene.csb");
@@ -79,13 +70,20 @@ bool GameScene::init()
 	m_pAnimate->pause();
 	this->addChild(rootNode);
 	// get button
-	auto buttonReturn = dynamic_cast<Button*>(rootNode->getChildByName("Button_Return"));
-	buttonReturn->addClickEventListener(CC_CALLBACK_1(GameScene::buttonCallback_MainMenu, this));
-	auto buttonRetry = dynamic_cast<Button*>(rootNode->getChildByName("Button_Retry"));
-	buttonRetry->addClickEventListener(CC_CALLBACK_1(GameScene::buttonCallback_Retry, this));
+	m_pButtonPause = dynamic_cast<Button*>(rootNode->getChildByName("Button_Pause"));
+	m_pButtonPause->addClickEventListener(CC_CALLBACK_1(GameScene::buttonCallback_Pause, this));
+	m_pButtonRetry = dynamic_cast<Button*>(rootNode->getChildByName("Button_Retry"));
+	m_pButtonRetry->addClickEventListener(CC_CALLBACK_1(GameScene::buttonCallback_Retry, this));
+	m_pButtonPause->setEnabled(false);
+	m_pButtonRetry->setEnabled(false);
 	// get text
 	m_pTextDeadNum = dynamic_cast<Text*>(rootNode->getChildByName("Text_DeadNumber"));
-	m_pTextDeadNum->setString(StringUtils::format("%d", m_nDeadNumber));
+	m_nDeadNumberMin = m_pGameMediator->getLevelMinDeadCount()->at(curLevel - 1);
+	if (m_nDeadNumberMin < 0)
+		m_pTextDeadNum->setString(StringUtils::format("%d", m_nDeadNumber));
+	else
+		m_pTextDeadNum->setString(StringUtils::format("%d/%d", m_nDeadNumber, m_nDeadNumberMin));
+	
 	Text* levelName = dynamic_cast<Text*>(rootNode->getChildByName("Text_LevelName"));
 	levelName->setString(m_pCurLevelData->getLevelName());
 	Text* levelNumber = dynamic_cast<Text*>(rootNode->getChildByName("Text_LevelNumber"));
@@ -94,7 +92,26 @@ bool GameScene::init()
 	// play animate
 	m_pAnimate->play("Scene_Start", false);
 
+	this->scheduleUpdate();
+
     return true;
+}
+
+void GameScene::update(float dt)
+{
+	if (m_pPlayer && m_pParticleTail)
+	{
+		auto action = m_pPlayer->getActionByTag(ACTIONTAG_JUMP);
+		if (!action || action->isDone())
+		{
+			m_pParticleTail->setPosition(m_pPlayer->getPosition() - m_pPlayer->getContentSize() / 2);
+		}
+		else
+		{
+			m_pParticleTail->setPositionY(-1024);
+		}
+		
+	}
 }
 
 void GameScene::onFrameEvent(Frame* frame)
@@ -106,6 +123,21 @@ void GameScene::onFrameEvent(Frame* frame)
 	string str = event->getEvent();
 	if (str == "Scene_Start_End")
 	{
+		m_pButtonPause->setEnabled(true);
+		m_pButtonRetry->setEnabled(true);
+		// get level data
+		auto roomsData = m_pCurLevelData->getRoomsData();
+		m_pGameMediator->setCurGameRoom(1);
+		m_pCurRoomData = &roomsData->at(0);
+
+#ifdef DEBUG_MODE
+		// add all room
+		for (size_t i = 0, length = roomsData->size(); i < length; i++)
+			this->addRoom(&roomsData->at(i));
+#else
+		// add first room
+		this->addRoom(m_pCurRoomData);
+#endif
 		// add player
 		this->addPlayer(m_pCurRoomData);
 	}
@@ -128,22 +160,42 @@ void GameScene::onTouchEnded(Touch *touch, Event *event)
 {
 }
 
-void GameScene::buttonCallback_MainMenu(Ref* pSender)
+void GameScene::buttonCallback_Pause(Ref* pSender)
 {
-	Director::getInstance()->replaceScene(MainMenuScene::createScene());
+	Size visibleSize = Director::getInstance()->getVisibleSize();
+	RenderTexture* renderTexture = RenderTexture::create(visibleSize.width, visibleSize.height, Texture2D::PixelFormat::RGBA8888, GL_DEPTH24_STENCIL8);
+	// Go through all child of Game class and draw in renderTexture
+	// It's like screenshot
+	renderTexture->begin();
+	Director::getInstance()->getRunningScene()->visit();
+	renderTexture->end();
+
+	Director::getInstance()->getRenderer()->render();// Must add this for version 3.0 or image goes black  
+	Director::getInstance()->getTextureCache()->addImage(renderTexture->newImage(), "GamePauseImage");
+
+	Director::getInstance()->pushScene(GamePauseScene::createScene());
 }
 
 void GameScene::buttonCallback_Retry(Ref* pSender)
 {
 	// clear all data
 	m_nDeadNumber = 0;
+	if (m_nDeadNumberMin < 0)
+		m_pTextDeadNum->setString("0");
+	else
+		m_pTextDeadNum->setString(StringUtils::format("0/%d", m_nDeadNumberMin));
+	
 	if (m_pPlayer)
 	{
 		m_pPlayer->die();
 		m_pPlayer = nullptr;
+		m_pParticleTail->removeFromParent();
+		m_pParticleTail = nullptr;
 	}
-	this->removeChildByName("room");
+	for (size_t i = 0; i < m_nRoomCount; i++)
+		this->removeChildByName("room");
 	m_vEnemys.clear();
+	m_nRoomCount = 0;
 
 	// get room data
 	auto roomsData = m_pCurLevelData->getRoomsData();
@@ -159,7 +211,6 @@ void GameScene::buttonCallback_Retry(Ref* pSender)
 	this->addRoom(m_pCurRoomData);
 #endif
 
-	m_pTextDeadNum->setString(StringUtils::format("%d", m_nDeadNumber));
 	// add player
 	this->addPlayer(m_pCurRoomData);
 }
@@ -196,12 +247,17 @@ bool GameScene::onContactBegin(const PhysicsContact& contact)
 
 		m_pPlayer->die();
 		m_pPlayer = nullptr;
+		m_pParticleTail->removeFromParent();
+		m_pParticleTail = nullptr;
 		m_nDeadNumber++;
-		m_pTextDeadNum->setString(StringUtils::format("%d", m_nDeadNumber));
+		if (m_nDeadNumberMin < 0)
+			m_pTextDeadNum->setString(StringUtils::format("%d", m_nDeadNumber));
+		else
+			m_pTextDeadNum->setString(StringUtils::format("%d/%d", m_nDeadNumber, m_nDeadNumberMin));
 		m_pAnimate->play("DeadTextEnlarge", false);
 
 		this->runAction(Sequence::createWithTwoActions(
-			DelayTime::create(0.5f),
+			DelayTime::create(0.7f),
 			CallFuncN::create([=](Ref* pSender)->void
 		{
 			this->addPlayer(m_pCurRoomData);
@@ -218,32 +274,16 @@ void GameScene::addRoom(RoomData* roomData)
 	background->drawSolidRect(Point::ZERO, roomData->size, Color4F(roomData->color));
 	background->setPosition(roomData->position);
 	this->addChild(background, 4 - roomData->id, "room");
+	m_nRoomCount++;
 
 	// enemys
 	auto enemysData = &roomData->enemysData;
 	for (size_t i = 0, j = enemysData->size(); i < j; i++)
 	{
 		auto enemyData = &enemysData->at(i);
-		Enemy* enemy = NULL;
-		switch (enemyData->type)
-		{
-		case TYPE_NORMAL:
-			enemy = Enemy::create(enemyData->size, roomData->enemy_color);
-			break;
-		case TYPE_ROTATE:
-			enemy = Enemy::createRotate(enemyData->size, roomData->enemy_color, -1, enemyData->delayTime, enemyData->rotateTime, enemyData->angle);
-			enemy->setAnchorPoint(enemyData->anchorPoint);
-			break;
-		case TYPE_MOVE:
-			enemy = Enemy::createMove(enemyData->size, roomData->enemy_color, -1, enemyData->position, enemyData->destination, enemyData->delayTime, enemyData->moveTime);
-			break;
-		case TYPE_BLINK:
-			enemy = Enemy::createBlink(enemyData->size, roomData->enemy_color, -1, enemyData->blinkTime, enemyData->blinkHideTime);
-			break;
-		default:
-			enemy = Enemy::create(enemyData->size, roomData->enemy_color);
-			break;
-		}
+		Enemy* enemy = Enemy::create(enemyData->size, roomData->enemy_color);
+		auto actionsData = &enemyData->actionsData;
+		enemy->setActions(actionsData);
 		enemy->setPosition(enemyData->position);
 		background->addChild(enemy);
 		m_vEnemys.pushBack(enemy);
@@ -272,6 +312,8 @@ void GameScene::addPlayer(RoomData* roomData)
 	{
 		m_pPlayer->die();
 		m_pPlayer = nullptr;
+		m_pParticleTail->removeFromParent();
+		m_pParticleTail = nullptr;
 		int roomIndex = m_pGameMediator->getCurGameRoom();
 		if (roomIndex < m_pCurLevelData->getRoomsData()->size())
 		{
@@ -300,4 +342,23 @@ void GameScene::addPlayer(RoomData* roomData)
 		}
 	})));
 	this->addChild(m_pPlayer, 4);
+
+	// Add tail particles
+	m_pParticleTail = ParticleMeteor::createWithTotalParticles(150);
+	m_pParticleTail->setTexture(Director::getInstance()->getTextureCache()->getTextureForKey("playerImage"));
+	m_pParticleTail->setBlendAdditive(false);
+	m_pParticleTail->setAngle(175);
+	m_pParticleTail->setAngleVar(5);
+	m_pParticleTail->setStartSize(3);
+	m_pParticleTail->setStartSizeVar(2);
+	m_pParticleTail->setStartColor(m_pPlayer->getPlayerColor());
+	m_pParticleTail->setStartColorVar(Color4F(1, 1, 1, 0));
+	m_pParticleTail->setEndColor(m_pPlayer->getPlayerColor());
+	m_pParticleTail->setEndColorVar(Color4F(1, 1, 1, 0));
+	m_pParticleTail->setSpeed(roomData->player_speed);
+	m_pParticleTail->setSpeedVar(0);
+	m_pParticleTail->setLife(0.15f);
+	m_pParticleTail->setLifeVar(0.1f);
+	m_pParticleTail->setPosition(0, roomData->position.y); // left-bottom of player
+	this->addChild(m_pParticleTail, 5);
 }

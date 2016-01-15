@@ -2,40 +2,26 @@
 
 Enemy::Enemy(void)
 	: m_nID(0)
-	, m_nType(TYPE_NORMAL)
 	, m_bIsSelected(false)
 	, m_size(Size(50, 50))
 	, m_color(Color4F::BLUE)
 	, m_bIsPlayerAdded(false)
-	, m_fDelayTime(0.0f)
-	, m_fRotateDuration(1.0f)
-	, m_fRotateAngle(0.0f)
-	, m_StartPoint(Point::ZERO)
-	, m_DestPoint(Point::ZERO)
-	, m_fMoveDuration(1.0f)
-	, m_fBlinkDuration(1.0f)
-	, m_fBlinkHideDuration(1.0f)
+	, m_bIsHaveMoveAction(false)
 {
+	m_vActions.clear();
 }
 
 Enemy::~Enemy(void)
 {
+	m_vActions.clear();
 }
 
 Enemy* Enemy::create(const Size &size, const Color3B &color, const int &id)
 {
 	Enemy *pRet = new(std::nothrow) Enemy();
-	if (pRet && pRet->init(size, color, id))
-	{
-		pRet->autorelease();
-		return pRet;
-	}
-	else
-	{
-		delete pRet;
-		pRet = NULL;
-		return NULL;
-	}
+	pRet->init(size, color, id);
+	pRet->autorelease();
+	return pRet;
 }
 
 bool Enemy::init(const Size &size, const Color3B &color, const int &id)
@@ -46,7 +32,6 @@ bool Enemy::init(const Size &size, const Color3B &color, const int &id)
         CC_BREAK_IF(!Node::init());  
 
 		m_nID = id;
-		m_nType = TYPE_NORMAL;
 		m_size = size;
 		m_color = Color4F(color);
 		// draw enemy rect
@@ -81,75 +66,120 @@ bool Enemy::init(const Size &size, const Color3B &color, const int &id)
     return bRet;
 }
 
-Enemy* Enemy::createRotate(const Size &size, const Color3B &color, const int &id, const float &delay, const float &duration, const float &angle)
+bool Enemy::addAction(ActionData* action_data)
 {
-	Enemy* enemy = Enemy::create(size, color, id);
-	enemy->setType(TYPE_ROTATE);
-	enemy->setAnchorPoint(Vec2(0.5f, 0.5f));
-	enemy->setDelayTime(delay);
-	enemy->setRotateDuration(duration);
-	float mAngle = MIN(MAX(angle, -360), 360);
-	enemy->setRotateAngle(mAngle);
-	if (mAngle >= 360 || mAngle <= -360)
+	bool bRet = false;
+	do
 	{
-		auto action = RepeatForever::create(Sequence::createWithTwoActions(
-			DelayTime::create(delay),
-			RotateBy::create(duration, mAngle)));
-		action->setTag(TAG_ACTION_ROTATE);
-		enemy->runAction(action);
-	}
-	else
-	{
-		auto action = RepeatForever::create(Sequence::create(
-			DelayTime::create(delay),
-			RotateBy::create(duration, mAngle),
-			RotateBy::create(duration, -mAngle),
-			NULL));
-		action->setTag(TAG_ACTION_ROTATE);
-		enemy->runAction(action);
-	}
-	return enemy;
+		CC_BREAK_IF(!action_data);
+
+		// All actions are unique
+		int type = action_data->getType();
+		for (size_t i = 0, length = m_vActions.size(); i < length; i++)
+			if (m_vActions.at(i)->getType() == type)
+				return false;
+		switch (type)
+		{
+		case TYPE_MOVE:
+			if (!m_bIsHaveMoveAction)
+				m_bIsHaveMoveAction = true;
+			else
+				return false;
+			break;
+		case TYPE_ROTATE:
+			this->setAnchorPoint(dynamic_cast<RotateActionData*>(action_data)->getAnchor());
+			break;
+		case TYPE_BLINK:
+			this->setVisible(false);
+			break;
+		case TYPE_MOVE_ONEWAY:
+			if (!m_bIsHaveMoveAction)
+				m_bIsHaveMoveAction = true;
+			else
+				return false;
+			break;
+		default:
+			break;
+		}
+		m_vActions.pushBack(action_data);
+		this->runAction(action_data->getAction());
+		bRet = true;
+	} while (0);
+
+	return bRet;
 }
 
-Enemy* Enemy::createMove(const Size& size, const Color3B& color, const int& id, const Point &start, const Point& dest, const float &delay, const float& duration)
+bool Enemy::removeAction(ActionData* action_data)
 {
-	Enemy* enemy = Enemy::create(size, color, id);
-	enemy->setType(TYPE_MOVE);
-	enemy->setStartPoint(start);
-	enemy->setDestPoint(dest);
-	enemy->setDelayTime(delay);
-	enemy->setMoveDuration(duration);
-	enemy->setPosition(start);
-	auto action = RepeatForever::create(Sequence::create(
-		DelayTime::create(delay),
-		MoveTo::create(duration, dest),
-		MoveTo::create(duration, start),
-		NULL));
-	action->setTag(TAG_ACTION_MOVE);
-	enemy->runAction(action);
-	return enemy;
+	bool bRet = false;
+	do
+	{
+		CC_BREAK_IF(!action_data);
+
+		auto type = action_data->getType();
+		this->stopActionByTag(type);
+		// return to normal
+		switch(type)
+		{
+		case TYPE_MOVE:
+			this->setPosition(dynamic_cast<MoveActionData*>(action_data)->getStart());
+			m_bIsHaveMoveAction = false;
+			break;
+		case TYPE_ROTATE:
+			this->setRotation(0);
+			this->setAnchorPoint(Vec2(0.5f, 0));
+			break;
+		case TYPE_BLINK:
+			this->setVisible(true);
+			break;
+		case TYPE_MOVE_ONEWAY:
+			this->setPosition(dynamic_cast<MoveOnewayActionData*>(action_data)->getStart());
+			m_bIsHaveMoveAction = false;
+			break;
+		default:
+			break;
+		}
+
+		m_vActions.eraseObject(action_data);
+
+		bRet = true;
+	} while (0);
+
+	return bRet;
 }
 
-Enemy* Enemy::createBlink(const Size& size, const Color3B& color, const int& id, const float &duration_blink, const float &duration_hide)
+void Enemy::updateAction(ActionData* action_data)
 {
-	Enemy* enemy = Enemy::create(size, color, id);
-	enemy->setType(TYPE_BLINK);
-	enemy->setBlinkDuration(duration_blink);
-	enemy->setBlinkHideDuration(duration_hide);
-	auto action = RepeatForever::create(Sequence::create(
-		DelayTime::create(duration_blink),
-		CallFunc::create([=] {enemy->setVisible(false); }),
-		DelayTime::create(duration_hide),
-		CallFunc::create([=] {enemy->setVisible(true); }),
-		NULL));
-	action->setTag(TAG_ACTION_BLINK);
-	enemy->runAction(action);
-	return enemy;
+	CS_RETURN_IF(!action_data);
+
+	auto type = action_data->getType();
+	// return to normal
+	switch (type)
+	{
+	case TYPE_MOVE:
+		this->setPosition(dynamic_cast<MoveActionData*>(action_data)->getStart());
+		break;
+	case TYPE_ROTATE:
+		this->setRotation(0);
+		break;
+	case TYPE_BLINK:
+		this->setVisible(true);
+		break;
+	case TYPE_MOVE_ONEWAY:
+		this->setPosition(dynamic_cast<MoveOnewayActionData*>(action_data)->getStart());
+		break;
+	default:
+		break;
+	}
+
+	this->stopActionByTag(type);
+	this->runAction(action_data->getAction());
 }
 
 void Enemy::updateId(const int& id)
 {
 	this->removeChildByTag(TAG_TEXT_ID);
+	m_nID = id;
 	Text* text = Text::create(StringUtils::format("%d", id), "fonts/arial.ttf", 20);
 	text->setAnchorPoint(Vec2(0.5f, 0.5f));
 	text->setPosition(m_size / 2);
@@ -178,6 +208,7 @@ void Enemy::updateSize(const Size &size)
 	if (m_bIsSelected)
 	{
 		this->removeChildByTag(TAG_SELECTED_BLOCK);
+		m_bIsSelected = false;
 		this->select();
 	}
 
@@ -201,177 +232,22 @@ void Enemy::updateColor(const Color3B &color)
 	}
 }
 
-void Enemy::updateRotateDuration(const float &duration)
-{
-	m_fRotateDuration = duration;
-	if (m_nType == TYPE_ROTATE)
-	{
-		this->stopActionByTag(TAG_ACTION_ROTATE);
-		if (m_fRotateAngle >= 360 || m_fRotateAngle <= -360)
-		{
-			auto action = RepeatForever::create(Sequence::createWithTwoActions(
-				DelayTime::create(m_fDelayTime),
-				RotateBy::create(duration, m_fRotateAngle)));
-			action->setTag(TAG_ACTION_ROTATE);
-			this->runAction(action);
-		}
-		else
-		{
-			auto action = RepeatForever::create(Sequence::create(
-				DelayTime::create(m_fDelayTime),
-				RotateBy::create(duration, m_fRotateAngle),
-				RotateBy::create(duration, -m_fRotateAngle),
-				NULL));
-			action->setTag(TAG_ACTION_ROTATE);
-			this->runAction(action);
-		}
-	}
-}
-
-void Enemy::updateRotateAngle(const float& angle)
-{
-	m_fRotateAngle = MIN(MAX(angle, -360), 360);
-	if (m_nType == TYPE_ROTATE)
-	{
-		this->stopActionByTag(TAG_ACTION_ROTATE);
-		if (m_fRotateAngle >= 360 || m_fRotateAngle <= -360)
-		{
-			auto action = RepeatForever::create(Sequence::createWithTwoActions(
-				DelayTime::create(m_fDelayTime),
-				RotateBy::create(m_fRotateDuration, m_fRotateAngle)));
-			action->setTag(TAG_ACTION_ROTATE);
-			this->runAction(action);
-		}
-		else
-		{
-			auto action = RepeatForever::create(Sequence::create(
-				DelayTime::create(m_fDelayTime),
-				RotateBy::create(m_fRotateDuration, m_fRotateAngle),
-				RotateBy::create(m_fRotateDuration, -m_fRotateAngle),
-				NULL));
-			action->setTag(TAG_ACTION_ROTATE);
-			this->runAction(action);
-		}
-	}
-}
-
 void Enemy::updateStartPoint(const Point& start)
 {
-	m_StartPoint = start;
-	if (m_nType == TYPE_MOVE)
-	{
-		this->stopActionByTag(TAG_ACTION_MOVE);
-		auto action = RepeatForever::create(Sequence::create(
-			DelayTime::create(m_fDelayTime),
-			MoveTo::create(m_fMoveDuration, m_DestPoint),
-			MoveTo::create(m_fMoveDuration, start),
-			NULL));
-		action->setTag(TAG_ACTION_MOVE);
-		this->runAction(action);
-	}
-}
+	CS_RETURN_IF(!m_bIsHaveMoveAction);
 
-void Enemy::updateDestPoint(const Point& dest)
-{
-	m_DestPoint = dest;
-	if (m_nType == TYPE_MOVE)
+	for (size_t i = 0, length = m_vActions.size(); i < length; i++)
 	{
-		this->stopActionByTag(TAG_ACTION_MOVE);
-		auto action = RepeatForever::create(Sequence::create(
-			DelayTime::create(m_fDelayTime),
-			MoveTo::create(m_fMoveDuration, dest),
-			MoveTo::create(m_fMoveDuration, m_StartPoint),
-			NULL));
-		action->setTag(TAG_ACTION_MOVE);
-		this->runAction(action);
-	}
-}
-
-void Enemy::updateDelayTime(const float& delay)
-{
-	m_fDelayTime = delay;
-	if (m_nType == TYPE_MOVE)
-	{
-		this->stopActionByTag(TAG_ACTION_MOVE);
-		auto action = RepeatForever::create(Sequence::create(
-			DelayTime::create(delay),
-			MoveTo::create(m_fMoveDuration, m_DestPoint),
-			MoveTo::create(m_fMoveDuration, m_StartPoint),
-			NULL));
-		action->setTag(TAG_ACTION_MOVE);
-		this->runAction(action);
-	}
-	else if (m_nType == TYPE_ROTATE)
-	{
-		this->stopActionByTag(TAG_ACTION_ROTATE);
-		if (m_fRotateAngle >= 360 || m_fRotateAngle <= -360)
+		auto action_data = m_vActions.at(i);
+		auto type = action_data->getType();
+		if (type == TYPE_MOVE || type == TYPE_MOVE_ONEWAY)
 		{
-			auto action = RepeatForever::create(Sequence::createWithTwoActions(
-				DelayTime::create(delay),
-				RotateBy::create(m_fRotateDuration, m_fRotateAngle)));
-			action->setTag(TAG_ACTION_ROTATE);
-			this->runAction(action);
+			auto move_data = dynamic_cast<MoveActionData*>(action_data);
+			this->stopActionByTag(move_data->getType());
+			move_data->setStart(start);
+			move_data->updateAction();
+			this->runAction(move_data->getAction());
 		}
-		else
-		{
-			auto action = RepeatForever::create(Sequence::create(
-				DelayTime::create(delay),
-				RotateBy::create(m_fRotateDuration, m_fRotateAngle),
-				RotateBy::create(m_fRotateDuration, -m_fRotateAngle),
-				NULL));
-			action->setTag(TAG_ACTION_ROTATE);
-			this->runAction(action);
-		}
-	}
-}
-
-void Enemy::updateMoveDuration(const float& duration)
-{
-	m_fMoveDuration = duration;
-	if (m_nType == TYPE_MOVE)
-	{
-		this->stopActionByTag(TAG_ACTION_MOVE);
-		auto action = RepeatForever::create(Sequence::create(
-			DelayTime::create(m_fDelayTime),
-			MoveTo::create(duration, m_DestPoint),
-			MoveTo::create(duration, m_StartPoint),
-			NULL));
-		action->setTag(TAG_ACTION_MOVE);
-		this->runAction(action);
-	}
-}
-
-void Enemy::updateBlinkDuration(const float& duration)
-{
-	m_fBlinkDuration = duration;
-	if (m_nType == TYPE_BLINK)
-	{
-		this->stopActionByTag(TAG_ACTION_BLINK);
-		auto action = RepeatForever::create(Sequence::create(
-			DelayTime::create(duration),
-			CallFunc::create([=] {this->setVisible(false); }),
-			DelayTime::create(m_fBlinkHideDuration),
-			CallFunc::create([=] {this->setVisible(true); }),
-			NULL));
-		action->setTag(TAG_ACTION_BLINK);
-		this->runAction(action);
-	}
-}
-
-void Enemy::updateBlinkHideDuration(const float& duration)
-{
-	m_fBlinkHideDuration = duration;
-	if (m_nType == TYPE_BLINK)
-	{
-		this->stopActionByTag(TAG_ACTION_BLINK);
-		auto action = RepeatForever::create(Sequence::create(
-			DelayTime::create(m_fBlinkDuration),
-			CallFunc::create([=] {this->setVisible(false); }),
-			DelayTime::create(duration),
-			CallFunc::create([=] {this->setVisible(true); }),
-			NULL));
-		action->setTag(TAG_ACTION_BLINK);
-		this->runAction(action);
 	}
 }
 
@@ -404,7 +280,7 @@ void Enemy::unSelect()
 
 void Enemy::addPlayerBlockForLevelMake(Size playerSize)
 {
-	CS_RETURN_IF(m_nType == TYPE_ROTATE);
+	// CS_RETURN_IF(has rotate action)
 
 	if (!m_bIsPlayerAdded)
 	{
@@ -433,11 +309,62 @@ void Enemy::addPlayerBlockForLevelMake(Size playerSize)
 
 void Enemy::removePlayerBlockForLevelMake()
 {
-	CS_RETURN_IF(m_nType == TYPE_ROTATE);
-
 	if (m_bIsPlayerAdded)
 	{
 		this->removeChildByTag(TAG_PLAYER_BLOCK);
 		m_bIsPlayerAdded = false;
+	}
+}
+
+Point Enemy::getStartPoint()
+{
+	if(m_bIsHaveMoveAction)
+	{
+		for (size_t i = 0, length = m_vActions.size(); i < length; i++)
+		{
+			auto action_data = m_vActions.at(i);
+			auto type = action_data->getType();
+			if (type == TYPE_MOVE || type == TYPE_MOVE_ONEWAY)
+				return dynamic_cast<MoveActionData*>(action_data)->getStart();
+		}
+	}
+
+	return Point::ZERO;
+}
+
+void Enemy::setActions(Vector<ActionData*>* actions)
+{
+	CS_RETURN_IF(!actions);
+
+	for (size_t i = 0, length = actions->size(); i < length; i++)
+	{
+		auto action_data = actions->at(i);
+		int type = action_data->getType();
+		switch (type)
+		{
+		case TYPE_MOVE:
+			if (!m_bIsHaveMoveAction)
+				m_bIsHaveMoveAction = true;
+			else
+				continue;
+			break;
+		case TYPE_ROTATE:
+			this->setAnchorPoint(dynamic_cast<RotateActionData*>(action_data)->getAnchor());
+			break;
+		case TYPE_BLINK:
+			this->setVisible(false);
+			break;
+		case TYPE_MOVE_ONEWAY:
+			if (!m_bIsHaveMoveAction)
+				m_bIsHaveMoveAction = true;
+			else
+				continue;
+			break;
+		default:
+			break;
+		}
+		auto action_data_clone = action_data->clone();
+		m_vActions.pushBack(action_data_clone);
+		this->runAction(action_data_clone->getAction());
 	}
 }

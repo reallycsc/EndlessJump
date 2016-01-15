@@ -37,7 +37,7 @@ enum TextFieldTag
 	TAG_ENEMY_ROTATE_TIME10,
 	TAG_ENEMY_MOVE_TIME10,
 	TAG_ENEMY_BLINK_TIME10,
-	TAG_ENEMY_BLINKHIDE_TIME10,
+	TAG_ENEMY_BLINKPOST_TIME10,
 	TAG_ENEMY_MAX,
 
 	TAG_PLAYER_MIN,
@@ -51,6 +51,7 @@ enum NodeTag
 	TAG_BACKGROUND = 1,
 	TAG_FOOTHOLDLINE,
 	TAG_TIMETEXT,
+	TAG_PLAYERPOSTEXT,
 	TAG_ENEMY, // tag for all enemys. so this need to be last one
 };
 
@@ -107,8 +108,8 @@ private:
 
 	void onTextFieldEvent(Ref *pSender, TextField::EventType type);
 	void onSliderEvent(Ref *pSender, Slider::EventType type);
-	void onDropDownList_BlockType(EventCustom* event);
 	void onDropDownList_BlockId(EventCustom* event);
+	void onDropDownList_BlockAction(EventCustom* event);
 	void onDropDownList_Level(EventCustom* event);
 	void onDropDownList_Room(EventCustom* event);
 
@@ -124,31 +125,41 @@ private:
 	void buttonCallback_Export(Ref* pSender);
 	void buttonCallback_Import(Ref* pSender);
 
+	void buttonCallback_BlockAddRotate(Ref* pSender);
+	void buttonCallback_BlockAddMove(Ref* pSender);
+	void buttonCallback_BlockAddMoveOneway(Ref* pSender);
+	void buttonCallback_BlockAddBlink(Ref* pSender);
+	void buttonCallback_BlockRemoveAction(Ref* pSender);
+
 	void addRoom();
+	void updateLevelOrEnemys(int tag);
+	void updateDropDownListOfLevelAndRoom(vector<GameLevelData*>* levelsData);
+
 	void addEnemy();
+	void selectEnemy(Enemy* enemy);
+	void updateCurEnemy(int tag);
+	void updateDropDownListOfEnemys();
+	void updateBlockTextFieldEnableByCurActionType();
+	void updateBlockTextFieldByCurAction();
+	void updateDropDownListOfEnemyActions();
+
 	void addPlayer();
 	void addPlayerForTrying();
-	void selectEnemy(Enemy* enemy);
-	void updateLevelOrEnemys(int tag);
-	void updateCurEnemy(int tag);
 	void updatePlayer(int tag);
-	void calcFoothold();
 
 	void loadDataFrom(int level, int room);
 	void saveDataTo(int level, int room);
 
-	void setDropDownList(vector<GameLevelData*>* levelsData);
+	void calcFoothold();
 	bool isJumpLineConflict(const Vec2 &origin, const Vec2 &control, const Vec2 &destination);
-
-	inline void getLevelNode(Node* root, int tag, bool isWithSlider = true);
-	static inline void initStruct(TextFieldSliderBindInt* structTmp, int min, int number, int max);
-	inline void updateBlockTextFieldNumber(int tag, int number);
-	inline void updateBlockTextFieldMax(int tag, int max);
-	inline void updateBlockByLevel(int tag, int number);
-	inline void updateBlockType(int type);
-	inline void drawJumpLine(DrawNode* draw, const Vec2 &origin, const Vec2 &control, const Vec2 &destination, const Color4F &color);
-	inline void AddEstimateFrameText(Node* parent, float p1, float p2,
+	void drawJumpLine(DrawNode* draw, const Vec2 &origin, const Vec2 &control, const Vec2 &destination, const Color4F &color);
+	void AddEstimateFrameText(Node* parent, float p1, float p2,
 		int frameRate, float playerWidth, float speed, float posY, Color4B color) const;
+	void AddPlayerPositionForTime(const int &speed, const float &width, const float &height);
+
+	void getLevelNodeAndInit(Node* root, int tag, int min, int number, int max);
+	inline void updateBlockTextFieldByNumber(int tag, int number);
+	inline void updateBlockTextFieldByMax(int tag, int max);
 	inline void setTextFieldStructEnable(int tag, bool isEnable);
 
 public:
@@ -161,17 +172,18 @@ private:
 
 	CSCClass::DropDownList* m_pDropDownListLevel;
 	CSCClass::DropDownList* m_pDropDownListRoom;
-	CSCClass::DropDownList* m_pDropDownListType;
 	CSCClass::DropDownList* m_pDropDownListBlockId;
+	CSCClass::DropDownList* m_pDropDownListBlockAction;
 
 	Vector<Enemy*>	m_vEnemys;
-	Player*	m_pPlayer;
+	Player*			m_pPlayer;
+	Enemy*			m_pCurEnemy;
+	ActionData*		m_pCurAction;
 
 	vector<JumpPoints>	m_vJumpPoints;
 	vector<pair<float, bool>>	m_vJumpPointsForAutoTrying;
 	vector<Point>	m_vAirPoints;
 
-	int m_nCurEnemyId;
 	int m_nCurJumpPointId;
 
 	bool m_bIsAutoTrying;

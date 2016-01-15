@@ -87,7 +87,7 @@ void Player::jump()
 
 void Player::die()
 {
-	Director::getInstance()->getTextureCache()->removeTextureForKey("playerImage");
+	//Director::getInstance()->getTextureCache()->removeTextureForKey("playerImage");
 	this->stopAllActions();
 	this->unscheduleAllCallbacks();
 	this->removeFromParent();
