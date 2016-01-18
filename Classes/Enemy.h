@@ -24,18 +24,18 @@ public:
 	Enemy(void);
 	~Enemy(void);
 
-	static Enemy* create(const Size &size = Size(50, 50), const Color3B &color = Color3B::BLUE, const int &id = -1);
-	bool init(const Size &size, const Color3B &color, const int &id);
+	static Enemy* create(const Size &size = Size(50, 50), const Color3B &color = Color3B::BLUE, const int &id = -1, const int &room_id = 1);
+	bool init(const Size &size, const Color3B &color, const int &id, const int &room_id);
 
 	bool addAction(ActionData* action_data);
 	bool removeAction(ActionData* action_data);
 	void updateAction(ActionData* action_data);
+	void restartActions();
 
 	void updateId(const int &id);
 	void updateSize(const Size &size);
 	void updateColor(const Color3B &color);
 	// TYPE_MOVE
-	bool isHaveMoveAction();
 	void updateStartPoint(const Point &start);
 
 	void select();
@@ -51,6 +51,7 @@ public:
 
 public:
 	CC_SYNTHESIZE(int, m_nID, ID);
+	CC_SYNTHESIZE(int, m_nRoomID, RoomID);
 	
 	CC_SYNTHESIZE(bool, m_bIsHaveMoveAction, IsHaveMoveAction);
 	CC_SYNTHESIZE(bool, m_bIsSelected, IsSelected);

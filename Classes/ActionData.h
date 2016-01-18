@@ -7,7 +7,6 @@ enum enemyActionType
 	TYPE_ROTATE,
 	TYPE_MOVE,
 	TYPE_BLINK,
-	TYPE_MOVE_ONEWAY,
 };
 
 /*===============================Base Class===============================*/
@@ -27,7 +26,9 @@ public:
 public:
 	CC_SYNTHESIZE(int, m_nType, Type);
 	CC_SYNTHESIZE(float, m_fDelay, Delay);
-	CC_SYNTHESIZE(RepeatForever*, m_pAction, Action);
+	CC_SYNTHESIZE(bool, m_bIsRepeat, IsRepeat);
+	CC_SYNTHESIZE(bool, m_bIsReverse, IsReverse);
+	CC_SYNTHESIZE(ActionInterval*, m_pAction, Action);
 };
 
 /*===============================Move Action===============================*/
@@ -82,18 +83,4 @@ public:
 public:
 	CC_SYNTHESIZE(float, m_fDuration, Duration);
 	CC_SYNTHESIZE(float, m_fPostDelay, PostDelay);
-};
-
-/*===============================Move oneway Action===============================*/
-class MoveOnewayActionData : public MoveActionData
-{
-public:
-	MoveOnewayActionData(void);
-	~MoveOnewayActionData(void);
-
-	static MoveOnewayActionData* create(const float &delay, const float &duration, const Point &start, const Point &destination);
-	bool init(const float &delay, const float &duration, const Point &start, const Point &destination);
-
-	virtual void updateAction() override;
-	virtual MoveOnewayActionData* clone() const override;
 };

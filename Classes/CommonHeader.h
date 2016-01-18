@@ -11,7 +11,8 @@ using namespace std;
 using namespace tinyxml2;
 
 // flags
-#define DEBUG_MODE
+#define LEVEL_MAKER_MODE
+#define SHOW_ALL_ROOM_MODE
 
 // physics mask  
 const int MASK_PLAYER = 1 << 0; // player

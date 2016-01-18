@@ -72,9 +72,10 @@ bool MainMenuScene::init()
 		buttonLevel->setTag(i + 1);
 		buttonLevel->addClickEventListener(CC_CALLBACK_1(MainMenuScene::buttonCallback_LevelPlay, this));
 		// if the next level of curLevel open condition < total dead, need open the next level (when update new level will have this situation)
+		int maxDeadCount = levelData->getMaxDeadTime();
 		if (i > 0 && i == curLevel && 
 			levelDeadCounts->at(i - 1) >= 0 && 
-			totalDead < levelData->getMaxDeadTime())
+			totalDead < maxDeadCount)
 		{
 			pGameMediator->gotoNextGameLevel();
 		}
@@ -89,7 +90,17 @@ bool MainMenuScene::init()
 		auto textDeadCount = dynamic_cast<Text*>(levelNode->getChildByName("Text_DeadTime"));
 		int deadCount = levelDeadCounts->at(i);
 		if (deadCount < 0)
-			textDeadCount->setVisible(false);
+		{
+			if (i == maxLevel)
+			{
+				textDeadCount->setString(StringUtils::format("<%d deads", maxDeadCount));
+				textDeadCount->setTextColor(Color4B::GRAY);
+			}
+			else
+			{
+				textDeadCount->setVisible(false);
+			}
+		}
 		else
 		{
 			if (deadCount == 0)
@@ -109,7 +120,7 @@ bool MainMenuScene::init()
 	scrollView->setInnerContainerSize(Size(scrollView->getInnerContainerSize().width, innerHeight));
 	scrollView->setInnerContainerPosition(Point(0,-maxLevelHeight + scrollInnerHeight / 2));
 
-#ifndef DEBUG_MODE
+#ifndef LEVEL_MAKER_MODE
 	buttonEditor->setEnabled(false);
 	buttonEditor->setVisible(false);
 #endif

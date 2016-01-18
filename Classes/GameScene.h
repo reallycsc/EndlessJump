@@ -30,7 +30,8 @@ private:
 	void buttonCallback_Retry(Ref* pSender);
 
 	void addRoom(RoomData* roomData);
-	void addPlayer(RoomData* roomData);
+	void resetRoom(int id);
+	void addPlayer();
 
 private:
 	GameMediator*	m_pGameMediator;

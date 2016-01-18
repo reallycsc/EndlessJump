@@ -11,7 +11,7 @@ Scene* GameScene::createScene()
 	// open Debug
 	PhysicsWorld* world = scene->getPhysicsWorld();
 	world->setGravity(Vec2(0, 0));
-#ifdef DEBUG_MODE
+#ifdef LEVEL_MAKER_MODE
 	//world->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
 #endif
     
@@ -68,7 +68,7 @@ bool GameScene::init()
 	m_pAnimate->setFrameEventCallFunc(CC_CALLBACK_1(GameScene::onFrameEvent, this));
 	rootNode->runAction(m_pAnimate);
 	m_pAnimate->pause();
-	this->addChild(rootNode);
+	this->addChild(rootNode, 100);
 	// get button
 	m_pButtonPause = dynamic_cast<Button*>(rootNode->getChildByName("Button_Pause"));
 	m_pButtonPause->addClickEventListener(CC_CALLBACK_1(GameScene::buttonCallback_Pause, this));
@@ -103,14 +103,9 @@ void GameScene::update(float dt)
 	{
 		auto action = m_pPlayer->getActionByTag(ACTIONTAG_JUMP);
 		if (!action || action->isDone())
-		{
 			m_pParticleTail->setPosition(m_pPlayer->getPosition() - m_pPlayer->getContentSize() / 2);
-		}
 		else
-		{
 			m_pParticleTail->setPositionY(-1024);
-		}
-		
 	}
 }
 
@@ -130,7 +125,7 @@ void GameScene::onFrameEvent(Frame* frame)
 		m_pGameMediator->setCurGameRoom(1);
 		m_pCurRoomData = &roomsData->at(0);
 
-#ifdef DEBUG_MODE
+#ifdef SHOW_ALL_ROOM_MODE
 		// add all room
 		for (size_t i = 0, length = roomsData->size(); i < length; i++)
 			this->addRoom(&roomsData->at(i));
@@ -139,7 +134,7 @@ void GameScene::onFrameEvent(Frame* frame)
 		this->addRoom(m_pCurRoomData);
 #endif
 		// add player
-		this->addPlayer(m_pCurRoomData);
+		this->addPlayer();
 	}
 }
 
@@ -202,7 +197,7 @@ void GameScene::buttonCallback_Retry(Ref* pSender)
 	m_pGameMediator->setCurGameRoom(1);
 	m_pCurRoomData = &roomsData->at(0);
 
-#ifdef DEBUG_MODE
+#ifdef SHOW_ALL_ROOM_MODE
 	// add all room
 	for (size_t i = 0, length = roomsData->size(); i < length; i++)
 		this->addRoom(&roomsData->at(i));
@@ -212,7 +207,7 @@ void GameScene::buttonCallback_Retry(Ref* pSender)
 #endif
 
 	// add player
-	this->addPlayer(m_pCurRoomData);
+	this->addPlayer();
 }
 
 bool GameScene::onContactBegin(const PhysicsContact& contact)
@@ -257,10 +252,11 @@ bool GameScene::onContactBegin(const PhysicsContact& contact)
 		m_pAnimate->play("DeadTextEnlarge", false);
 
 		this->runAction(Sequence::createWithTwoActions(
-			DelayTime::create(0.7f),
+			DelayTime::create(0.01f),
 			CallFuncN::create([=](Ref* pSender)->void
 		{
-			this->addPlayer(m_pCurRoomData);
+			this->resetRoom(m_pCurRoomData->id);
+			this->addPlayer();
 		})));
 	}
 
@@ -281,7 +277,7 @@ void GameScene::addRoom(RoomData* roomData)
 	for (size_t i = 0, j = enemysData->size(); i < j; i++)
 	{
 		auto enemyData = &enemysData->at(i);
-		Enemy* enemy = Enemy::create(enemyData->size, roomData->enemy_color);
+		Enemy* enemy = Enemy::create(enemyData->size, roomData->enemy_color, -1, roomData->id);
 		auto actionsData = &enemyData->actionsData;
 		enemy->setActions(actionsData);
 		enemy->setPosition(enemyData->position);
@@ -290,21 +286,33 @@ void GameScene::addRoom(RoomData* roomData)
 	}
 }
 
-void GameScene::addPlayer(RoomData* roomData)
+void GameScene::resetRoom(int id)
+{
+	// reset enemys
+	auto room_id = m_pCurRoomData->id;
+	for (size_t i = 0, length = m_vEnemys.size(); i < length; i++)
+	{
+		auto enemy = m_vEnemys.at(i);
+		if (enemy->getRoomID() == room_id)
+			enemy->restartActions();
+	}
+}
+
+void GameScene::addPlayer()
 {
 	CS_RETURN_IF(m_pPlayer); // in case there will be more than one player
 
-	m_pPlayer = Player::create(roomData->player_color, roomData->player_speed, roomData->player_jumpTime);
+	m_pPlayer = Player::create(m_pCurRoomData->player_color, m_pCurRoomData->player_speed, m_pCurRoomData->player_jumpTime);
 
 	Size visibleSize = Director::getInstance()->getVisibleSize();
 	auto screenWidth = visibleSize.width;
-#ifdef DEBUG_MODE
+#ifdef LEVEL_MAKER_MODE
 	screenWidth = screenWidth / 2;
 #endif
-	float duration = screenWidth / roomData->player_speed;
+	float duration = screenWidth / m_pCurRoomData->player_speed;
 	Size playerSize = m_pPlayer->getContentSize();
 	float posX = playerSize.width / 2;
-	float posY = roomData->position.y + playerSize.height / 2;
+	float posY = m_pCurRoomData->position.y + playerSize.height / 2;
 	m_pPlayer->setPosition(posX, posY);
 	m_pPlayer->runAction(Sequence::createWithTwoActions(
 		MoveTo::create(duration, Vec2(posX + screenWidth, posY)),
@@ -320,10 +328,12 @@ void GameScene::addPlayer(RoomData* roomData)
 			// next room
 			m_pCurRoomData = &m_pCurLevelData->getRoomsData()->at(roomIndex++);
 			m_pGameMediator->gotoNextGameRoom();
-#ifndef DEBUG_MODE
+#ifndef SHOW_ALL_ROOM_MODE
 			this->addRoom(m_pCurRoomData);
+#else
+			this->resetRoom(m_pCurRoomData->id);
 #endif
-			this->addPlayer(m_pCurRoomData);
+			this->addPlayer();
 		}
 		else
 		{
@@ -355,10 +365,10 @@ void GameScene::addPlayer(RoomData* roomData)
 	m_pParticleTail->setStartColorVar(Color4F(1, 1, 1, 0));
 	m_pParticleTail->setEndColor(m_pPlayer->getPlayerColor());
 	m_pParticleTail->setEndColorVar(Color4F(1, 1, 1, 0));
-	m_pParticleTail->setSpeed(roomData->player_speed);
+	m_pParticleTail->setSpeed(m_pCurRoomData->player_speed);
 	m_pParticleTail->setSpeedVar(0);
 	m_pParticleTail->setLife(0.15f);
 	m_pParticleTail->setLifeVar(0.1f);
-	m_pParticleTail->setPosition(0, roomData->position.y); // left-bottom of player
+	m_pParticleTail->setPosition(0, m_pCurRoomData->position.y); // left-bottom of player
 	this->addChild(m_pParticleTail, 5);
 }

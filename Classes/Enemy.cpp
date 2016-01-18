@@ -2,6 +2,7 @@
 
 Enemy::Enemy(void)
 	: m_nID(0)
+	, m_nRoomID(0)
 	, m_bIsSelected(false)
 	, m_size(Size(50, 50))
 	, m_color(Color4F::BLUE)
@@ -16,15 +17,15 @@ Enemy::~Enemy(void)
 	m_vActions.clear();
 }
 
-Enemy* Enemy::create(const Size &size, const Color3B &color, const int &id)
+Enemy* Enemy::create(const Size &size, const Color3B &color, const int &id, const int &room_id)
 {
 	Enemy *pRet = new(std::nothrow) Enemy();
-	pRet->init(size, color, id);
+	pRet->init(size, color, id, room_id);
 	pRet->autorelease();
 	return pRet;
 }
 
-bool Enemy::init(const Size &size, const Color3B &color, const int &id)
+bool Enemy::init(const Size &size, const Color3B &color, const int &id, const int &room_id)
 {  
     bool bRet = false;  
     do   
@@ -32,6 +33,7 @@ bool Enemy::init(const Size &size, const Color3B &color, const int &id)
         CC_BREAK_IF(!Node::init());  
 
 		m_nID = id;
+		m_nRoomID = room_id;
 		m_size = size;
 		m_color = Color4F(color);
 		// draw enemy rect
@@ -50,7 +52,7 @@ bool Enemy::init(const Size &size, const Color3B &color, const int &id)
 		body->setContactTestBitmask(MASK_PLAYER);
 		this->setPhysicsBody(body);
 
-#ifdef DEBUG_MODE
+#ifdef LEVEL_MAKER_MODE
 		if (id >= 0) // add id label
 		{
 			Text* text = Text::create(StringUtils::format("%d", id), "fonts/arial.ttf", 20);
@@ -58,7 +60,7 @@ bool Enemy::init(const Size &size, const Color3B &color, const int &id)
 			text->setPosition(m_size / 2);
 			this->addChild(text, 2, TAG_TEXT_ID);
 		}
-#endif // DEBUG_MODE
+#endif // LEVEL_MAKER_MODE
 
         bRet = true;
     } while (0);
@@ -81,22 +83,10 @@ bool Enemy::addAction(ActionData* action_data)
 		switch (type)
 		{
 		case TYPE_MOVE:
-			if (!m_bIsHaveMoveAction)
-				m_bIsHaveMoveAction = true;
-			else
-				return false;
+			m_bIsHaveMoveAction = true;
 			break;
 		case TYPE_ROTATE:
 			this->setAnchorPoint(dynamic_cast<RotateActionData*>(action_data)->getAnchor());
-			break;
-		case TYPE_BLINK:
-			this->setVisible(false);
-			break;
-		case TYPE_MOVE_ONEWAY:
-			if (!m_bIsHaveMoveAction)
-				m_bIsHaveMoveAction = true;
-			else
-				return false;
 			break;
 		default:
 			break;
@@ -119,22 +109,17 @@ bool Enemy::removeAction(ActionData* action_data)
 		auto type = action_data->getType();
 		this->stopActionByTag(type);
 		// return to normal
-		switch(type)
+		switch (type)
 		{
 		case TYPE_MOVE:
-			this->setPosition(dynamic_cast<MoveActionData*>(action_data)->getStart());
 			m_bIsHaveMoveAction = false;
+			this->setPosition(dynamic_cast<MoveActionData*>(action_data)->getStart());
 			break;
 		case TYPE_ROTATE:
 			this->setRotation(0);
-			this->setAnchorPoint(Vec2(0.5f, 0));
 			break;
 		case TYPE_BLINK:
 			this->setVisible(true);
-			break;
-		case TYPE_MOVE_ONEWAY:
-			this->setPosition(dynamic_cast<MoveOnewayActionData*>(action_data)->getStart());
-			m_bIsHaveMoveAction = false;
 			break;
 		default:
 			break;
@@ -152,28 +137,33 @@ void Enemy::updateAction(ActionData* action_data)
 {
 	CS_RETURN_IF(!action_data);
 
+	action_data->updateAction();
+
 	auto type = action_data->getType();
-	// return to normal
+	// stop old action
+	this->stopActionByTag(type);
+	// set data for new action
 	switch (type)
 	{
 	case TYPE_MOVE:
-		this->setPosition(dynamic_cast<MoveActionData*>(action_data)->getStart());
+		m_bIsHaveMoveAction = true;
 		break;
 	case TYPE_ROTATE:
-		this->setRotation(0);
+		this->setAnchorPoint(dynamic_cast<RotateActionData*>(action_data)->getAnchor());
 		break;
 	case TYPE_BLINK:
-		this->setVisible(true);
-		break;
-	case TYPE_MOVE_ONEWAY:
-		this->setPosition(dynamic_cast<MoveOnewayActionData*>(action_data)->getStart());
 		break;
 	default:
 		break;
 	}
-
-	this->stopActionByTag(type);
+	// run new action
 	this->runAction(action_data->getAction());
+}
+
+void Enemy::restartActions()
+{
+	for (size_t i = 0, length = m_vActions.size(); i < length; i++)
+		this->updateAction(m_vActions.at(i));
 }
 
 void Enemy::updateId(const int& id)
@@ -240,7 +230,7 @@ void Enemy::updateStartPoint(const Point& start)
 	{
 		auto action_data = m_vActions.at(i);
 		auto type = action_data->getType();
-		if (type == TYPE_MOVE || type == TYPE_MOVE_ONEWAY)
+		if (type == TYPE_MOVE)
 		{
 			auto move_data = dynamic_cast<MoveActionData*>(action_data);
 			this->stopActionByTag(move_data->getType());
@@ -324,7 +314,7 @@ Point Enemy::getStartPoint()
 		{
 			auto action_data = m_vActions.at(i);
 			auto type = action_data->getType();
-			if (type == TYPE_MOVE || type == TYPE_MOVE_ONEWAY)
+			if (type == TYPE_MOVE)
 				return dynamic_cast<MoveActionData*>(action_data)->getStart();
 		}
 	}
@@ -353,12 +343,6 @@ void Enemy::setActions(Vector<ActionData*>* actions)
 			break;
 		case TYPE_BLINK:
 			this->setVisible(false);
-			break;
-		case TYPE_MOVE_ONEWAY:
-			if (!m_bIsHaveMoveAction)
-				m_bIsHaveMoveAction = true;
-			else
-				continue;
 			break;
 		default:
 			break;

@@ -178,27 +178,26 @@ bool GameMediator::saveGameLevelFile()
 					{
 						auto action_data = actionsData->at(i2);
 						auto action_type = action_data->getType();
+						XMLElement *surface5 = document->NewElement("Action");
+						surface5->SetAttribute("type", action_type);
+						surface5->SetAttribute("isRepeat", action_data->getIsRepeat());
+						surface5->SetAttribute("isReverse", action_data->getIsReverse());
+						surface5->SetAttribute("delay", action_data->getDelay());
 						switch (action_type)
 						{
 						case TYPE_ROTATE:
 						{
 							auto rotate_data = dynamic_cast<RotateActionData*>(action_data);
-							XMLElement *surface5 = document->NewElement("Action");
-							surface5->SetAttribute("type", action_type);
-							surface5->SetAttribute("delay", rotate_data->getDelay());
 							surface5->SetAttribute("rotateDuration", rotate_data->getDuration());
 							surface5->SetAttribute("angle", rotate_data->getAngle());
 							surface5->SetAttribute("anchor_x", rotate_data->getAnchor().x);
 							surface5->SetAttribute("anchor_y", rotate_data->getAnchor().y);
-							surface4->LinkEndChild(surface5);
+							
 							break;
 						}
 						case TYPE_MOVE:
 						{
 							auto move_data = dynamic_cast<MoveActionData*>(action_data);
-							XMLElement *surface5 = document->NewElement("Action");
-							surface5->SetAttribute("type", action_type);
-							surface5->SetAttribute("delay", move_data->getDelay());
 							surface5->SetAttribute("moveDuration", move_data->getDuration());
 							surface5->SetAttribute("dest_x", static_cast<int>(move_data->getDestination().x));
 							surface5->SetAttribute("dest_y", static_cast<int>(move_data->getDestination().y));
@@ -208,29 +207,14 @@ bool GameMediator::saveGameLevelFile()
 						case TYPE_BLINK:
 						{
 							auto blink_data = dynamic_cast<BlinkActionData*>(action_data);
-							XMLElement *surface5 = document->NewElement("Action");
-							surface5->SetAttribute("type", action_type);
-							surface5->SetAttribute("delay", blink_data->getDelay());
 							surface5->SetAttribute("blinkDuration", blink_data->getDuration());
 							surface5->SetAttribute("postDelay", blink_data->getPostDelay());
-							surface4->LinkEndChild(surface5);
-							break;
-						}
-						case TYPE_MOVE_ONEWAY:
-						{
-							auto move_data = dynamic_cast<MoveOnewayActionData*>(action_data);
-							XMLElement *surface5 = document->NewElement("Action");
-							surface5->SetAttribute("type", action_type);
-							surface5->SetAttribute("delay", move_data->getDelay());
-							surface5->SetAttribute("moveDuration", move_data->getDuration());
-							surface5->SetAttribute("dest_x", static_cast<int>(move_data->getDestination().x));
-							surface5->SetAttribute("dest_y", static_cast<int>(move_data->getDestination().y));
-							surface4->LinkEndChild(surface5);
 							break;
 						}
 						default:
 							break;
 						}
+						surface4->LinkEndChild(surface5);
 					}
 					surface3->LinkEndChild(surface4);
 				}

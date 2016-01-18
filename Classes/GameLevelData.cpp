@@ -93,49 +93,41 @@ bool GameLevelData::setRoomDataWithFile(XMLElement* surface)
 				enemy.position = Point(surface3->IntAttribute("x"), surface3->IntAttribute("y"));
 				for (XMLElement* surface4 = surface3->FirstChildElement("Action"); surface4 != NULL; surface4 = surface4->NextSiblingElement("Action"))
 				{
-					int type = surface4->IntAttribute("type");
+					auto type = surface4->IntAttribute("type");
+					auto isRepeat = surface4->BoolAttribute("isRepeat");
+					auto isReverse = surface4->BoolAttribute("isReverse");
+					auto delay = surface4->FloatAttribute("delay");
+					ActionData* actionData = nullptr;
 					switch (type)
 					{
 					case TYPE_ROTATE:
 					{
-						auto delay = surface4->FloatAttribute("delay");
 						auto duration = surface4->FloatAttribute("rotateDuration");
 						auto angle = surface4->FloatAttribute("angle");
 						auto anchor = Point(surface4->FloatAttribute("anchor_x"), surface4->FloatAttribute("anchor_y"));
-						auto actionData = RotateActionData::create(delay, duration, angle, anchor);
-						enemy.actionsData.pushBack(actionData);
+						actionData = RotateActionData::create(delay, duration, angle, anchor);
 						break;
 					}
 					case TYPE_MOVE:
 					{
-						auto delay = surface4->FloatAttribute("delay");
 						auto duration = surface4->FloatAttribute("moveDuration");
 						auto dest = Point(surface4->IntAttribute("dest_x"), surface4->IntAttribute("dest_y"));
-						auto actionData = MoveActionData::create(delay, duration, enemy.position, dest);
-						enemy.actionsData.pushBack(actionData);
+						actionData = MoveActionData::create(delay, duration, enemy.position, dest);
 						break;
 					}
 					case TYPE_BLINK:
 					{
-						auto delay = surface4->FloatAttribute("delay");
 						auto duration = surface4->FloatAttribute("blinkDuration");
 						auto post_delay = surface4->FloatAttribute("postDelay");
-						auto actionData = BlinkActionData::create(delay, duration, post_delay);
-						enemy.actionsData.pushBack(actionData);
-						break;
-					}
-					case TYPE_MOVE_ONEWAY:
-					{
-						auto delay = surface4->FloatAttribute("delay");
-						auto duration = surface4->FloatAttribute("moveDuration");
-						auto dest = Point(surface4->IntAttribute("dest_x"), surface4->IntAttribute("dest_y"));
-						auto actionData = MoveOnewayActionData::create(delay, duration, enemy.position, dest);
-						enemy.actionsData.pushBack(actionData);
+						actionData = BlinkActionData::create(delay, duration, post_delay);
 						break;
 					}
 					default:
 						break;
 					}
+					actionData->setIsRepeat(isRepeat);
+					actionData->setIsReverse(isReverse);
+					enemy.actionsData.pushBack(actionData);
 				}
 				room.enemysData.push_back(enemy);
 			}

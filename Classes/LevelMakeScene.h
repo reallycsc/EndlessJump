@@ -127,13 +127,15 @@ private:
 
 	void buttonCallback_BlockAddRotate(Ref* pSender);
 	void buttonCallback_BlockAddMove(Ref* pSender);
-	void buttonCallback_BlockAddMoveOneway(Ref* pSender);
 	void buttonCallback_BlockAddBlink(Ref* pSender);
+	void buttonCallback_BlockSetRepeat(Ref* pSender);
+	void buttonCallback_BlockSetReverse(Ref* pSender);
 	void buttonCallback_BlockRemoveAction(Ref* pSender);
 
 	void addRoom();
 	void updateLevelOrEnemys(int tag);
 	void updateDropDownListOfLevelAndRoom(vector<GameLevelData*>* levelsData);
+	void resetRoom();
 
 	void addEnemy();
 	void selectEnemy(Enemy* enemy);
@@ -174,6 +176,9 @@ private:
 	CSCClass::DropDownList* m_pDropDownListRoom;
 	CSCClass::DropDownList* m_pDropDownListBlockId;
 	CSCClass::DropDownList* m_pDropDownListBlockAction;
+
+	Button*	m_pButtonSetRepeat;
+	Button*	m_pButtonSetReverse;
 
 	Vector<Enemy*>	m_vEnemys;
 	Player*			m_pPlayer;
