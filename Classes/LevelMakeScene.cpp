@@ -157,17 +157,19 @@ bool LevelMakeScene::init()
 	this->getLevelNodeAndInit(dynamic_cast<Node*>(panelBlock->getChildByName("Node_AnchorX")), TAG_ENEMY_ANCHOR_X10, 0, 5, 10);
 	this->getLevelNodeAndInit(dynamic_cast<Node*>(panelBlock->getChildByName("Node_AnchorY")), TAG_ENEMY_ANCHOR_Y10, 0, 5, 10);
 	this->getLevelNodeAndInit(dynamic_cast<Node*>(panelBlock->getChildByName("Node_Angle")), TAG_ENEMY_ANGLE, -360, -360, 360);
-	this->getLevelNodeAndInit(dynamic_cast<Node*>(panelBlock->getChildByName("Node_Delay")), TAG_ENEMY_DELAY_TIME10, 0, 10, 999);
-	this->getLevelNodeAndInit(dynamic_cast<Node*>(panelBlock->getChildByName("Node_RotateDuration")), TAG_ENEMY_ROTATE_TIME10, 1, 10, 999);
-	this->getLevelNodeAndInit(dynamic_cast<Node*>(panelBlock->getChildByName("Node_MoveDuration")), TAG_ENEMY_MOVE_TIME10, 1, 10, 999);
-	this->getLevelNodeAndInit(dynamic_cast<Node*>(panelBlock->getChildByName("Node_BlinkDuration")), TAG_ENEMY_BLINK_TIME10, 1, 10, 999);
-	this->getLevelNodeAndInit(dynamic_cast<Node*>(panelBlock->getChildByName("Node_BlinkHideDuration")), TAG_ENEMY_BLINKPOST_TIME10, 0, 10, 999);
+	this->getLevelNodeAndInit(dynamic_cast<Node*>(panelBlock->getChildByName("Node_ScaleX")), TAG_ENEMY_SCALE_X10, 0, 20, 100);
+	this->getLevelNodeAndInit(dynamic_cast<Node*>(panelBlock->getChildByName("Node_ScaleY")), TAG_ENEMY_SCALE_Y10, 0, 20, 100);
+	this->getLevelNodeAndInit(dynamic_cast<Node*>(panelBlock->getChildByName("Node_Delay")), TAG_ENEMY_DELAY10, 0, 10, 999);
+	this->getLevelNodeAndInit(dynamic_cast<Node*>(panelBlock->getChildByName("Node_Duration")), TAG_ENEMY_DURATION10, 1, 10, 999);
+	this->getLevelNodeAndInit(dynamic_cast<Node*>(panelBlock->getChildByName("Node_PostDelay")), TAG_ENEMY_POSTDELAY10, 0, 10, 999);
 	auto buttonAddRotate = dynamic_cast<Button*>(panelBlock->getChildByName("Button_AddRotate"));
 	buttonAddRotate->addClickEventListener(CC_CALLBACK_1(LevelMakeScene::buttonCallback_BlockAddRotate, this));
 	auto buttonAddMove = dynamic_cast<Button*>(panelBlock->getChildByName("Button_AddMove"));
 	buttonAddMove->addClickEventListener(CC_CALLBACK_1(LevelMakeScene::buttonCallback_BlockAddMove, this));
 	auto buttonAddBlink = dynamic_cast<Button*>(panelBlock->getChildByName("Button_AddBlink"));
 	buttonAddBlink->addClickEventListener(CC_CALLBACK_1(LevelMakeScene::buttonCallback_BlockAddBlink, this));
+	auto buttonAddScale = dynamic_cast<Button*>(panelBlock->getChildByName("Button_AddScale"));
+	buttonAddScale->addClickEventListener(CC_CALLBACK_1(LevelMakeScene::buttonCallback_BlockAddScale, this));
 	m_pButtonSetRepeat = dynamic_cast<Button*>(panelBlock->getChildByName("Button_SetRepeat"));
 	m_pButtonSetRepeat->addClickEventListener(CC_CALLBACK_1(LevelMakeScene::buttonCallback_BlockSetRepeat, this));
 	m_pButtonSetReverse = dynamic_cast<Button*>(panelBlock->getChildByName("Button_SetReverse"));
@@ -373,26 +375,26 @@ bool LevelMakeScene::onContactBegin(const PhysicsContact& contact)
 	if ((body1->getCategoryBitmask() & MASK_PLAYER) == MASK_PLAYER ||
 		(body2->getCategoryBitmask() & MASK_PLAYER) == MASK_PLAYER)
 	{
-		auto particle = ParticleExplosion::createWithTotalParticles(130);
-		particle->setTexture(Director::getInstance()->getTextureCache()->getTextureForKey("playerImage"));
-		particle->setStartSize(5);
-		particle->setStartSizeVar(5);
-		particle->setStartColor(m_pPlayer->getPlayerColor());
-		particle->setStartColorVar(Color4F(0, 0, 0, 0));
-		particle->setEndColor(m_pPlayer->getPlayerColor());
-		particle->setEndColorVar(Color4F(0, 0, 0, 0));
-		particle->setSpeed(500);
-		particle->setSpeedVar(300);
-		particle->setLife(0.5f);
-		particle->setLifeVar(0.2f);
-		particle->setPosition(contact.getContactData()->points[0]);
-		this->addChild(particle);
+		//auto particle = ParticleExplosion::createWithTotalParticles(130);
+		//particle->setTexture(Director::getInstance()->getTextureCache()->getTextureForKey("playerImage"));
+		//particle->setStartSize(5);
+		//particle->setStartSizeVar(5);
+		//particle->setStartColor(m_pPlayer->getPlayerColor());
+		//particle->setStartColorVar(Color4F(0, 0, 0, 0));
+		//particle->setEndColor(m_pPlayer->getPlayerColor());
+		//particle->setEndColorVar(Color4F(0, 0, 0, 0));
+		//particle->setSpeed(500);
+		//particle->setSpeedVar(300);
+		//particle->setLife(0.5f);
+		//particle->setLifeVar(0.2f);
+		//particle->setPosition(contact.getContactData()->points[0]);
+		//this->addChild(particle);
 
 		m_pPlayer->die();
 		m_pPlayer = nullptr;
 
 		this->runAction(Sequence::createWithTwoActions(
-			DelayTime::create(0.7f),
+			DelayTime::create(0.01f),
 			CallFuncN::create([=](Ref* pSender)->void
 		{
 			this->resetRoom();
@@ -542,9 +544,7 @@ void LevelMakeScene::buttonCallback_Try(Ref* pSender)
 		{
 			obj.second.textField->setEnabled(true);
 			if (obj.second.slider)
-			{
 				obj.second.slider->setEnabled(true);
-			}
 		}
 
 		this->addPlayer();
@@ -558,9 +558,7 @@ void LevelMakeScene::buttonCallback_Try(Ref* pSender)
 		{
 			obj.second.textField->setEnabled(false);
 			if (obj.second.slider)
-			{
 				obj.second.slider->setEnabled(false);
-			}
 		}
 
 		this->resetRoom();
@@ -598,7 +596,7 @@ void LevelMakeScene::buttonCallback_Import(Ref* pSender)
 // enemy action button functions
 void LevelMakeScene::buttonCallback_BlockAddRotate(Ref* pSender)
 {
-	m_pCurAction = RotateActionData::create(0.0f, 1.0f, 360, Vec2(0.5f, 0.5f)); // default rotate action
+	m_pCurAction = RotateActionData::create(0, 1, 0, 360, Vec2(0.5f, 0.5f)); // default rotate action
 	if(m_pCurEnemy->addAction(m_pCurAction))
 	{
 		auto id = m_pCurEnemy->getActions()->size() - 1;
@@ -619,7 +617,7 @@ void LevelMakeScene::buttonCallback_BlockAddRotate(Ref* pSender)
 
 void LevelMakeScene::buttonCallback_BlockAddMove(Ref* pSender)
 {
-	m_pCurAction = MoveActionData::create(0, 1, m_pCurEnemy->getPosition(), Point(200, 0)); // default move action
+	m_pCurAction = MoveActionData::create(0, 1, 0, m_pCurEnemy->getPosition(), Point(200, 0)); // default move action
 	if (m_pCurEnemy->addAction(m_pCurAction))
 	{
 		auto id = m_pCurEnemy->getActions()->size() - 1;
@@ -645,6 +643,27 @@ void LevelMakeScene::buttonCallback_BlockAddBlink(Ref* pSender)
 	{
 		auto id = m_pCurEnemy->getActions()->size() - 1;
 		m_pDropDownListBlockAction->addLabel(Label::createWithSystemFont(StringUtils::format("%d:Blink", id), "fonts/arial.ttf", 20));
+		m_pDropDownListBlockAction->setSelectedIndex(id);
+		this->updateBlockTextFieldByCurAction();
+		this->updateBlockTextFieldEnableByCurActionType();
+		m_pButtonSetRepeat->setEnabled(true);
+		m_pButtonSetReverse->setEnabled(true);
+		m_pButtonSetRepeat->setTitleText("Set Repeat");
+		m_pButtonSetReverse->setTitleText("Set Reverse");
+	}
+	else
+	{
+		// call common notify window
+	}
+}
+
+void LevelMakeScene::buttonCallback_BlockAddScale(Ref* pSender)
+{
+	m_pCurAction = ScaleActionData::create(0, 1, 0, 2, 2, Vec2(0.5f, 0.5f)); // default scale action
+	if (m_pCurEnemy->addAction(m_pCurAction))
+	{
+		auto id = m_pCurEnemy->getActions()->size() - 1;
+		m_pDropDownListBlockAction->addLabel(Label::createWithSystemFont(StringUtils::format("%d:Scale", id), "fonts/arial.ttf", 20));
 		m_pDropDownListBlockAction->setSelectedIndex(id);
 		this->updateBlockTextFieldByCurAction();
 		this->updateBlockTextFieldEnableByCurActionType();
@@ -701,6 +720,7 @@ void LevelMakeScene::buttonCallback_BlockRemoveAction(Ref* pSender)
 	CS_RETURN_IF(!m_pCurEnemy);
 
 	m_pCurEnemy->removeAction(m_pCurAction);
+	m_pCurAction = nullptr;
 	this->updateDropDownListOfEnemyActions();
 }
 
@@ -832,21 +852,6 @@ void LevelMakeScene::updateCurEnemy(int tag)
 		else
 			m_pCurEnemy->setPositionY(number);
 		break;
-	case TAG_ENEMY_DELAY_TIME10:
-		if (m_pCurAction)
-		{
-			m_pCurAction->setDelay(number * 0.1f);
-			m_pCurEnemy->updateAction(m_pCurAction);
-		}
-		break;
-	case TAG_ENEMY_MOVE_TIME10:
-		if (m_pCurAction && m_pCurAction->getType() == TYPE_MOVE)
-		{
-			auto move_data = dynamic_cast<MoveActionData*>(m_pCurAction);
-			move_data->setDuration(number * 0.1f);
-			m_pCurEnemy->updateAction(move_data);
-		}
-		break;
 	case TAG_ENEMY_DESTINATION_X:
 		if (m_pCurAction && m_pCurAction->getType() == TYPE_MOVE)
 		{
@@ -863,54 +868,70 @@ void LevelMakeScene::updateCurEnemy(int tag)
 			m_pCurEnemy->updateAction(move_data);
 		}
 		break;
-	case TAG_ENEMY_ROTATE_TIME10:
-		if (m_pCurAction && m_pCurAction->getType() == TYPE_ROTATE)
-		{
-			auto rotate_data = dynamic_cast<RotateActionData*>(m_pCurAction);
-			rotate_data->setDuration(number * 0.1f);
-			m_pCurEnemy->updateAction(rotate_data);
-		}
-		break;
 	case TAG_ENEMY_ANCHOR_X10:
-		if (m_pCurAction && m_pCurAction->getType() == TYPE_ROTATE)
+		if (m_pCurAction)
 		{
 			auto anchor = Vec2(number * 0.1f, m_pCurEnemy->getAnchorPoint().y);
-			auto rotate_data = dynamic_cast<RotateActionData*>(m_pCurAction);
-			rotate_data->setAnchor(anchor);
+			auto type = m_pCurAction->getType();
+			if (type == TYPE_ROTATE)
+				dynamic_cast<RotateActionData*>(m_pCurAction)->setAnchor(anchor);
+			else if (type == TYPE_SCALE)
+				dynamic_cast<ScaleActionData*>(m_pCurAction)->setAnchor(anchor);
 			m_pCurEnemy->setAnchorPoint(anchor);
 		}
 		break;
 	case TAG_ENEMY_ANCHOR_Y10:
-		if (m_pCurAction && m_pCurAction->getType() == TYPE_ROTATE)
+		if (m_pCurAction)
 		{
 			auto anchor = Vec2(m_pCurEnemy->getAnchorPoint().x, number * 0.1f);
-			auto rotate_data = dynamic_cast<RotateActionData*>(m_pCurAction);
-			rotate_data->setAnchor(anchor);
+			auto type = m_pCurAction->getType();
+			if (type == TYPE_ROTATE)
+				dynamic_cast<RotateActionData*>(m_pCurAction)->setAnchor(anchor);
+			else if (type == TYPE_SCALE)
+				dynamic_cast<ScaleActionData*>(m_pCurAction)->setAnchor(anchor);
 			m_pCurEnemy->setAnchorPoint(anchor);
 		}
 		break;
 	case TAG_ENEMY_ANGLE:
 		if (m_pCurAction && m_pCurAction->getType() == TYPE_ROTATE)
 		{
-			auto rotate_data = dynamic_cast<RotateActionData*>(m_pCurAction);
-			rotate_data->setAngle(number);
-			m_pCurEnemy->updateAction(rotate_data);
+			dynamic_cast<RotateActionData*>(m_pCurAction)->setAngle(number);
+			m_pCurEnemy->updateAction(m_pCurAction);
 		}
 		break;
-	case TAG_ENEMY_BLINK_TIME10:
-		if (m_pCurAction && m_pCurAction->getType() == TYPE_BLINK)
+	case TAG_ENEMY_SCALE_X10:
+		if (m_pCurAction && m_pCurAction->getType() == TYPE_SCALE)
 		{
-			auto blink_data = dynamic_cast<BlinkActionData*>(m_pCurAction);
-			blink_data->setDuration(number * 0.1f);
-			m_pCurEnemy->updateAction(blink_data);
+			dynamic_cast<ScaleActionData*>(m_pCurAction)->setScaleX(number * 0.1f);
+			m_pCurEnemy->updateAction(m_pCurAction);
 		}
 		break;
-	case TAG_ENEMY_BLINKPOST_TIME10:
-		if (m_pCurAction && m_pCurAction->getType() == TYPE_BLINK)
+	case TAG_ENEMY_SCALE_Y10:
+		if (m_pCurAction && m_pCurAction->getType() == TYPE_SCALE)
 		{
-			auto blink_data = dynamic_cast<BlinkActionData*>(m_pCurAction);
-			blink_data->setPostDelay(number * 0.1f);
-			m_pCurEnemy->updateAction(blink_data);
+			dynamic_cast<ScaleActionData*>(m_pCurAction)->setScaleY(number * 0.1f);
+			m_pCurEnemy->updateAction(m_pCurAction);
+		}
+		break;
+	case TAG_ENEMY_DELAY10:
+		if (m_pCurAction)
+		{
+			m_pCurAction->setDelay(number * 0.1f);
+			m_pCurEnemy->updateAction(m_pCurAction);
+		}
+		break;
+	case TAG_ENEMY_DURATION10:
+		if (m_pCurAction)
+		{
+			m_pCurAction->setDuration(number * 0.1f);
+			m_pCurEnemy->updateAction(m_pCurAction);
+		}
+		break;
+	case TAG_ENEMY_POSTDELAY10:
+		if (m_pCurAction)
+		{
+			m_pCurAction->setPostDelay(number * 0.1f);
+			m_pCurEnemy->updateAction(m_pCurAction);
 		}
 		break;
 	default:
@@ -940,11 +961,11 @@ void LevelMakeScene::updateBlockTextFieldEnableByCurActionType()
 		this->setTextFieldStructEnable(TAG_ENEMY_ANCHOR_X10, false);
 		this->setTextFieldStructEnable(TAG_ENEMY_ANCHOR_Y10, false);
 		this->setTextFieldStructEnable(TAG_ENEMY_ANGLE, false);
-		this->setTextFieldStructEnable(TAG_ENEMY_DELAY_TIME10, false);
-		this->setTextFieldStructEnable(TAG_ENEMY_ROTATE_TIME10, false);
-		this->setTextFieldStructEnable(TAG_ENEMY_MOVE_TIME10, false);
-		this->setTextFieldStructEnable(TAG_ENEMY_BLINK_TIME10, false);
-		this->setTextFieldStructEnable(TAG_ENEMY_BLINKPOST_TIME10, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_SCALE_X10, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_SCALE_Y10, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_DELAY10, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_DURATION10, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_POSTDELAY10, false);
 		break;
 	}
 	case TYPE_ROTATE:
@@ -954,11 +975,11 @@ void LevelMakeScene::updateBlockTextFieldEnableByCurActionType()
 		this->setTextFieldStructEnable(TAG_ENEMY_ANCHOR_X10, true);
 		this->setTextFieldStructEnable(TAG_ENEMY_ANCHOR_Y10, true);
 		this->setTextFieldStructEnable(TAG_ENEMY_ANGLE, true);
-		this->setTextFieldStructEnable(TAG_ENEMY_DELAY_TIME10, true);
-		this->setTextFieldStructEnable(TAG_ENEMY_ROTATE_TIME10, true);
-		this->setTextFieldStructEnable(TAG_ENEMY_MOVE_TIME10, false);
-		this->setTextFieldStructEnable(TAG_ENEMY_BLINK_TIME10, false);
-		this->setTextFieldStructEnable(TAG_ENEMY_BLINKPOST_TIME10, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_SCALE_X10, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_SCALE_Y10, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_DELAY10, true);
+		this->setTextFieldStructEnable(TAG_ENEMY_DURATION10, true);
+		this->setTextFieldStructEnable(TAG_ENEMY_POSTDELAY10, true);
 		break;
 	}
 	case TYPE_MOVE:
@@ -968,11 +989,11 @@ void LevelMakeScene::updateBlockTextFieldEnableByCurActionType()
 		this->setTextFieldStructEnable(TAG_ENEMY_ANCHOR_X10, false);
 		this->setTextFieldStructEnable(TAG_ENEMY_ANCHOR_Y10, false);
 		this->setTextFieldStructEnable(TAG_ENEMY_ANGLE, false);
-		this->setTextFieldStructEnable(TAG_ENEMY_DELAY_TIME10, true);
-		this->setTextFieldStructEnable(TAG_ENEMY_ROTATE_TIME10, false);
-		this->setTextFieldStructEnable(TAG_ENEMY_MOVE_TIME10, true);
-		this->setTextFieldStructEnable(TAG_ENEMY_BLINK_TIME10, false);
-		this->setTextFieldStructEnable(TAG_ENEMY_BLINKPOST_TIME10, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_SCALE_X10, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_SCALE_Y10, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_DELAY10, true);
+		this->setTextFieldStructEnable(TAG_ENEMY_DURATION10, true);
+		this->setTextFieldStructEnable(TAG_ENEMY_POSTDELAY10, true);
 		break;
 	}
 	case TYPE_BLINK:
@@ -982,11 +1003,25 @@ void LevelMakeScene::updateBlockTextFieldEnableByCurActionType()
 		this->setTextFieldStructEnable(TAG_ENEMY_ANCHOR_X10, false);
 		this->setTextFieldStructEnable(TAG_ENEMY_ANCHOR_Y10, false);
 		this->setTextFieldStructEnable(TAG_ENEMY_ANGLE, false);
-		this->setTextFieldStructEnable(TAG_ENEMY_DELAY_TIME10, true);
-		this->setTextFieldStructEnable(TAG_ENEMY_ROTATE_TIME10, false);
-		this->setTextFieldStructEnable(TAG_ENEMY_MOVE_TIME10, false);
-		this->setTextFieldStructEnable(TAG_ENEMY_BLINK_TIME10, true);
-		this->setTextFieldStructEnable(TAG_ENEMY_BLINKPOST_TIME10, true);
+		this->setTextFieldStructEnable(TAG_ENEMY_SCALE_X10, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_SCALE_Y10, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_DELAY10, true);
+		this->setTextFieldStructEnable(TAG_ENEMY_DURATION10, true);
+		this->setTextFieldStructEnable(TAG_ENEMY_POSTDELAY10, true);
+		break;
+	}
+	case TYPE_SCALE:
+	{
+		this->setTextFieldStructEnable(TAG_ENEMY_DESTINATION_X, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_DESTINATION_Y, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_ANCHOR_X10, true);
+		this->setTextFieldStructEnable(TAG_ENEMY_ANCHOR_Y10, true);
+		this->setTextFieldStructEnable(TAG_ENEMY_ANGLE, false);
+		this->setTextFieldStructEnable(TAG_ENEMY_SCALE_X10, true);
+		this->setTextFieldStructEnable(TAG_ENEMY_SCALE_Y10, true);
+		this->setTextFieldStructEnable(TAG_ENEMY_DELAY10, true);
+		this->setTextFieldStructEnable(TAG_ENEMY_DURATION10, true);
+		this->setTextFieldStructEnable(TAG_ENEMY_POSTDELAY10, true);
 		break;
 	}
 	default:
@@ -1004,8 +1039,9 @@ void LevelMakeScene::updateBlockTextFieldByCurAction()
 	case TYPE_ROTATE:
 	{
 		auto rotate_data = dynamic_cast<RotateActionData*>(m_pCurAction);
-		this->updateBlockTextFieldByNumber(TAG_ENEMY_DELAY_TIME10, rotate_data->getDelay() * 10);
-		this->updateBlockTextFieldByNumber(TAG_ENEMY_ROTATE_TIME10, rotate_data->getDuration() * 10);
+		this->updateBlockTextFieldByNumber(TAG_ENEMY_DELAY10, rotate_data->getDelay() * 10);
+		this->updateBlockTextFieldByNumber(TAG_ENEMY_DURATION10, rotate_data->getDuration() * 10);
+		this->updateBlockTextFieldByNumber(TAG_ENEMY_POSTDELAY10, rotate_data->getPostDelay() * 10);
 		this->updateBlockTextFieldByNumber(TAG_ENEMY_ANGLE, rotate_data->getAngle());
 		this->updateBlockTextFieldByNumber(TAG_ENEMY_ANCHOR_X10, rotate_data->getAnchor().x * 10);
 		this->updateBlockTextFieldByNumber(TAG_ENEMY_ANCHOR_Y10, rotate_data->getAnchor().y * 10);
@@ -1014,8 +1050,9 @@ void LevelMakeScene::updateBlockTextFieldByCurAction()
 	case TYPE_MOVE:
 	{
 		auto move_data = dynamic_cast<MoveActionData*>(m_pCurAction);
-		this->updateBlockTextFieldByNumber(TAG_ENEMY_DELAY_TIME10, move_data->getDelay() * 10);
-		this->updateBlockTextFieldByNumber(TAG_ENEMY_MOVE_TIME10, move_data->getDuration() * 10);
+		this->updateBlockTextFieldByNumber(TAG_ENEMY_DELAY10, move_data->getDelay() * 10);
+		this->updateBlockTextFieldByNumber(TAG_ENEMY_DURATION10, move_data->getDuration() * 10);
+		this->updateBlockTextFieldByNumber(TAG_ENEMY_POSTDELAY10, move_data->getPostDelay() * 10);
 		this->updateBlockTextFieldByNumber(TAG_ENEMY_POSITION_X, move_data->getStart().x);
 		this->updateBlockTextFieldByNumber(TAG_ENEMY_POSITION_Y, move_data->getStart().y);
 		this->updateBlockTextFieldByNumber(TAG_ENEMY_DESTINATION_X, move_data->getDestination().x);
@@ -1025,9 +1062,21 @@ void LevelMakeScene::updateBlockTextFieldByCurAction()
 	case TYPE_BLINK:
 	{
 		auto blink_data = dynamic_cast<BlinkActionData*>(m_pCurAction);
-		this->updateBlockTextFieldByNumber(TAG_ENEMY_DELAY_TIME10, blink_data->getDelay() * 10);
-		this->updateBlockTextFieldByNumber(TAG_ENEMY_BLINK_TIME10, blink_data->getDuration() * 10);
-		this->updateBlockTextFieldByNumber(TAG_ENEMY_BLINKPOST_TIME10, blink_data->getPostDelay() * 10);
+		this->updateBlockTextFieldByNumber(TAG_ENEMY_DELAY10, blink_data->getDelay() * 10);
+		this->updateBlockTextFieldByNumber(TAG_ENEMY_DURATION10, blink_data->getDuration() * 10);
+		this->updateBlockTextFieldByNumber(TAG_ENEMY_POSTDELAY10, blink_data->getPostDelay() * 10);
+		break;
+	}
+	case TYPE_SCALE:
+	{
+		auto scale_data = dynamic_cast<ScaleActionData*>(m_pCurAction);
+		this->updateBlockTextFieldByNumber(TAG_ENEMY_DELAY10, scale_data->getDelay() * 10);
+		this->updateBlockTextFieldByNumber(TAG_ENEMY_DURATION10, scale_data->getDuration() * 10);
+		this->updateBlockTextFieldByNumber(TAG_ENEMY_POSTDELAY10, scale_data->getPostDelay() * 10);
+		this->updateBlockTextFieldByNumber(TAG_ENEMY_SCALE_X10, scale_data->getScaleX() * 10);
+		this->updateBlockTextFieldByNumber(TAG_ENEMY_SCALE_Y10, scale_data->getScaleY() * 10);
+		this->updateBlockTextFieldByNumber(TAG_ENEMY_ANCHOR_X10, scale_data->getAnchor().x * 10);
+		this->updateBlockTextFieldByNumber(TAG_ENEMY_ANCHOR_Y10, scale_data->getAnchor().y * 10);
 		break;
 	}
 	default:
@@ -1055,6 +1104,9 @@ void LevelMakeScene::updateDropDownListOfEnemyActions()
 			break;
 		case TYPE_BLINK:
 			m_pDropDownListBlockAction->addLabel(Label::createWithSystemFont(StringUtils::format("%d:Blink", i), "fonts/arial.ttf", 20));
+			break;
+		case TYPE_SCALE:
+			m_pDropDownListBlockAction->addLabel(Label::createWithSystemFont(StringUtils::format("%d:Scale", i), "fonts/arial.ttf", 20));
 			break;
 		default:
 			m_pDropDownListBlockAction->addLabel(Label::createWithSystemFont(StringUtils::format("%d:Unknown", i), "fonts/arial.ttf", 20));
@@ -1137,6 +1189,7 @@ void LevelMakeScene::addPlayerForTrying()
 		m_pPlayer->die();
 		m_pPlayer = nullptr;
 		this->addPlayerForTrying();
+		CCLOG("Sucessce!");
 	}))));
 
 	this->addChild(m_pPlayer);

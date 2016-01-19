@@ -16,7 +16,7 @@ public:
 	static Player* create(const Color3B &color = Color3B::BLUE, float speed = 128, float jumpTime = 0.8f);
 	bool init(const Color3B &color = Color3B::BLUE, float speed = 128, float jumpTime = 0.8f);
 
-	void jump();
+	bool jump();
 	void die();
 
 public:

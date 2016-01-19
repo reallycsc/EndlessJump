@@ -33,11 +33,11 @@ enum TextFieldTag
 	TAG_ENEMY_ANCHOR_X10,
 	TAG_ENEMY_ANCHOR_Y10,
 	TAG_ENEMY_ANGLE,
-	TAG_ENEMY_DELAY_TIME10,
-	TAG_ENEMY_ROTATE_TIME10,
-	TAG_ENEMY_MOVE_TIME10,
-	TAG_ENEMY_BLINK_TIME10,
-	TAG_ENEMY_BLINKPOST_TIME10,
+	TAG_ENEMY_SCALE_X10,
+	TAG_ENEMY_SCALE_Y10,
+	TAG_ENEMY_DELAY10,
+	TAG_ENEMY_DURATION10,
+	TAG_ENEMY_POSTDELAY10,
 	TAG_ENEMY_MAX,
 
 	TAG_PLAYER_MIN,
@@ -128,6 +128,7 @@ private:
 	void buttonCallback_BlockAddRotate(Ref* pSender);
 	void buttonCallback_BlockAddMove(Ref* pSender);
 	void buttonCallback_BlockAddBlink(Ref* pSender);
+	void buttonCallback_BlockAddScale(Ref* pSender);
 	void buttonCallback_BlockSetRepeat(Ref* pSender);
 	void buttonCallback_BlockSetReverse(Ref* pSender);
 	void buttonCallback_BlockRemoveAction(Ref* pSender);

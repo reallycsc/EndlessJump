@@ -97,6 +97,7 @@ bool GameLevelData::setRoomDataWithFile(XMLElement* surface)
 					auto isRepeat = surface4->BoolAttribute("isRepeat");
 					auto isReverse = surface4->BoolAttribute("isReverse");
 					auto delay = surface4->FloatAttribute("delay");
+					auto post_delay = surface4->FloatAttribute("postDelay");
 					ActionData* actionData = nullptr;
 					switch (type)
 					{
@@ -105,21 +106,29 @@ bool GameLevelData::setRoomDataWithFile(XMLElement* surface)
 						auto duration = surface4->FloatAttribute("rotateDuration");
 						auto angle = surface4->FloatAttribute("angle");
 						auto anchor = Point(surface4->FloatAttribute("anchor_x"), surface4->FloatAttribute("anchor_y"));
-						actionData = RotateActionData::create(delay, duration, angle, anchor);
+						actionData = RotateActionData::create(delay, duration, post_delay, angle, anchor);
 						break;
 					}
 					case TYPE_MOVE:
 					{
 						auto duration = surface4->FloatAttribute("moveDuration");
 						auto dest = Point(surface4->IntAttribute("dest_x"), surface4->IntAttribute("dest_y"));
-						actionData = MoveActionData::create(delay, duration, enemy.position, dest);
+						actionData = MoveActionData::create(delay, duration, post_delay, enemy.position, dest);
 						break;
 					}
 					case TYPE_BLINK:
 					{
 						auto duration = surface4->FloatAttribute("blinkDuration");
-						auto post_delay = surface4->FloatAttribute("postDelay");
 						actionData = BlinkActionData::create(delay, duration, post_delay);
+						break;
+					}
+					case TYPE_SCALE:
+					{
+						auto duration = surface4->FloatAttribute("scaleDuration");
+						auto scale_x = surface4->FloatAttribute("scale_x");
+						auto scale_y = surface4->FloatAttribute("scale_y");
+						auto anchor = Point(surface4->FloatAttribute("anchor_x"), surface4->FloatAttribute("anchor_y"));
+						actionData = ScaleActionData::create(delay, duration, post_delay, scale_x, scale_y, anchor);
 						break;
 					}
 					default:

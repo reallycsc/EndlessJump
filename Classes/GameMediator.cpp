@@ -183,6 +183,7 @@ bool GameMediator::saveGameLevelFile()
 						surface5->SetAttribute("isRepeat", action_data->getIsRepeat());
 						surface5->SetAttribute("isReverse", action_data->getIsReverse());
 						surface5->SetAttribute("delay", action_data->getDelay());
+						surface5->SetAttribute("postDelay", action_data->getPostDelay());
 						switch (action_type)
 						{
 						case TYPE_ROTATE:
@@ -192,7 +193,6 @@ bool GameMediator::saveGameLevelFile()
 							surface5->SetAttribute("angle", rotate_data->getAngle());
 							surface5->SetAttribute("anchor_x", rotate_data->getAnchor().x);
 							surface5->SetAttribute("anchor_y", rotate_data->getAnchor().y);
-							
 							break;
 						}
 						case TYPE_MOVE:
@@ -208,7 +208,16 @@ bool GameMediator::saveGameLevelFile()
 						{
 							auto blink_data = dynamic_cast<BlinkActionData*>(action_data);
 							surface5->SetAttribute("blinkDuration", blink_data->getDuration());
-							surface5->SetAttribute("postDelay", blink_data->getPostDelay());
+							break;
+						}
+						case TYPE_SCALE:
+						{
+							auto scale_data = dynamic_cast<ScaleActionData*>(action_data);
+							surface5->SetAttribute("scaleDuration", scale_data->getDuration());
+							surface5->SetAttribute("scale_x", scale_data->getScaleX());
+							surface5->SetAttribute("scale_y", scale_data->getScaleY());
+							surface5->SetAttribute("anchor_x", scale_data->getAnchor().x);
+							surface5->SetAttribute("anchor_y", scale_data->getAnchor().y);
 							break;
 						}
 						default:
@@ -278,6 +287,8 @@ void GameMediator::gotoNextGameLevel()
 	{
 		m_nCurGameLevel++;
 		this->saveIntegerGameDataForKey("CurLevel", m_nCurGameLevel);
+		m_nMaxGameLevel = MAX(m_nMaxGameLevel, m_nCurGameLevel);
+		this->saveIntegerGameDataForKey("MaxLevel", m_nMaxGameLevel);
 	}
 	m_nCurGameRoom = 1;
 }

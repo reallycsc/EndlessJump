@@ -44,6 +44,7 @@ private:
 	Player*	m_pPlayer;
 	Vector<Enemy*>	m_vEnemys;
 
+	LayerColor*	m_pBlackLayer;
 	Button*	m_pButtonPause;
 	Button*	m_pButtonRetry;
 	Text*	m_pTextDeadNum;
@@ -51,6 +52,7 @@ private:
 	int m_nDeadNumberMin;
 
 	ParticleMeteor*	m_pParticleTail;
+	Point	m_LastJumpPoint;
 };
 
 #endif // __GAME_SCENE_H__

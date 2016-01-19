@@ -80,17 +80,7 @@ bool Enemy::addAction(ActionData* action_data)
 		for (size_t i = 0, length = m_vActions.size(); i < length; i++)
 			if (m_vActions.at(i)->getType() == type)
 				return false;
-		switch (type)
-		{
-		case TYPE_MOVE:
-			m_bIsHaveMoveAction = true;
-			break;
-		case TYPE_ROTATE:
-			this->setAnchorPoint(dynamic_cast<RotateActionData*>(action_data)->getAnchor());
-			break;
-		default:
-			break;
-		}
+		this->prepareForAction(action_data);
 		m_vActions.pushBack(action_data);
 		this->runAction(action_data->getAction());
 		bRet = true;
@@ -116,10 +106,15 @@ bool Enemy::removeAction(ActionData* action_data)
 			this->setPosition(dynamic_cast<MoveActionData*>(action_data)->getStart());
 			break;
 		case TYPE_ROTATE:
+			this->setAnchorPoint(Vec2(0.5f, 0));
 			this->setRotation(0);
 			break;
 		case TYPE_BLINK:
 			this->setVisible(true);
+			break;
+		case TYPE_SCALE:
+			this->setAnchorPoint(Vec2(0.5f, 0));
+			this->setScale(1, 1);
 			break;
 		default:
 			break;
@@ -139,23 +134,10 @@ void Enemy::updateAction(ActionData* action_data)
 
 	action_data->updateAction();
 
-	auto type = action_data->getType();
 	// stop old action
-	this->stopActionByTag(type);
+	this->stopActionByTag(action_data->getType());
 	// set data for new action
-	switch (type)
-	{
-	case TYPE_MOVE:
-		m_bIsHaveMoveAction = true;
-		break;
-	case TYPE_ROTATE:
-		this->setAnchorPoint(dynamic_cast<RotateActionData*>(action_data)->getAnchor());
-		break;
-	case TYPE_BLINK:
-		break;
-	default:
-		break;
-	}
+	this->prepareForAction(action_data);
 	// run new action
 	this->runAction(action_data->getAction());
 }
@@ -329,26 +311,30 @@ void Enemy::setActions(Vector<ActionData*>* actions)
 	for (size_t i = 0, length = actions->size(); i < length; i++)
 	{
 		auto action_data = actions->at(i);
-		int type = action_data->getType();
-		switch (type)
-		{
-		case TYPE_MOVE:
-			if (!m_bIsHaveMoveAction)
-				m_bIsHaveMoveAction = true;
-			else
-				continue;
-			break;
-		case TYPE_ROTATE:
-			this->setAnchorPoint(dynamic_cast<RotateActionData*>(action_data)->getAnchor());
-			break;
-		case TYPE_BLINK:
-			this->setVisible(false);
-			break;
-		default:
-			break;
-		}
+		this->prepareForAction(action_data);
 		auto action_data_clone = action_data->clone();
 		m_vActions.pushBack(action_data_clone);
 		this->runAction(action_data_clone->getAction());
+	}
+}
+
+void Enemy::prepareForAction(ActionData* action_data)
+{
+	int type = action_data->getType();
+	switch (type)
+	{
+	case TYPE_MOVE:
+		m_bIsHaveMoveAction = true;
+		break;
+	case TYPE_ROTATE:
+		this->setAnchorPoint(dynamic_cast<RotateActionData*>(action_data)->getAnchor());
+		break;
+	case TYPE_BLINK:
+		break;
+	case TYPE_SCALE:
+		this->setAnchorPoint(dynamic_cast<ScaleActionData*>(action_data)->getAnchor());
+		break;
+	default:
+		break;
 	}
 }

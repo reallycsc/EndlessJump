@@ -1,52 +1,80 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GameLevel>
-    <Level level="1" name="Ruins" deadCount="1000">
-        <Room id="1" width="768" height="204" x="0" y="0" color_r="216" color_g="204" color_b="145">
-            <Player speed="300" jumpTime="0.6" color_r="206" color_g="124" color_b="86"/>
-            <Enemys color_r="206" color_g="124" color_b="86">
-                <Enemy id="1" width="150" height="100" x="384" y="0">
-                    <Action type="3" isRepeat="0" isReverse="0" delay="0.5" moveDuration="0.5" dest_x="384" dest_y="-101"/>
-                </Enemy>
-                <Enemy id="2" width="45" height="45" x="384" y="0"/>
+    <Level level="1" name="Be Inside" deadCount="99999">
+        <Room id="1" width="768" height="204" x="0" y="0" color_r="84" color_g="50" color_b="71">
+            <Player speed="300" jumpTime="0.6" color_r="239" color_g="137" color_b="28"/>
+            <Enemys color_r="239" color_g="137" color_b="28">
+                <Enemy id="1" width="45" height="45" x="100" y="0"/>
+                <Enemy id="2" width="45" height="45" x="300" y="0"/>
+                <Enemy id="3" width="45" height="45" x="480" y="0"/>
+                <Enemy id="4" width="45" height="45" x="660" y="0"/>
+                <Enemy id="5" width="45" height="83" x="0" y="120"/>
+                <Enemy id="6" width="45" height="83" x="200" y="120"/>
+                <Enemy id="7" width="45" height="83" x="390" y="120"/>
+                <Enemy id="8" width="45" height="83" x="390" y="120"/>
+                <Enemy id="9" width="45" height="83" x="570" y="120"/>
+                <Enemy id="10" width="45" height="83" x="750" y="120"/>
             </Enemys>
         </Room>
-        <Room id="2" width="768" height="204" x="0" y="204" color_r="160" color_g="190" color_b="184">
-            <Player speed="300" jumpTime="0.6" color_r="216" color_g="204" color_b="145"/>
-            <Enemys color_r="216" color_g="204" color_b="145">
-                <Enemy id="1" width="50" height="150" x="210" y="-1">
-                    <Action type="2" isRepeat="0" isReverse="0" delay="0.3" rotateDuration="0.5" angle="90" anchor_x="0" anchor_y="0"/>
+        <Room id="2" width="768" height="204" x="0" y="204" color_r="191" color_g="221" color_b="98">
+            <Player speed="300" jumpTime="0.6" color_r="84" color_g="50" color_b="71"/>
+            <Enemys color_r="84" color_g="50" color_b="71">
+                <Enemy id="1" width="200" height="10" x="860" y="100">
+                    <Action type="3" isRepeat="1" isReverse="0" delay="0" postDelay="0" moveDuration="1.2" dest_x="-100" dest_y="100"/>
                 </Enemy>
-                <Enemy id="2" width="80" height="150" x="615" y="0">
-                    <Action type="3" isRepeat="0" isReverse="0" delay="1" moveDuration="1" dest_x="615" dest_y="-100"/>
+                <Enemy id="2" width="150" height="5" x="850" y="50">
+                    <Action type="3" isRepeat="1" isReverse="0" delay="0" postDelay="0" moveDuration="1" dest_x="-80" dest_y="50"/>
                 </Enemy>
-            </Enemys>
-        </Room>
-        <Room id="3" width="768" height="204" x="0" y="408" color_r="91" color_g="128" color_b="128">
-            <Player speed="300" jumpTime="0.6" color_r="160" color_g="190" color_b="184"/>
-            <Enemys color_r="160" color_g="190" color_b="184">
-                <Enemy id="1" width="65" height="204" x="706" y="-1">
-                    <Action type="2" isRepeat="0" isReverse="0" delay="0" rotateDuration="1.5" angle="-90" anchor_x="1" anchor_y="0"/>
+                <Enemy id="3" width="150" height="5" x="900" y="20">
+                    <Action type="3" isRepeat="1" isReverse="0" delay="0.8" postDelay="0" moveDuration="1" dest_x="-80" dest_y="20"/>
                 </Enemy>
-                <Enemy id="2" width="65" height="65" x="600" y="250">
-                    <Action type="3" isRepeat="0" isReverse="0" delay="0" moveDuration="1" dest_x="400" dest_y="0"/>
-                </Enemy>
-                <Enemy id="3" width="50" height="50" x="500" y="320">
-                    <Action type="3" isRepeat="0" isReverse="0" delay="0" moveDuration="2" dest_x="200" dest_y="0"/>
-                </Enemy>
-                <Enemy id="4" width="10" height="10" x="520" y="-10">
-                    <Action type="3" isRepeat="0" isReverse="0" delay="1.5" moveDuration="0.5" dest_x="520" dest_y="0"/>
+                <Enemy id="4" width="150" height="5" x="860" y="180">
+                    <Action type="3" isRepeat="1" isReverse="0" delay="0" postDelay="0" moveDuration="0.8" dest_x="-80" dest_y="180"/>
                 </Enemy>
             </Enemys>
         </Room>
-        <Room id="4" width="768" height="204" x="0" y="612" color_r="79" color_g="98" color_b="112">
-            <Player speed="300" jumpTime="0.6" color_r="91" color_g="128" color_b="128"/>
-            <Enemys color_r="91" color_g="128" color_b="128">
-                <Enemy id="1" width="100" height="400" x="-48" y="0">
-                    <Action type="2" isRepeat="0" isReverse="0" delay="0" rotateDuration="1.3" angle="90" anchor_x="1" anchor_y="0"/>
+        <Room id="3" width="768" height="204" x="0" y="408" color_r="147" color_g="129" color_b="152">
+            <Player speed="300" jumpTime="0.6" color_r="191" color_g="221" color_b="98"/>
+            <Enemys color_r="191" color_g="221" color_b="98">
+                <Enemy id="1" width="60" height="60" x="192" y="30">
+                    <Action type="3" isRepeat="1" isReverse="1" delay="0" postDelay="0" moveDuration="1" dest_x="200" dest_y="40"/>
+                    <Action type="2" isRepeat="1" isReverse="0" delay="0" postDelay="0" rotateDuration="1" angle="-360" anchor_x="0.5" anchor_y="0.5"/>
                 </Enemy>
-                <Enemy id="2" width="50" height="50" x="405" y="0"/>
-                <Enemy id="3" width="400" height="200" x="560" y="204">
-                    <Action type="3" isRepeat="0" isReverse="0" delay="0.8" moveDuration="2.1" dest_x="560" dest_y="0"/>
+                <Enemy id="2" width="30" height="30" x="350" y="20">
+                    <Action type="2" isRepeat="1" isReverse="0" delay="0" postDelay="0" rotateDuration="1" angle="360" anchor_x="0.5" anchor_y="0.5"/>
+                </Enemy>
+                <Enemy id="3" width="25" height="100" x="550" y="40">
+                    <Action type="3" isRepeat="1" isReverse="1" delay="0" postDelay="0" moveDuration="0.9" dest_x="550" dest_y="0"/>
+                </Enemy>
+                <Enemy id="4" width="25" height="25" x="300" y="100">
+                    <Action type="3" isRepeat="1" isReverse="1" delay="0" postDelay="0" moveDuration="1" dest_x="350" dest_y="120"/>
+                    <Action type="2" isRepeat="1" isReverse="0" delay="0" postDelay="0" rotateDuration="1" angle="-360" anchor_x="0.5" anchor_y="0"/>
+                </Enemy>
+                <Enemy id="5" width="768" height="25" x="384" y="203">
+                    <Action type="5" isRepeat="1" isReverse="1" delay="0" postDelay="0.2" scaleDuration="1" scale_x="1" scale_y="2" anchor_x="0.5" anchor_y="1"/>
+                </Enemy>
+                <Enemy id="6" width="100" height="25" x="718" y="0">
+                    <Action type="5" isRepeat="1" isReverse="1" delay="0" postDelay="0.2" scaleDuration="1" scale_x="1" scale_y="2" anchor_x="0.5" anchor_y="0"/>
+                </Enemy>
+            </Enemys>
+        </Room>
+        <Room id="4" width="768" height="204" x="0" y="612" color_r="124" color_g="77" color_b="137">
+            <Player speed="300" jumpTime="0.6" color_r="147" color_g="129" color_b="152"/>
+            <Enemys color_r="147" color_g="129" color_b="152">
+                <Enemy id="1" width="65" height="65" x="384" y="120">
+                    <Action type="5" isRepeat="1" isReverse="1" delay="0" postDelay="0.5" scaleDuration="0.2" scale_x="2" scale_y="2" anchor_x="0.5" anchor_y="0.5"/>
+                </Enemy>
+                <Enemy id="2" width="340" height="63" x="170" y="140">
+                    <Action type="3" isRepeat="1" isReverse="1" delay="0" postDelay="0.5" moveDuration="0.2" dest_x="140" dest_y="140"/>
+                </Enemy>
+                <Enemy id="3" width="340" height="63" x="600" y="140">
+                    <Action type="3" isRepeat="1" isReverse="1" delay="0" postDelay="0.5" moveDuration="0.2" dest_x="630" dest_y="140"/>
+                </Enemy>
+                <Enemy id="4" width="30" height="60" x="250" y="0">
+                    <Action type="3" isRepeat="1" isReverse="1" delay="0" postDelay="0.5" moveDuration="0.2" dest_x="250" dest_y="-30"/>
+                </Enemy>
+                <Enemy id="5" width="30" height="90" x="500" y="0">
+                    <Action type="3" isRepeat="1" isReverse="1" delay="0" postDelay="0.5" moveDuration="0.2" dest_x="500" dest_y="-30"/>
                 </Enemy>
             </Enemys>
         </Room>

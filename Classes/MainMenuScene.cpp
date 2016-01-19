@@ -38,6 +38,11 @@ bool MainMenuScene::init()
 	buttonEditor->addClickEventListener(CC_CALLBACK_1(MainMenuScene::buttonCallback_LevelEditor, this));
 	// get text
 	auto textTotalDead = dynamic_cast<Text*>(rootNode->getChildByName("Text_TotalDead"));
+	auto textSubtitle = dynamic_cast<Text*>(rootNode->getChildByName("Text_Subtitle"));
+	textSubtitle->setVisible(false);
+	textSubtitle->runAction(RepeatForever::create(Sequence::createWithTwoActions(
+		DelayTime::create(10.0f),
+		Blink::create(0.1f, 1))));
 	int maxLevel = pGameMediator->getMaxGameLevel();
 	int curLevel = pGameMediator->getCurGameLevel();
 	int totalDead = pGameMediator->getDeadCountAll(maxLevel);
@@ -71,16 +76,21 @@ bool MainMenuScene::init()
 		buttonLevel->setColor(levelColor);
 		buttonLevel->setTag(i + 1);
 		buttonLevel->addClickEventListener(CC_CALLBACK_1(MainMenuScene::buttonCallback_LevelPlay, this));
+		buttonLevel->setTitleText(StringUtils::format("%d:", i + 1) + levelData->getLevelName());
+		buttonLevel->setTitleFontSize(26);
 		// if the next level of curLevel open condition < total dead, need open the next level (when update new level will have this situation)
 		int maxDeadCount = levelData->getMaxDeadTime();
-		if (i > 0 && i == curLevel && 
+		if (i > 0 && i == curLevel - 1 && 
 			levelDeadCounts->at(i - 1) >= 0 && 
 			totalDead < maxDeadCount)
 		{
 			pGameMediator->gotoNextGameLevel();
+			maxLevel = pGameMediator->getMaxGameLevel();
 		}
 		else if (i > maxLevel - 1)
 		{
+			buttonLevel->setTitleText(StringUtils::format("%d", i + 1));
+			buttonLevel->setTitleFontSize(46);
 			buttonLevel->setEnabled(false);
 			buttonLevel->setColor(Color3B::GRAY);
 		}
@@ -97,9 +107,7 @@ bool MainMenuScene::init()
 				textDeadCount->setTextColor(Color4B::GRAY);
 			}
 			else
-			{
 				textDeadCount->setVisible(false);
-			}
 		}
 		else
 		{
@@ -129,9 +137,9 @@ bool MainMenuScene::init()
 	{
 		random_shuffle(m_vLevelColors.begin(), m_vLevelColors.end());
 
-		m_pColorLayer->runAction(TintTo::create(1.5f, m_vLevelColors.at(0).first));
+		m_pColorLayer->runAction(TintTo::create(3, m_vLevelColors.at(0).first));
 		this->schedule(CC_CALLBACK_1(MainMenuScene::schedule_changeColor, this),
-			2.0f, "change_color");
+			4, "change_color");
 	}
 
     return true;
@@ -155,5 +163,5 @@ void MainMenuScene::schedule_changeColor(float dt)
 {
 	random_shuffle(m_vLevelColors.begin(), m_vLevelColors.end());
 
-	m_pColorLayer->runAction(TintTo::create(1.5f, m_vLevelColors.at(0).first));
+	m_pColorLayer->runAction(TintTo::create(3, m_vLevelColors.at(0).first));
 }

@@ -1,13 +1,7 @@
 #include "ActionData.h"
-#include "GameLevelData.h"
 
 /*===============================Base Class===============================*/
-ActionData::ActionData(void)
-	: m_nType(TYPE_NORMAL)
-	, m_fDelay(0.0f)
-	, m_pAction(nullptr)
-	, m_bIsRepeat(false)
-	, m_bIsReverse(false)
+ActionData::ActionData(void): m_nType(TYPE_NORMAL), m_fDelay(0), m_fDuration(0), m_fPostDelay(0), m_bIsRepeat(false), m_bIsReverse(false), m_pAction(nullptr)
 {
 }
 
@@ -22,9 +16,6 @@ ActionData::~ActionData(void)
 
 /*===============================Move Action===============================*/
 MoveActionData::MoveActionData(void)
-	: m_fDuration(0.0f)
-	, m_Start(Point::ZERO)
-	, m_Destination(Point::ZERO)
 {
 }
 
@@ -32,15 +23,15 @@ MoveActionData::~MoveActionData(void)
 {
 }
 
-MoveActionData* MoveActionData::create(const float &delay, const float &duration, const Point &start, const Point &destination)
+MoveActionData* MoveActionData::create(const float &delay, const float &duration, const float &postDelay, const Point &start, const Point &destination)
 {
 	MoveActionData* pRet = new(std::nothrow) MoveActionData();
-	pRet->init(delay, duration, start, destination);
+	pRet->init(delay, duration, postDelay, start, destination);
 	pRet->autorelease();
 	return pRet;
 }
 
-bool MoveActionData::init(const float &delay, const float &duration, const Point &start, const Point &destination)
+bool MoveActionData::init(const float &delay, const float &duration, const float &postDelay, const Point &start, const Point &destination)
 {
 	bool bRet = false;
 	do
@@ -48,12 +39,14 @@ bool MoveActionData::init(const float &delay, const float &duration, const Point
 		m_nType = TYPE_MOVE;
 		m_fDelay = delay;
 		m_fDuration = duration;
+		m_fPostDelay = postDelay;
 		m_Start = start;
 		m_Destination = destination;
 		m_pAction = Sequence::create(
-			DelayTime::create(m_fDelay),
 			CallFunc::create([=] {m_pAction->getTarget()->setPosition(m_Start); }),
+			DelayTime::create(m_fDelay),
 			MoveTo::create(m_fDuration, m_Destination),
+			DelayTime::create(m_fPostDelay),
 			NULL);
 		m_pAction->setTag(m_nType);
 		m_pAction->retain();
@@ -73,12 +66,14 @@ void MoveActionData::updateAction()
 			DelayTime::create(m_fDelay),
 			MoveTo::create(m_fDuration, m_Destination),
 			MoveTo::create(m_fDuration, m_Start),
+			DelayTime::create(m_fPostDelay),
 			NULL);
 	else
 		m_pAction = Sequence::create(
 			CallFunc::create([=] {m_pAction->getTarget()->setPosition(m_Start); }),
 			DelayTime::create(m_fDelay),
 			MoveTo::create(m_fDuration, m_Destination),
+			DelayTime::create(m_fPostDelay),
 			NULL);
 	if (m_bIsRepeat)
 		m_pAction = RepeatForever::create(m_pAction);
@@ -90,7 +85,7 @@ MoveActionData* MoveActionData::clone() const
 {    
 	// no copy constructor
 	auto a = new (std::nothrow) MoveActionData();
-	a->init(m_fDelay, m_fDuration, m_Start, m_Destination);
+	a->init(m_fDelay, m_fDuration, m_fPostDelay, m_Start, m_Destination);
 	a->setIsRepeat(m_bIsRepeat);
 	a->setIsReverse(m_bIsReverse);
 	a->updateAction();
@@ -99,10 +94,7 @@ MoveActionData* MoveActionData::clone() const
 }
 
 /*===============================Rotate Action===============================*/
-RotateActionData::RotateActionData(void)
-	: m_fDuration(0.0f)
-	, m_fAngle(0.0f)
-	, m_Anchor(Vec2::ZERO)
+RotateActionData::RotateActionData(void): m_fAngle(0)
 {
 }
 
@@ -110,15 +102,15 @@ RotateActionData::~RotateActionData(void)
 {
 }
 
-RotateActionData* RotateActionData::create(const float &delay, const float &duration, const float &angle, const Vec2 &anchor)
+RotateActionData* RotateActionData::create(const float &delay, const float &duration, const float &postDelay, const float &angle, const Vec2 &anchor)
 {
 	RotateActionData* pRet = new(std::nothrow) RotateActionData();
-	pRet->init(delay, duration, angle, anchor);
+	pRet->init(delay, duration, postDelay, angle, anchor);
 	pRet->autorelease();
 	return pRet;
 }
 
-bool RotateActionData::init(const float &delay, const float &duration, const float &angle, const Vec2 &anchor)
+bool RotateActionData::init(const float &delay, const float &duration, const float &postDelay, const float &angle, const Vec2 &anchor)
 {
 	bool bRet = false;
 	do
@@ -126,6 +118,7 @@ bool RotateActionData::init(const float &delay, const float &duration, const flo
 		m_nType = TYPE_ROTATE;
 		m_fDelay = delay;
 		m_fDuration = duration;
+		m_fPostDelay = postDelay;
 		m_fAngle = angle;
 		m_Anchor = anchor;
 		if (m_fAngle >= 360 || m_fAngle <= -360)
@@ -133,12 +126,14 @@ bool RotateActionData::init(const float &delay, const float &duration, const flo
 				CallFunc::create([=] {m_pAction->getTarget()->setRotation(0); }),
 				DelayTime::create(m_fDelay),
 				RotateBy::create(m_fDuration, m_fAngle),
+				DelayTime::create(m_fPostDelay),
 				NULL);
 		else
 			m_pAction = Sequence::create(
-				DelayTime::create(m_fDelay),
 				CallFunc::create([=] {m_pAction->getTarget()->setRotation(0); }),
+				DelayTime::create(m_fDelay),
 				RotateBy::create(m_fDuration, m_fAngle),
+				DelayTime::create(m_fPostDelay),
 				NULL);
 		m_pAction->setTag(m_nType);
 		m_pAction->retain();
@@ -158,6 +153,7 @@ void RotateActionData::updateAction()
 			CallFunc::create([=] {m_pAction->getTarget()->setRotation(0); }),
 			DelayTime::create(m_fDelay),
 			RotateBy::create(m_fDuration, m_fAngle),
+			DelayTime::create(m_fPostDelay),
 			NULL);
 	else if (m_bIsReverse)
 		m_pAction = Sequence::create(
@@ -165,12 +161,14 @@ void RotateActionData::updateAction()
 			DelayTime::create(m_fDelay),
 			RotateBy::create(m_fDuration, m_fAngle),
 			RotateBy::create(m_fDuration, -m_fAngle),
+			DelayTime::create(m_fPostDelay),
 			NULL);
 	else
 		m_pAction = Sequence::create(
 			CallFunc::create([=] {m_pAction->getTarget()->setRotation(0); }),
 			DelayTime::create(m_fDelay),
 			RotateBy::create(m_fDuration, m_fAngle),
+			DelayTime::create(m_fPostDelay),
 			NULL);
 	if (m_bIsRepeat)
 		m_pAction = RepeatForever::create(m_pAction);
@@ -182,7 +180,7 @@ RotateActionData* RotateActionData::clone() const
 {
 	// no copy constructor
 	auto a = new (std::nothrow) RotateActionData();
-	a->init(m_fDelay, m_fDuration, m_fAngle, m_Anchor);
+	a->init(m_fDelay, m_fDuration, m_fPostDelay, m_fAngle, m_Anchor);
 	a->setIsRepeat(m_bIsRepeat);
 	a->setIsReverse(m_bIsReverse);
 	a->updateAction();
@@ -192,8 +190,6 @@ RotateActionData* RotateActionData::clone() const
 
 /*===============================Blink Action===============================*/
 BlinkActionData::BlinkActionData(void)
-	: m_fDuration(0.0f)
-	, m_fPostDelay(0.0f)
 {
 }
 
@@ -257,6 +253,86 @@ BlinkActionData* BlinkActionData::clone() const
 	// no copy constructor
 	auto a = new (std::nothrow) BlinkActionData();
 	a->init(m_fDelay, m_fDuration, m_fPostDelay);
+	a->setIsRepeat(m_bIsRepeat);
+	a->setIsReverse(m_bIsReverse);
+	a->updateAction();
+	a->autorelease();
+	return a;
+}
+
+/*===============================Scale Action===============================*/
+ScaleActionData::ScaleActionData(void): m_fScaleX(0), m_fScaleY(0)
+{
+}
+
+ScaleActionData::~ScaleActionData(void)
+{
+}
+
+ScaleActionData* ScaleActionData::create(const float &delay, const float &duration, const float &postDelay, const float &scaleX, const float &scaleY, const Vec2 &anchor)
+{
+	ScaleActionData* pRet = new(std::nothrow) ScaleActionData();
+	pRet->init(delay, duration, postDelay, scaleX, scaleY, anchor);
+	pRet->autorelease();
+	return pRet;
+}
+
+bool ScaleActionData::init(const float &delay, const float &duration, const float &postDelay, const float &scaleX, const float &scaleY, const Vec2 &anchor)
+{
+	bool bRet = false;
+	do
+	{
+		m_nType = TYPE_SCALE;
+		m_fDelay = delay;
+		m_fDuration = duration;
+		m_fPostDelay = postDelay;
+		m_fScaleX = scaleX;
+		m_fScaleY = scaleY;
+		m_Anchor = anchor;
+		m_pAction = Sequence::create(
+			CallFunc::create([=] {m_pAction->getTarget()->setScale(1, 1); }),
+			DelayTime::create(m_fDelay),
+			ScaleTo::create(m_fDuration, m_fScaleX, m_fScaleY),
+			DelayTime::create(m_fPostDelay),
+			NULL);
+		m_pAction->setTag(m_nType);
+		m_pAction->retain();
+		bRet = true;
+	} while (0);
+
+	return bRet;
+}
+
+void ScaleActionData::updateAction()
+{
+	m_pAction->release();
+	m_pAction = nullptr;
+	if (m_bIsReverse)
+		m_pAction = Sequence::create(
+			CallFunc::create([=] {m_pAction->getTarget()->setScale(1, 1); }),
+			DelayTime::create(m_fDelay),
+			ScaleTo::create(m_fDuration, m_fScaleX, m_fScaleY),
+			ScaleTo::create(m_fDuration, 1, 1),
+			DelayTime::create(m_fPostDelay),
+			NULL);
+	else
+		m_pAction = Sequence::create(
+			CallFunc::create([=] {m_pAction->getTarget()->setScale(1, 1); }),
+			DelayTime::create(m_fDelay),
+			ScaleTo::create(m_fDuration, m_fScaleX, m_fScaleY),
+			DelayTime::create(m_fPostDelay),
+			NULL);
+	if (m_bIsRepeat)
+		m_pAction = RepeatForever::create(m_pAction);
+	m_pAction->setTag(m_nType);
+	m_pAction->retain();
+}
+
+ScaleActionData* ScaleActionData::clone() const
+{
+	// no copy constructor
+	auto a = new (std::nothrow) ScaleActionData();
+	a->init(m_fDelay, m_fDuration, m_fPostDelay, m_fScaleX, m_fScaleY, m_Anchor);
 	a->setIsRepeat(m_bIsRepeat);
 	a->setIsReverse(m_bIsReverse);
 	a->updateAction();

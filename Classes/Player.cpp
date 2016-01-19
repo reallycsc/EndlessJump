@@ -1,6 +1,6 @@
 #include "Player.h"
 
-Player::Player(void)
+Player::Player(void): m_fSpeed(0), m_fJumpHeight(0), m_fJumpDuration(0)
 {
 }
 
@@ -11,17 +11,9 @@ Player::~Player(void)
 Player* Player::create(const Color3B &color, float speed, float jumpTime)
 {
 	Player *pRet = new(std::nothrow) Player();
-	if (pRet && pRet->init(color, speed, jumpTime))
-	{
-		pRet->autorelease();
-		return pRet;
-	}
-	else
-	{
-		delete pRet;
-		pRet = NULL;
-		return NULL;
-	}
+	pRet->init(color, speed, jumpTime);
+	pRet->autorelease();
+	return pRet;
 }
 
 bool Player::init(const Color3B &color, float speed, float jumpTime)
@@ -70,7 +62,7 @@ bool Player::init(const Color3B &color, float speed, float jumpTime)
     return bRet;
 }
 
-void Player::jump()
+bool Player::jump()
 {
 	auto action = this->getActionByTag(ACTIONTAG_JUMP);
 	if (!action || action->isDone())
@@ -82,7 +74,9 @@ void Player::jump()
 			);
 		actionJump->setTag(ACTIONTAG_JUMP);
 		this->runAction(actionJump);
+		return true;
 	}
+	return false;
 }
 
 void Player::die()

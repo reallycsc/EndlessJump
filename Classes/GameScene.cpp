@@ -1,6 +1,5 @@
 #include "GameScene.h"
 #include "CSCClass\CSCAction\Shake.h"
-#include "MainMenuScene.h"
 #include "GamePauseScene.h"
 #include "GameOverScene.h"
 
@@ -51,11 +50,13 @@ bool GameScene::init()
         return false;
     }
     /////////////////////////////
+	Size visibleSize = Director::getInstance()->getVisibleSize();
 	m_pGameMediator = GameMediator::getInstance();
 	m_nRoomCount = 0;
 	m_nDeadNumber = 0;
 	m_pPlayer = nullptr;
 	m_pParticleTail = nullptr;
+	m_LastJumpPoint = Point(-100, -100);
 
 	// get level data
 	auto levelsData = m_pGameMediator->getGameLevelData();
@@ -88,6 +89,11 @@ bool GameScene::init()
 	levelName->setString(m_pCurLevelData->getLevelName());
 	Text* levelNumber = dynamic_cast<Text*>(rootNode->getChildByName("Text_LevelNumber"));
 	levelNumber->setString(StringUtils::format("%d/%d", curLevel, m_pGameMediator->getGameLevelCount()));
+
+	// black layer
+	m_pBlackLayer = LayerColor::create(Color4B::BLACK, visibleSize.width, visibleSize.height);
+	m_pBlackLayer->setPosition(Point::ZERO);
+	this->addChild(m_pBlackLayer, 99);
 
 	// play animate
 	m_pAnimate->play("Scene_Start", false);
@@ -141,8 +147,11 @@ void GameScene::onFrameEvent(Frame* frame)
 bool GameScene::onTouchBegan(Touch *touch, Event *event)
 {
 	//Point point = touch->getLocation();
-	if (m_pPlayer)
-		m_pPlayer->jump();
+	if (m_pPlayer && m_pPlayer->jump())
+	{
+		m_LastJumpPoint = Point(m_pPlayer->getPositionX() + m_pPlayer->getContentSize().width / 2, m_pPlayer->getPositionY() - m_pPlayer->getContentSize().height / 2 + 2);
+	}
+
 	return true;
 }
 
@@ -258,6 +267,12 @@ bool GameScene::onContactBegin(const PhysicsContact& contact)
 			this->resetRoom(m_pCurRoomData->id);
 			this->addPlayer();
 		})));
+
+		// show last dead jump point
+		this->removeChildByName("LastJumpPoint");
+		DrawNode* point = DrawNode::create();
+		point->drawPoint(m_LastJumpPoint, 4, m_pCurRoomData->color == Color3B::RED ? Color4F::GREEN : Color4F::RED);
+		this->addChild(point, 98, "LastJumpPoint");
 	}
 
 	return false;
@@ -265,6 +280,9 @@ bool GameScene::onContactBegin(const PhysicsContact& contact)
 
 void GameScene::addRoom(RoomData* roomData)
 {
+	// set black layer position
+	m_pBlackLayer->setPositionY(m_pBlackLayer->getPositionY() + roomData->size.height);
+
 	// background
 	DrawNode* background = DrawNode::create();
 	background->drawSolidRect(Point::ZERO, roomData->size, Color4F(roomData->color));
@@ -369,6 +387,5 @@ void GameScene::addPlayer()
 	m_pParticleTail->setSpeedVar(0);
 	m_pParticleTail->setLife(0.15f);
 	m_pParticleTail->setLifeVar(0.1f);
-	m_pParticleTail->setPosition(0, m_pCurRoomData->position.y); // left-bottom of player
 	this->addChild(m_pParticleTail, 5);
 }

@@ -49,6 +49,9 @@ public:
 	void setActions(Vector<ActionData*>* actions);
 	Vector<ActionData*>* getActions() { return &m_vActions; }
 
+private:
+	inline void prepareForAction(ActionData* action_data);
+
 public:
 	CC_SYNTHESIZE(int, m_nID, ID);
 	CC_SYNTHESIZE(int, m_nRoomID, RoomID);
