@@ -23,7 +23,8 @@ bool CSC_IOSHelper::init()
 	bool bRet = false;
 	do
 	{
-		CC_BREAK_IF(!Node::init());
+		this->GameCenter_authenticateLocalUser();
+
 		bRet = true;
 	} while (false);
 	return bRet;
@@ -183,12 +184,14 @@ void CSC_IOSHelper::IAP_requestAllPurchasedProductsWithCallback(bool isTest, con
 					if (response > 0) {
 						[ProgressHUD dismiss];
 						this->unschedule(schedule_selector(CSC_IOSHelper::waitingTimeOut));
+						//Director::getInstance()->getScheduler()->unschedule("waiting_time_out", this);
 						func();
 					}
 				}];
 				[ProgressHUD show : @"Downloading information, please wait¡­"
 					Interaction : FALSE];
 				this->scheduleOnce(schedule_selector(CSC_IOSHelper::waitingTimeOut), 10.0f);
+				//Director::getInstance()->getScheduler()->schedule(schedule_selector(CSC_IOSHelper::waitingTimeOut), this, 0, 0, 10, false, "waiting_time_out");
 			}
 			else {
 				func();
@@ -196,6 +199,7 @@ void CSC_IOSHelper::IAP_requestAllPurchasedProductsWithCallback(bool isTest, con
 		}
 	} while (false);
 #endif
+	
 }
 
 void CSC_IOSHelper::IAP_purchaseProduct(bool isTest, const char* id)
@@ -302,12 +306,14 @@ void CSC_IOSHelper::IAP_restorePurchase()
 				}
 				//[ProgressHUD dismiss];
 				this->unschedule(schedule_selector(CSC_IOSHelper::waitingTimeOut));
+				//Director::getInstance()->getScheduler()->unschedule("waiting_time_out", this);
 				[ProgressHUD showSuccess : @"Restore success."];
 			}
 		}];
 		[ProgressHUD show : @"Downloading information, please wait¡­"
 			Interaction : FALSE];
 		this->scheduleOnce(schedule_selector(CSC_IOSHelper::waitingTimeOut), 10.0f);
+		//Director::getInstance()->getScheduler()->schedule(schedule_selector(CSC_IOSHelper::waitingTimeOut), this, 0, 0, 10, false, "waiting_time_out");
 	} while (false);
 #endif
 }

@@ -2,13 +2,13 @@
 #include "CommonDefinition.h"
 
 NS_CSC_BEGIN
-class CSC_IOSHelper : public Node
+class CSC_IOSHelper : public Ref
 {
 public:
 	CSC_IOSHelper();
 	// singlar
 	static CSC_IOSHelper* getInstance();
-	virtual bool init() override;
+	bool init();
 
 public:
 	// Game Center
