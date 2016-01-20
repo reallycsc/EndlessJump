@@ -12,6 +12,7 @@
         <Project Name="GameOverScene.csd" Type="Scene" />
         <Project Name="MainMenuScene_NodeLevel.csd" Type="Node" />
         <Project Name="GamePauseScene.csd" Type="Scene" />
+        <Project Name="CreditScene.csd" Type="Scene" />
       </RootFolder>
     </Group>
   </SolutionFolder>

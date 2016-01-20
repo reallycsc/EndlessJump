@@ -14,15 +14,21 @@ public:
     CREATE_FUNC(MainMenuScene);
 
 private:
+	void update(float dt);
+
 	void buttonCallback_LevelPlay(Ref* pSender);
 	void buttonCallback_LevelEditor(Ref* pSender);
+	void buttonCallback_Credit(Ref* pSender);
 
-	void schedule_changeColor(float dt);
-
+	inline LayerGradient* createLayerColor();
 private:
-	LayerColor*	m_pColorLayer;
+	LayerGradient*	m_pLayerColor1;
+	LayerGradient*	m_pLayerColor2;
 	vector<pair<Color3B,Color3B>>	m_vLevelColors;
 	Vector<Text*>	m_vLevelDeadCount;
+
+	int m_nCurColorIndex;
+	float	m_fLayerColorSpeed;
 };
 
 #endif // __MAINMENU_SCENE_H__

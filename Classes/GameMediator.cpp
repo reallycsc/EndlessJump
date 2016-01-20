@@ -62,7 +62,7 @@ bool GameMediator::init()
 				m_vLevelMinDeadCount.push_back(deadCount);
 			}
 		}
-
+		
 		bRet = true;
 	} while (false);
 	

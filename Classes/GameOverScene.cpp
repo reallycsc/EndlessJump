@@ -2,6 +2,7 @@
 #include "GameMediator.h"
 #include "MainMenuScene.h"
 #include "GameScene.h"
+#include "CreditScene.h"
 
 Scene* GameOverScene::createScene(int deadCount)
 {
@@ -92,17 +93,14 @@ bool GameOverScene::init(int deadCount)
 	int maxDeadTime = levelData->getMaxDeadTime();
 	auto textNextRequirement = dynamic_cast<Text*>(layout->getChildByName("Text_NextRequirement"));
 	textNextRequirement->setString(StringUtils::format("(Total deads < %d)", maxDeadTime));
-	auto textFinish = dynamic_cast<Text*>(layout->getChildByName("Text_Finish"));
 
 	if (pGameMediator->getCurGameLevel() == pGameMediator->getGameLevelCount()) // the last level, finish the game!
 	{
 		textNextRequirement->setVisible(false);
-		buttonNext->setEnabled(false);
-		buttonNext->setVisible(false);
+		buttonNext->setTitleText("Finish");
 	}
 	else
 	{
-		textFinish->setVisible(false);
 		if (pGameMediator->getCurGameLevel() < pGameMediator->getMaxGameLevel())
 		{
 			textNextRequirement->setVisible(false);
@@ -130,9 +128,17 @@ bool GameOverScene::init(int deadCount)
 
 void GameOverScene::buttonCallback_Next(Ref* pSender)
 {
+	GameMediator* pGameMediator = GameMediator::getInstance();
 	Director::getInstance()->getTextureCache()->removeTextureForKey("GameOverImage");
-	GameMediator::getInstance()->gotoNextGameLevel();
-	Director::getInstance()->replaceScene(GameScene::createScene());
+	if (pGameMediator->getCurGameLevel() == pGameMediator->getGameLevelCount()) // the last level, finish the game!
+	{
+		Director::getInstance()->replaceScene(CreditScene::createScene());
+	}
+	else
+	{
+		GameMediator::getInstance()->gotoNextGameLevel();
+		Director::getInstance()->replaceScene(GameScene::createScene());
+	}
 }
 
 void GameOverScene::buttonCallback_Retry(Ref* pSender)

@@ -55,7 +55,7 @@
       <ObjectData Name="Scene" Tag="155" ctype="GameNodeObjectData">
         <Size X="1536.0000" Y="1024.0000" />
         <Children>
-          <AbstractNodeData Name="Panel_GameOver" ActionTag="1587651597" Tag="169" IconVisible="False" PositionPercentYEnabled="True" RightMargin="768.0000" TopMargin="287.0000" BottomMargin="287.0000" TouchEnable="True" ClipAble="True" BackColorAlpha="191" ComboBoxIndex="1" ColorAngle="90.0000" Scale9Width="1" Scale9Height="1" ctype="PanelObjectData">
+          <AbstractNodeData Name="Panel_GameOver" ActionTag="1587651597" Tag="169" IconVisible="False" PositionPercentYEnabled="True" LeftMargin="-768.0000" RightMargin="1536.0000" TopMargin="287.0000" BottomMargin="287.0000" TouchEnable="True" ClipAble="True" BackColorAlpha="191" ComboBoxIndex="1" ColorAngle="90.0000" Scale9Width="1" Scale9Height="1" ctype="PanelObjectData">
             <Size X="768.0000" Y="450.0000" />
             <Children>
               <AbstractNodeData Name="Text_Title" ActionTag="-836941380" Tag="170" IconVisible="False" PositionPercentXEnabled="True" PositionPercentYEnabled="True" LeftMargin="188.5000" RightMargin="188.5000" BottomMargin="359.0000" FontSize="72" LabelText="Level Name" OutlineSize="4" OutlineEnabled="True" ShadowOffsetX="2.0000" ShadowOffsetY="-2.0000" ctype="TextObjectData">
@@ -70,7 +70,7 @@
                 <OutlineColor A="255" R="30" G="144" B="255" />
                 <ShadowColor A="255" R="0" G="0" B="0" />
               </AbstractNodeData>
-              <AbstractNodeData Name="Node_EnlargeAnimation" ActionTag="-1961623313" Tag="171" IconVisible="True" LeftMargin="384.0000" RightMargin="384.0000" TopMargin="168.9335" BottomMargin="281.0665" ctype="SingleNodeObjectData">
+              <AbstractNodeData Name="Node_EnlargeAnimation" ActionTag="-1961623313" Tag="171" IconVisible="True" LeftMargin="384.0000" RightMargin="384.0000" TopMargin="150.0000" BottomMargin="300.0000" ctype="SingleNodeObjectData">
                 <Size X="0.0000" Y="0.0000" />
                 <Children>
                   <AbstractNodeData Name="Text_DeadNumber" ActionTag="-1281327057" Tag="172" IconVisible="False" LeftMargin="-142.5000" RightMargin="-142.5000" TopMargin="-51.0000" BottomMargin="10.0000" FontSize="36" LabelText="0 deads this level." HorizontalAlignmentType="HT_Center" OutlineSize="2" ShadowOffsetX="2.0000" ShadowOffsetY="-2.0000" ctype="TextObjectData">
@@ -99,10 +99,10 @@
                   </AbstractNodeData>
                 </Children>
                 <AnchorPoint />
-                <Position X="384.0000" Y="281.0665" />
-                <Scale ScaleX="0.9733" ScaleY="0.9733" />
+                <Position X="384.0000" Y="300.0000" />
+                <Scale ScaleX="0.5000" ScaleY="0.5000" />
                 <CColor A="255" R="255" G="255" B="255" />
-                <PrePosition X="0.5000" Y="0.6246" />
+                <PrePosition X="0.5000" Y="0.6667" />
                 <PreSize X="0.0000" Y="0.0000" />
               </AbstractNodeData>
               <AbstractNodeData Name="Button_Next" ActionTag="1633137155" Tag="174" IconVisible="False" PositionPercentXEnabled="True" LeftMargin="324.0000" RightMargin="324.0000" TopMargin="300.0000" BottomMargin="110.0000" TouchEnable="True" FontSize="24" ButtonText="Next" Scale9Enable="True" LeftEage="15" RightEage="15" TopEage="11" BottomEage="11" Scale9OriginX="15" Scale9OriginY="11" Scale9Width="16" Scale9Height="14" ShadowOffsetX="2.0000" ShadowOffsetY="-2.0000" ctype="ButtonObjectData">
@@ -165,24 +165,12 @@
                 <OutlineColor A="255" R="255" G="0" B="0" />
                 <ShadowColor A="255" R="110" G="110" B="110" />
               </AbstractNodeData>
-              <AbstractNodeData Name="Text_Finish" ActionTag="726890833" Tag="178" IconVisible="False" PositionPercentXEnabled="True" PositionPercentYEnabled="True" LeftMargin="109.0000" RightMargin="109.0000" TopMargin="220.0000" BottomMargin="130.0000" IsCustomSize="True" FontSize="22" LabelText="Thank you for playing!&#xA;New levels will coming soon in next big update.&#xA;Now you can try to get the ultimate achievement." HorizontalAlignmentType="HT_Center" VerticalAlignmentType="VT_Center" OutlineSize="4" ShadowOffsetX="2.0000" ShadowOffsetY="-2.0000" ShadowEnabled="True" ctype="TextObjectData">
-                <Size X="550.0000" Y="100.0000" />
-                <AnchorPoint ScaleX="0.5000" ScaleY="0.5000" />
-                <Position X="384.0000" Y="180.0000" />
-                <Scale ScaleX="1.0000" ScaleY="1.0000" />
-                <CColor A="255" R="255" G="165" B="0" />
-                <PrePosition X="0.5000" Y="0.4000" />
-                <PreSize X="0.7161" Y="0.2222" />
-                <FontResource Type="Normal" Path="Resource/fzzj.ttf" Plist="" />
-                <OutlineColor A="255" R="255" G="0" B="0" />
-                <ShadowColor A="255" R="0" G="0" B="0" />
-              </AbstractNodeData>
             </Children>
             <AnchorPoint ScaleX="0.5000" ScaleY="0.5000" />
-            <Position X="384.0000" Y="512.0000" />
+            <Position X="-384.0000" Y="512.0000" />
             <Scale ScaleX="1.0000" ScaleY="1.0000" />
             <CColor A="255" R="255" G="255" B="255" />
-            <PrePosition X="0.2500" Y="0.5000" />
+            <PrePosition X="-0.2500" Y="0.5000" />
             <PreSize X="0.5000" Y="0.4395" />
             <SingleColor A="255" R="26" G="26" B="26" />
             <FirstColor A="255" R="150" G="200" B="255" />

@@ -138,12 +138,12 @@ bool LevelMakeScene::init()
 	// get block panel
 	auto panelBlock = dynamic_cast<Layout*>(rootNode->getChildByName("Panel_Block"));
 	auto textBlock = dynamic_cast<Text*>(panelBlock->getChildByName("Text_Block"));
-	m_pDropDownListBlockId = CSCClass::DropDownList::create(Label::createWithSystemFont("0", "fonts/arial.ttf", 20), Size(80, 30), "blockId");
+	m_pDropDownListBlockId = CSCClass::DropDownList::create(Label::createWithTTF("0", "fonts/fzzj.ttf", 20), Size(80, 30), "blockId");
 	m_pDropDownListBlockId->setPosition(textBlock->getPositionX() + 10, textBlock->getPositionY() - m_pDropDownListBlockId->getContentSize().height / 2);
 	panelBlock->addChild(m_pDropDownListBlockId);
 	_eventDispatcher->addCustomEventListener(CSCClass::EVENT_DROPDOWNLIST_SELECTED + "blockId", CC_CALLBACK_1(LevelMakeScene::onDropDownList_BlockId, this));
 	auto textAction = dynamic_cast<Text*>(panelBlock->getChildByName("Text_Action"));
-	m_pDropDownListBlockAction = CSCClass::DropDownList::create(Label::createWithSystemFont("0:Unknown", "fonts/arial.ttf", 20), Size(80, 30), "blockAction");
+	m_pDropDownListBlockAction = CSCClass::DropDownList::create(Label::createWithTTF("0:Unknown", "fonts/fzzj.ttf", 20), Size(80, 30), "blockAction");
 	m_pDropDownListBlockAction->setPosition(textAction->getPositionX() + 10, textAction->getPositionY() - m_pDropDownListBlockAction->getContentSize().height / 2);
 	panelBlock->addChild(m_pDropDownListBlockAction);
 	m_pDropDownListBlockAction->clearAllLabels();
@@ -182,12 +182,12 @@ bool LevelMakeScene::init()
 	this->getLevelNodeAndInit(dynamic_cast<Node*>(panelPlayer->getChildByName("Node_JumpDuration")), TAG_PLAYER_JUMPTIME10, 1, 6, 20);
 	// get level choose panel
 	auto panelLevelChoose = dynamic_cast<Layout*>(rootNode->getChildByName("Panel_LevelChoose"));
-	m_pDropDownListLevel = CSCClass::DropDownList::create(Label::createWithSystemFont("1", "fonts/arial.ttf", 20), Size(80, 30), "level");
+	m_pDropDownListLevel = CSCClass::DropDownList::create(Label::createWithTTF("1", "fonts/fzzj.ttf", 20), Size(80, 30), "level");
 	m_pDropDownListLevel->setPosition(70, (panelLevelChoose->getContentSize().height - m_pDropDownListLevel->getContentSize().height) / 2);
 	panelLevelChoose->addChild(m_pDropDownListLevel);
 	_eventDispatcher->addCustomEventListener(CSCClass::EVENT_DROPDOWNLIST_SELECTED + "level", CC_CALLBACK_1(LevelMakeScene::onDropDownList_Level, this));
 
-	m_pDropDownListRoom = CSCClass::DropDownList::create(Label::createWithSystemFont("1", "fonts/arial.ttf", 20), Size(80, 30), "room");
+	m_pDropDownListRoom = CSCClass::DropDownList::create(Label::createWithTTF("1", "fonts/fzzj.ttf", 20), Size(80, 30), "room");
 	m_pDropDownListRoom->setPosition(270, (panelLevelChoose->getContentSize().height - m_pDropDownListRoom->getContentSize().height) / 2);
 	panelLevelChoose->addChild(m_pDropDownListRoom);
 	_eventDispatcher->addCustomEventListener(CSCClass::EVENT_DROPDOWNLIST_SELECTED + "room", CC_CALLBACK_1(LevelMakeScene::onDropDownList_Room, this));
@@ -341,7 +341,7 @@ void LevelMakeScene::onDropDownList_Level(EventCustom* event)
 	auto roomsData = GameMediator::getInstance()->getGameLevelData()->at(index)->getRoomsData();
 	m_pDropDownListRoom->clearAllLabels();
 	for (size_t i = 0, length = roomsData->size(); i < length; i++)
-		m_pDropDownListRoom->addLabel(Label::createWithSystemFont(StringUtils::format("%d", i + 1), "fonts/arial.ttf", 20));
+		m_pDropDownListRoom->addLabel(Label::createWithTTF(StringUtils::format("%d", i + 1), "fonts/fzzj.ttf", 20));
 	// load room 1 from this level
 	this->updateBlockTextFieldByNumber(TAG_LEVEL_ROOM_ID, 1);
 	m_pDropDownListRoom->setSelectedIndex(0);
@@ -454,10 +454,10 @@ void LevelMakeScene::buttonCallback_AddNewLevel(Ref* pSender)
 {
 	auto levelsData = GameMediator::getInstance()->getGameLevelData();
 	int newLevelIndex = levelsData->size() + 1;
-	m_pDropDownListLevel->addLabel(Label::createWithSystemFont(StringUtils::format("%d", newLevelIndex), "fonts/arial.ttf", 20));
+	m_pDropDownListLevel->addLabel(Label::createWithTTF(StringUtils::format("%d", newLevelIndex), "fonts/fzzj.ttf", 20));
 	m_pDropDownListLevel->setSelectedIndex(newLevelIndex - 1);
 	m_pDropDownListRoom->clearAllLabels();
-	m_pDropDownListRoom->addLabel(Label::createWithSystemFont("1", "fonts/arial.ttf", 20));
+	m_pDropDownListRoom->addLabel(Label::createWithTTF("1", "fonts/fzzj.ttf", 20));
 	m_pDropDownListRoom->setSelectedIndex(0);
 	this->updateBlockTextFieldByNumber(TAG_LEVEL_ID, newLevelIndex);
 	m_sLevelName = "Initial Title";
@@ -474,7 +474,7 @@ void LevelMakeScene::buttonCallback_AddNewRoom(Ref* pSender)
 	int level = m_mTextFieldStructs.at(TAG_LEVEL_ID).number;
 	auto roomsData = levelsData->at(level - 1)->getRoomsData();
 	int newRoomIndex = roomsData->size() + 1;
-	m_pDropDownListRoom->addLabel(Label::createWithSystemFont(StringUtils::format("%d", newRoomIndex), "fonts/arial.ttf", 20));
+	m_pDropDownListRoom->addLabel(Label::createWithTTF(StringUtils::format("%d", newRoomIndex), "fonts/fzzj.ttf", 20));
 	m_pDropDownListRoom->setSelectedIndex(newRoomIndex - 1);
 	this->updateBlockTextFieldByNumber(TAG_LEVEL_ROOM_ID, newRoomIndex);
 	this->saveDataTo(level, newRoomIndex);
@@ -600,7 +600,7 @@ void LevelMakeScene::buttonCallback_BlockAddRotate(Ref* pSender)
 	if(m_pCurEnemy->addAction(m_pCurAction))
 	{
 		auto id = m_pCurEnemy->getActions()->size() - 1;
-		m_pDropDownListBlockAction->addLabel(Label::createWithSystemFont(StringUtils::format("%d:Rotate", id), "fonts/arial.ttf", 20));
+		m_pDropDownListBlockAction->addLabel(Label::createWithTTF(StringUtils::format("%d:Rotate", id), "fonts/fzzj.ttf", 20));
 		m_pDropDownListBlockAction->setSelectedIndex(id);
 		this->updateBlockTextFieldByCurAction();
 		this->updateBlockTextFieldEnableByCurActionType();
@@ -621,7 +621,7 @@ void LevelMakeScene::buttonCallback_BlockAddMove(Ref* pSender)
 	if (m_pCurEnemy->addAction(m_pCurAction))
 	{
 		auto id = m_pCurEnemy->getActions()->size() - 1;
-		m_pDropDownListBlockAction->addLabel(Label::createWithSystemFont(StringUtils::format("%d:Move", id), "fonts/arial.ttf", 20));
+		m_pDropDownListBlockAction->addLabel(Label::createWithTTF(StringUtils::format("%d:Move", id), "fonts/fzzj.ttf", 20));
 		m_pDropDownListBlockAction->setSelectedIndex(id);
 		this->updateBlockTextFieldByCurAction();
 		this->updateBlockTextFieldEnableByCurActionType();
@@ -642,7 +642,7 @@ void LevelMakeScene::buttonCallback_BlockAddBlink(Ref* pSender)
 	if (m_pCurEnemy->addAction(m_pCurAction))
 	{
 		auto id = m_pCurEnemy->getActions()->size() - 1;
-		m_pDropDownListBlockAction->addLabel(Label::createWithSystemFont(StringUtils::format("%d:Blink", id), "fonts/arial.ttf", 20));
+		m_pDropDownListBlockAction->addLabel(Label::createWithTTF(StringUtils::format("%d:Blink", id), "fonts/fzzj.ttf", 20));
 		m_pDropDownListBlockAction->setSelectedIndex(id);
 		this->updateBlockTextFieldByCurAction();
 		this->updateBlockTextFieldEnableByCurActionType();
@@ -663,7 +663,7 @@ void LevelMakeScene::buttonCallback_BlockAddScale(Ref* pSender)
 	if (m_pCurEnemy->addAction(m_pCurAction))
 	{
 		auto id = m_pCurEnemy->getActions()->size() - 1;
-		m_pDropDownListBlockAction->addLabel(Label::createWithSystemFont(StringUtils::format("%d:Scale", id), "fonts/arial.ttf", 20));
+		m_pDropDownListBlockAction->addLabel(Label::createWithTTF(StringUtils::format("%d:Scale", id), "fonts/fzzj.ttf", 20));
 		m_pDropDownListBlockAction->setSelectedIndex(id);
 		this->updateBlockTextFieldByCurAction();
 		this->updateBlockTextFieldEnableByCurActionType();
@@ -764,12 +764,12 @@ void LevelMakeScene::updateDropDownListOfLevelAndRoom(vector<GameLevelData*>* le
 	CS_RETURN_IF(!levelsData);
 	m_pDropDownListLevel->clearAllLabels();
 	for (size_t i = 0, j = levelsData->size(); i < j; i++)
-		m_pDropDownListLevel->addLabel(Label::createWithSystemFont(StringUtils::format("%d", i + 1), "fonts/arial.ttf", 20));
+		m_pDropDownListLevel->addLabel(Label::createWithTTF(StringUtils::format("%d", i + 1), "fonts/fzzj.ttf", 20));
 
 	auto roomsData = levelsData->at(m_pDropDownListLevel->getSelectedIndex())->getRoomsData();
 	m_pDropDownListRoom->clearAllLabels();
 	for (size_t i = 0, j = roomsData->size(); i < j; i++)
-		m_pDropDownListRoom->addLabel(Label::createWithSystemFont(StringUtils::format("%d", i + 1), "fonts/arial.ttf", 20));
+		m_pDropDownListRoom->addLabel(Label::createWithTTF(StringUtils::format("%d", i + 1), "fonts/fzzj.ttf", 20));
 }
 
 void LevelMakeScene::resetRoom()
@@ -796,7 +796,7 @@ void LevelMakeScene::addEnemy()
 	this->addChild(m_pCurEnemy, 1, TAG_ENEMY);
 	m_vEnemys.pushBack(m_pCurEnemy);
 	m_pCurEnemy->select();
-	m_pDropDownListBlockId->addLabel(Label::createWithSystemFont(StringUtils::format("%d", id), "fonts/arial.ttf", 20));
+	m_pDropDownListBlockId->addLabel(Label::createWithTTF(StringUtils::format("%d", id), "fonts/fzzj.ttf", 20));
 	m_pDropDownListBlockId->setSelectedIndex(id);
 	this->updateDropDownListOfEnemyActions();
 }
@@ -943,7 +943,7 @@ void LevelMakeScene::updateDropDownListOfEnemys()
 {
 	m_pDropDownListBlockId->clearAllLabels();
 	for (size_t i = 0, length = m_vEnemys.size(); i < length; i++)
-		m_pDropDownListBlockId->addLabel(Label::createWithSystemFont(StringUtils::format("%d", i), "fonts/arial.ttf", 20));
+		m_pDropDownListBlockId->addLabel(Label::createWithTTF(StringUtils::format("%d", i), "fonts/fzzj.ttf", 20));
 }
 
 void LevelMakeScene::updateBlockTextFieldEnableByCurActionType()
@@ -1097,19 +1097,19 @@ void LevelMakeScene::updateDropDownListOfEnemyActions()
 		switch (type)
 		{
 		case TYPE_ROTATE:
-			m_pDropDownListBlockAction->addLabel(Label::createWithSystemFont(StringUtils::format("%d:Rotate", i), "fonts/arial.ttf", 20));
+			m_pDropDownListBlockAction->addLabel(Label::createWithTTF(StringUtils::format("%d:Rotate", i), "fonts/fzzj.ttf", 20));
 			break;
 		case TYPE_MOVE:
-			m_pDropDownListBlockAction->addLabel(Label::createWithSystemFont(StringUtils::format("%d:Move", i), "fonts/arial.ttf", 20));
+			m_pDropDownListBlockAction->addLabel(Label::createWithTTF(StringUtils::format("%d:Move", i), "fonts/fzzj.ttf", 20));
 			break;
 		case TYPE_BLINK:
-			m_pDropDownListBlockAction->addLabel(Label::createWithSystemFont(StringUtils::format("%d:Blink", i), "fonts/arial.ttf", 20));
+			m_pDropDownListBlockAction->addLabel(Label::createWithTTF(StringUtils::format("%d:Blink", i), "fonts/fzzj.ttf", 20));
 			break;
 		case TYPE_SCALE:
-			m_pDropDownListBlockAction->addLabel(Label::createWithSystemFont(StringUtils::format("%d:Scale", i), "fonts/arial.ttf", 20));
+			m_pDropDownListBlockAction->addLabel(Label::createWithTTF(StringUtils::format("%d:Scale", i), "fonts/fzzj.ttf", 20));
 			break;
 		default:
-			m_pDropDownListBlockAction->addLabel(Label::createWithSystemFont(StringUtils::format("%d:Unknown", i), "fonts/arial.ttf", 20));
+			m_pDropDownListBlockAction->addLabel(Label::createWithTTF(StringUtils::format("%d:Unknown", i), "fonts/fzzj.ttf", 20));
 			break;
 		}
 	}
@@ -1262,7 +1262,7 @@ void LevelMakeScene::loadDataFrom(int level, int room)
 		enemy->setPosition(enemyData->position);
 		this->addChild(enemy, 1, TAG_ENEMY);
 		m_vEnemys.pushBack(enemy);
-		m_pDropDownListBlockId->addLabel(Label::createWithSystemFont(StringUtils::format("%d", i), "fonts/arial.ttf", 20));
+		m_pDropDownListBlockId->addLabel(Label::createWithTTF(StringUtils::format("%d", i), "fonts/fzzj.ttf", 20));
 	}
 	// select the first one
 	if (enemys->size() > 0)
@@ -1556,7 +1556,7 @@ void LevelMakeScene::AddEstimateFrameText(Node* parent, float p1, float p2,
 {
 	CS_RETURN_IF(!parent);
 	int frameNumber = static_cast<int>(frameRate * (p2 - p1 - playerWidth) / speed);
-	Text* text = Text::create(StringUtils::format("%d", frameNumber), "fonts/arial.ttf", 16);
+	Text* text = Text::create(StringUtils::format("%d", frameNumber), "fonts/fzzj.ttf", 16);
 	if (frameNumber <= 0)
 		color = Color4B::RED;
 	text->setTextColor(color);
@@ -1573,7 +1573,7 @@ void LevelMakeScene::AddPlayerPositionForTime(const int& speed, const float& wid
 	for (size_t i = 1, length = totalTime / interval; i < length; i++)
 	{
 		auto t = interval * i;
-		Text* text = Text::create(StringUtils::format("%.1f", t), "fonts/arial.ttf", 12);
+		Text* text = Text::create(StringUtils::format("%.1f", t), "fonts/fzzj.ttf", 12);
 		text->setPosition(Point(speed * t, height));
 		textNode->addChild(text);
 	}

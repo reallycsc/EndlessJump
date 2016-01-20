@@ -11,8 +11,10 @@ using namespace std;
 using namespace tinyxml2;
 
 // flags
-#define LEVEL_MAKER_MODE
-#define SHOW_ALL_ROOM_MODE
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
+	#define LEVEL_MAKER_MODE
+	#define SHOW_ALL_ROOM_MODE
+#endif
 
 // physics mask  
 const int MASK_PLAYER = 1 << 0; // player

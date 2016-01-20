@@ -2,6 +2,7 @@
 #include "CommonHeader.h"
 #include "MainMenuScene.h"
 #include "GameMediator.h"
+#include "CSCClass/AudioCtrl.h"
 
 USING_NS_CC;
 
@@ -97,6 +98,19 @@ bool AppDelegate::applicationDidFinishLaunching() {
     // run
     director->runWithScene(MainMenuScene::createScene());
 
+	// load music
+	auto audio_engine = CSCClass::AudioCtrl::getInstance();
+	audio_engine->addBackgroundMusic("Alan Walker - Spectre.mp3");
+	audio_engine->addBackgroundMusic("Arty - Worlds Collide.mp3");
+	audio_engine->addBackgroundMusic("Calvin Harris - Iron.mp3");
+	audio_engine->addBackgroundMusic("Deorro - Play.mp3");
+	audio_engine->addBackgroundMusic("Hardwell - Jumper.mp3");
+	audio_engine->addBackgroundMusic("James Egbert - The Glory.mp3");
+
+	// Play music
+	CocosDenshion::SimpleAudioEngine::getInstance()->setBackgroundMusicVolume(1.0);
+	audio_engine->playBackgroundMusicList(true);
+
     return true;
 }
 
@@ -105,7 +119,7 @@ void AppDelegate::applicationDidEnterBackground() {
     Director::getInstance()->stopAnimation();
 
     // if you use SimpleAudioEngine, it must be pause
-    // SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
+	CocosDenshion::SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
 }
 
 // this function will be called when the app is active again
@@ -113,5 +127,5 @@ void AppDelegate::applicationWillEnterForeground() {
     Director::getInstance()->startAnimation();
 
     // if you use SimpleAudioEngine, it must resume here
-    // SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
+	CocosDenshion::SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
 }

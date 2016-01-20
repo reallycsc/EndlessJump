@@ -2,15 +2,9 @@
   <PropertyGroup Name="MainMenuScene" Type="Scene" ID="a2ee0952-26b5-49ae-8bf9-4f1d6279b798" Version="2.3.3.0" />
   <Content ctype="GameProjectContent">
     <Content>
-      <Animation Duration="60" Speed="1.0000">
+      <Animation Duration="0" Speed="1.0000">
         <Timeline ActionTag="-868953858" Property="Position">
-          <PointFrame FrameIndex="0" X="10.0000" Y="1014.0000">
-            <EasingData Type="0" />
-          </PointFrame>
-          <PointFrame FrameIndex="30" X="10.0000" Y="1070.0000">
-            <EasingData Type="0" />
-          </PointFrame>
-          <PointFrame FrameIndex="60" X="10.0000" Y="1014.0000">
+          <PointFrame FrameIndex="0" X="34.0000" Y="30.0000">
             <EasingData Type="0" />
           </PointFrame>
         </Timeline>
@@ -18,26 +12,11 @@
           <ScaleFrame FrameIndex="0" X="1.0000" Y="1.0000">
             <EasingData Type="0" />
           </ScaleFrame>
-          <ScaleFrame FrameIndex="30" X="1.0000" Y="1.0000">
-            <EasingData Type="0" />
-          </ScaleFrame>
-          <ScaleFrame FrameIndex="60" X="1.0000" Y="1.0000">
-            <EasingData Type="0" />
-          </ScaleFrame>
         </Timeline>
         <Timeline ActionTag="-868953858" Property="RotationSkew">
           <ScaleFrame FrameIndex="0" X="0.0000" Y="0.0000">
             <EasingData Type="0" />
           </ScaleFrame>
-          <ScaleFrame FrameIndex="30" X="0.0000" Y="0.0000">
-            <EasingData Type="0" />
-          </ScaleFrame>
-          <ScaleFrame FrameIndex="60" X="0.0000" Y="0.0000">
-            <EasingData Type="0" />
-          </ScaleFrame>
-        </Timeline>
-        <Timeline ActionTag="-868953858" Property="FrameEvent">
-          <EventFrame FrameIndex="60" Tween="False" Value="Scene_Start_End" />
         </Timeline>
       </Animation>
       <ObjectData Name="Scene" ctype="GameNodeObjectData">
@@ -109,13 +88,13 @@
             <ColorVector ScaleY="1.0000" />
             <InnerNodeSize Width="700" Height="600" />
           </AbstractNodeData>
-          <AbstractNodeData Name="Button_Setting" ActionTag="-868953858" Tag="186" IconVisible="False" LeftMargin="10.0000" RightMargin="1406.0000" TopMargin="10.0000" BottomMargin="974.0000" TouchEnable="True" FontSize="24" ButtonText="Setting" Scale9Enable="True" LeftEage="15" RightEage="15" TopEage="11" BottomEage="11" Scale9OriginX="15" Scale9OriginY="11" Scale9Width="16" Scale9Height="14" ShadowOffsetX="2.0000" ShadowOffsetY="-2.0000" ctype="ButtonObjectData">
+          <AbstractNodeData Name="Button_Credit" ActionTag="-868953858" Tag="186" FrameEvent="Scene_Start_End" IconVisible="False" LeftMargin="34.0000" RightMargin="1382.0000" TopMargin="954.0000" BottomMargin="30.0000" TouchEnable="True" FontSize="24" ButtonText="Credit" Scale9Enable="True" LeftEage="15" RightEage="15" TopEage="11" BottomEage="11" Scale9OriginX="15" Scale9OriginY="11" Scale9Width="16" Scale9Height="14" ShadowOffsetX="2.0000" ShadowOffsetY="-2.0000" ctype="ButtonObjectData">
             <Size X="120.0000" Y="40.0000" />
-            <AnchorPoint ScaleY="1.0000" />
-            <Position X="10.0000" Y="1014.0000" />
+            <AnchorPoint />
+            <Position X="34.0000" Y="30.0000" />
             <Scale ScaleX="1.0000" ScaleY="1.0000" />
-            <CColor A="255" R="173" G="216" B="230" />
-            <PrePosition X="0.0065" Y="0.9902" />
+            <CColor A="255" R="144" G="238" B="144" />
+            <PrePosition X="0.0221" Y="0.0293" />
             <PreSize X="0.0781" Y="0.0391" />
             <FontResource Type="Normal" Path="Resource/fzzj.ttf" Plist="" />
             <TextColor A="255" R="65" G="65" B="70" />
