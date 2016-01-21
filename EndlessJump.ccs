@@ -1,18 +1,18 @@
 <Solution>
-  <PropertyGroup Name="ENDLES~1" Version="2.3.3.0" Type="CocosStudio" />
+  <PropertyGroup Name="ENDLES~1" Version="3.10.0.0" Type="CocosStudio" />
   <SolutionFolder>
     <Group ctype="ResourceGroup">
       <RootFolder Name=".">
-        <Project Name="MainMenuScene.csd" Type="Scene" />
         <Folder Name="Resource">
           <TTF Name="fzzj.ttf" />
         </Folder>
-        <Project Name="LevelMakeScene.csd" Type="Scene" />
-        <Project Name="GameScene.csd" Type="Scene" />
-        <Project Name="GameOverScene.csd" Type="Scene" />
-        <Project Name="MainMenuScene_NodeLevel.csd" Type="Node" />
-        <Project Name="GamePauseScene.csd" Type="Scene" />
         <Project Name="CreditScene.csd" Type="Scene" />
+        <Project Name="GameOverScene.csd" Type="Scene" />
+        <Project Name="GamePauseScene.csd" Type="Scene" />
+        <Project Name="GameScene.csd" Type="Scene" />
+        <Project Name="LevelMakeScene.csd" Type="Scene" />
+        <Project Name="MainMenuScene.csd" Type="Scene" />
+        <Project Name="MainMenuScene_NodeLevel.csd" Type="Node" />
       </RootFolder>
     </Group>
   </SolutionFolder>

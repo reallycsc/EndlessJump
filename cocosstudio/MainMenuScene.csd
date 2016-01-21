@@ -1,5 +1,5 @@
 <GameFile>
-  <PropertyGroup Name="MainMenuScene" Type="Scene" ID="a2ee0952-26b5-49ae-8bf9-4f1d6279b798" Version="2.3.3.0" />
+  <PropertyGroup Name="MainMenuScene" Type="Scene" ID="a2ee0952-26b5-49ae-8bf9-4f1d6279b798" Version="3.10.0.0" />
   <Content ctype="GameProjectContent">
     <Content>
       <Animation Duration="0" Speed="1.0000">
@@ -14,6 +14,21 @@
           </ScaleFrame>
         </Timeline>
         <Timeline ActionTag="-868953858" Property="RotationSkew">
+          <ScaleFrame FrameIndex="0" X="0.0000" Y="0.0000">
+            <EasingData Type="0" />
+          </ScaleFrame>
+        </Timeline>
+        <Timeline ActionTag="-350296174" Property="Position">
+          <PointFrame FrameIndex="0" X="734.0000" Y="30.0000">
+            <EasingData Type="0" />
+          </PointFrame>
+        </Timeline>
+        <Timeline ActionTag="-350296174" Property="Scale">
+          <ScaleFrame FrameIndex="0" X="1.0000" Y="1.0000">
+            <EasingData Type="0" />
+          </ScaleFrame>
+        </Timeline>
+        <Timeline ActionTag="-350296174" Property="RotationSkew">
           <ScaleFrame FrameIndex="0" X="0.0000" Y="0.0000">
             <EasingData Type="0" />
           </ScaleFrame>
@@ -95,6 +110,22 @@
             <Scale ScaleX="1.0000" ScaleY="1.0000" />
             <CColor A="255" R="144" G="238" B="144" />
             <PrePosition X="0.0221" Y="0.0293" />
+            <PreSize X="0.0781" Y="0.0391" />
+            <FontResource Type="Normal" Path="Resource/fzzj.ttf" Plist="" />
+            <TextColor A="255" R="65" G="65" B="70" />
+            <DisabledFileData Type="Default" Path="Default/Button_Disable.png" Plist="" />
+            <PressedFileData Type="Default" Path="Default/Button_Press.png" Plist="" />
+            <NormalFileData Type="Default" Path="Default/Button_Normal.png" Plist="" />
+            <OutlineColor A="255" R="255" G="0" B="0" />
+            <ShadowColor A="255" R="110" G="110" B="110" />
+          </AbstractNodeData>
+          <AbstractNodeData Name="Button_Mute" ActionTag="-350296174" Tag="172" FrameEvent="Scene_Start_End" IconVisible="False" LeftMargin="614.0000" RightMargin="802.0000" TopMargin="954.0000" BottomMargin="30.0000" TouchEnable="True" FontSize="22" ButtonText="Music Off" Scale9Enable="True" LeftEage="15" RightEage="15" TopEage="11" BottomEage="11" Scale9OriginX="15" Scale9OriginY="11" Scale9Width="16" Scale9Height="14" ShadowOffsetX="2.0000" ShadowOffsetY="-2.0000" ctype="ButtonObjectData">
+            <Size X="120.0000" Y="40.0000" />
+            <AnchorPoint ScaleX="1.0000" />
+            <Position X="734.0000" Y="30.0000" />
+            <Scale ScaleX="1.0000" ScaleY="1.0000" />
+            <CColor A="255" R="173" G="216" B="230" />
+            <PrePosition X="0.4779" Y="0.0293" />
             <PreSize X="0.0781" Y="0.0391" />
             <FontResource Type="Normal" Path="Resource/fzzj.ttf" Plist="" />
             <TextColor A="255" R="65" G="65" B="70" />

@@ -19,13 +19,13 @@ private:
 	void buttonCallback_LevelPlay(Ref* pSender);
 	void buttonCallback_LevelEditor(Ref* pSender);
 	void buttonCallback_Credit(Ref* pSender);
+	void buttonCallback_Mute(Ref* pSender);
 
 	inline LayerGradient* createLayerColor();
 private:
 	LayerGradient*	m_pLayerColor1;
 	LayerGradient*	m_pLayerColor2;
 	vector<pair<Color3B,Color3B>>	m_vLevelColors;
-	Vector<Text*>	m_vLevelDeadCount;
 
 	int m_nCurColorIndex;
 	float	m_fLayerColorSpeed;

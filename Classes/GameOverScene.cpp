@@ -3,6 +3,7 @@
 #include "MainMenuScene.h"
 #include "GameScene.h"
 #include "CreditScene.h"
+#include "CSCClass/CSC_IOSHelper.h"
 
 Scene* GameOverScene::createScene(int deadCount)
 {
@@ -37,11 +38,9 @@ bool GameOverScene::init(int deadCount)
         return false;
     }
 	//////////////////////////////
-	m_bIsNextLevelAvailable = false;
-
 	GameMediator* pGameMediator = GameMediator::getInstance();
 	pGameMediator->setDeadCount(deadCount);
-	int deadCountAll = pGameMediator->getDeadCountAll(pGameMediator->getMaxGameLevel());
+	int totalDeadCount = pGameMediator->getTotalDeadCount();
 
 	// add background screenshot
 	Size visibleSize = Director::getInstance()->getVisibleSize();
@@ -60,6 +59,10 @@ bool GameOverScene::init(int deadCount)
 	// get button
 	auto buttonNext = dynamic_cast<Button*>(layout->getChildByName("Button_Next"));
 	buttonNext->addClickEventListener(CC_CALLBACK_1(GameOverScene::buttonCallback_Next, this));
+	auto buttonUnlockNow = dynamic_cast<Button*>(layout->getChildByName("Button_UnlockNow"));
+	buttonUnlockNow->addClickEventListener(CC_CALLBACK_1(GameOverScene::buttonCallback_UnlockNow, this));
+	buttonUnlockNow->setVisible(false);
+	buttonUnlockNow->setEnabled(false);
 	auto buttonRetry = dynamic_cast<Button*>(layout->getChildByName("Button_Retry"));
 	buttonRetry->addClickEventListener(CC_CALLBACK_1(GameOverScene::buttonCallback_Retry, this));
 	auto buttonMainMenu = dynamic_cast<Button*>(layout->getChildByName("Button_MainMenu"));
@@ -81,18 +84,18 @@ bool GameOverScene::init(int deadCount)
 	else
 		textDeadNumber->setString(StringUtils::format("%d deads this level.", deadCount));
 	auto textDeadNumberAll = dynamic_cast<Text*>(nodeEnlargeAnimation->getChildByName("Text_DeadNumberAll"));
-	if (deadCountAll == 0 && curLevel > 1)
+	if (totalDeadCount == 0 && curLevel > 1)
 	{
 		textDeadNumberAll->setString(StringUtils::format("Perfect till now!"));
 		textDeadNumberAll->setTextColor(Color4B::ORANGE);
 	}
-	else if (deadCountAll == 1)
-		textDeadNumberAll->setString(StringUtils::format("%d dead total.", deadCountAll));
+	else if (totalDeadCount == 1)
+		textDeadNumberAll->setString(StringUtils::format("%d dead total.", totalDeadCount));
 	else
-		textDeadNumberAll->setString(StringUtils::format("%d deads total.", deadCountAll));
-	int maxDeadTime = levelData->getMaxDeadTime();
+		textDeadNumberAll->setString(StringUtils::format("%d deads total.", totalDeadCount));
+	int levelMinDeadCount = levelData->getMaxDeadTime();
 	auto textNextRequirement = dynamic_cast<Text*>(layout->getChildByName("Text_NextRequirement"));
-	textNextRequirement->setString(StringUtils::format("(Total deads < %d)", maxDeadTime));
+	textNextRequirement->setString(StringUtils::format("(Total deads < %d)", levelMinDeadCount));
 
 	if (pGameMediator->getCurGameLevel() == pGameMediator->getGameLevelCount()) // the last level, finish the game!
 	{
@@ -104,24 +107,32 @@ bool GameOverScene::init(int deadCount)
 		if (pGameMediator->getCurGameLevel() < pGameMediator->getMaxGameLevel())
 		{
 			textNextRequirement->setVisible(false);
-			m_bIsNextLevelAvailable = true;
 		}
 		else
 		{
-			if (deadCountAll < maxDeadTime)
+			if (totalDeadCount < levelMinDeadCount)
 			{
 				textNextRequirement->setTextColor(Color4B::GREEN);
 				pGameMediator->setMaxGameLevel();
-				m_bIsNextLevelAvailable = true;
 			}
 			else
 			{
 				textNextRequirement->setTextColor(Color4B::RED);
+				buttonUnlockNow->setVisible(true);
+				buttonUnlockNow->setEnabled(true);
+				buttonNext->setVisible(false);
 				buttonNext->setEnabled(false);
-				m_bIsNextLevelAvailable = false;
 			}
 		}
 	}
+
+	// add custom listener
+	auto listener = EventListenerCustom::create(EVENT_PURCHASED + "com.reallycsc.lifeishard.unlocklevel", [=](EventCustom* event) {
+		Director::getInstance()->getTextureCache()->removeTextureForKey("GameOverImage");
+		GameMediator::getInstance()->gotoNextGameLevel();
+		Director::getInstance()->replaceScene(GameScene::createScene());
+	});
+	_eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
 
     return true;
 }
@@ -131,14 +142,21 @@ void GameOverScene::buttonCallback_Next(Ref* pSender)
 	GameMediator* pGameMediator = GameMediator::getInstance();
 	Director::getInstance()->getTextureCache()->removeTextureForKey("GameOverImage");
 	if (pGameMediator->getCurGameLevel() == pGameMediator->getGameLevelCount()) // the last level, finish the game!
-	{
 		Director::getInstance()->replaceScene(CreditScene::createScene());
-	}
 	else
 	{
 		GameMediator::getInstance()->gotoNextGameLevel();
 		Director::getInstance()->replaceScene(GameScene::createScene());
 	}
+}
+
+void GameOverScene::buttonCallback_UnlockNow(Ref* pSender)
+{
+#ifdef IAP_TEST
+	CSCClass::CSC_IOSHelper::getInstance()->IAP_purchaseProduct(false, "com.reallycsc.lifeishard.unlocklevel");
+#else
+	CSCClass::CSC_IOSHelper::getInstance()->IAP_purchaseProduct(false, "com.reallycsc.lifeishard.unlocklevel");
+#endif
 }
 
 void GameOverScene::buttonCallback_Retry(Ref* pSender)
@@ -150,9 +168,5 @@ void GameOverScene::buttonCallback_Retry(Ref* pSender)
 void GameOverScene::buttonCallback_MainMenu(Ref* pSender)
 {
 	Director::getInstance()->getTextureCache()->removeTextureForKey("GameOverImage");
-	if (m_bIsNextLevelAvailable)
-	{
-		GameMediator::getInstance()->gotoNextGameLevel();
-	}
 	Director::getInstance()->replaceScene(MainMenuScene::createScene());
 }

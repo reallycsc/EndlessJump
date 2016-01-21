@@ -51,6 +51,8 @@ bool CreditScene::init()
 	{
 		layout = layout_finished;
 		layout_unfinished->removeFromParent();
+		if (pGameMediator->getTotalDeadCount() == 0)
+			dynamic_cast<Text*>(layout_finished->getChildByName("Text_Try"))->removeFromParent();
 	}
 	else
 	{

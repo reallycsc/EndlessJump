@@ -3,6 +3,7 @@
 #include "MainMenuScene.h"
 #include "GameMediator.h"
 #include "CSCClass/AudioCtrl.h"
+#include "CSCClass/CSC_IOSHelper.h"
 
 USING_NS_CC;
 
@@ -111,6 +112,15 @@ bool AppDelegate::applicationDidFinishLaunching() {
 	CocosDenshion::SimpleAudioEngine::getInstance()->setBackgroundMusicVolume(1.0);
 	audio_engine->playBackgroundMusicList(true);
 
+	// login-in GameCenter
+	CSCClass::CSC_IOSHelper::getInstance()->GameCenter_authenticateLocalUser();
+
+#ifdef IAP_TEST
+	CSCClass::CSC_IOSHelper::getInstance()->IAP_requestAllPurchasedProducts(true);
+#else
+	CSCClass::CSC_IOSHelper::getInstance()->IAP_requestAllPurchasedProducts(false);
+#endif
+
     return true;
 }
 
@@ -119,7 +129,7 @@ void AppDelegate::applicationDidEnterBackground() {
     Director::getInstance()->stopAnimation();
 
     // if you use SimpleAudioEngine, it must be pause
-	CocosDenshion::SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
+	CSCClass::AudioCtrl::getInstance()->pauseBackgroundMusic();
 }
 
 // this function will be called when the app is active again
@@ -127,5 +137,5 @@ void AppDelegate::applicationWillEnterForeground() {
     Director::getInstance()->startAnimation();
 
     // if you use SimpleAudioEngine, it must resume here
-	CocosDenshion::SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
+	CSCClass::AudioCtrl::getInstance()->resumeBackgroundMusic();
 }

@@ -12,11 +12,9 @@ public:
    
 private:
 	void buttonCallback_Next(Ref* pSender);
+	void buttonCallback_UnlockNow(Ref* pSender);
 	void buttonCallback_Retry(Ref* pSender);
 	void buttonCallback_MainMenu(Ref* pSender);
-
-private:
-	bool m_bIsNextLevelAvailable;
 };
 
 #endif // __GAMEOVER_SCENE_H__
