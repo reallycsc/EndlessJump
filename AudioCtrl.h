@@ -17,6 +17,8 @@ public:
 	void addBackgroundMusic(const char* pszFilePath);
 	void playBackgroundMusicList(bool isRandom);
 	void stopBackgroundMusic();
+	void pauseBackgroundMusic();
+	void resumeBackgroundMusic();
 
 	// getter
 	vector<string>* getBackgroundMusicList() {return &m_vBackgroundMusics;}
@@ -24,12 +26,15 @@ public:
 private:
 	void update(float dt);
 
+public:
+	CC_SYNTHESIZE(bool, m_bIsListPlaying, IsListPlaying);
+
 private:
 	CocosDenshion::SimpleAudioEngine*	m_pSimpleAudioEngine;
 
 	vector<string>	m_vBackgroundMusics;
 	int	m_nCurBackgroundMusicIndex;
-	bool	m_bIsListPlaying;
+
 	bool	m_bIsRandom;
 };
 NS_CSC_END

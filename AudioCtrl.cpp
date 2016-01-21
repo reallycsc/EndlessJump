@@ -78,6 +78,18 @@ void AudioCtrl::stopBackgroundMusic()
 	Director::getInstance()->getScheduler()->unschedule("update", this);
 }
 
+void AudioCtrl::pauseBackgroundMusic()
+{
+	m_bIsListPlaying = false;
+	m_pSimpleAudioEngine->pauseBackgroundMusic();
+}
+
+void AudioCtrl::resumeBackgroundMusic()
+{
+	m_bIsListPlaying = true;
+	m_pSimpleAudioEngine->resumeBackgroundMusic();
+}
+
 void AudioCtrl::update(float dt)
 {
 	if (m_bIsListPlaying && !m_pSimpleAudioEngine->isBackgroundMusicPlaying())

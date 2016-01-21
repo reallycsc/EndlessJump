@@ -127,6 +127,9 @@
 #pragma mark - Leaderboard
 - (void)retirieveLocalPlayerScore:(NSString*)leaderboardId {
     if (!gameCenterAvailable) return;
+    if (!self.authenticated) {
+        [self authenticateLocalUser];
+    }
     
     GKLeaderboard* leaderboard = [[GKLeaderboard alloc] init];
     
@@ -150,6 +153,9 @@
 
 - (void)reportScore:(long long)aScore forLeaderboard:(NSString*)leaderboardId {
     if (!gameCenterAvailable) return;
+    if (!self.authenticated) {
+        [self authenticateLocalUser];
+    }
     
     GKScore *score = [[GKScore alloc] initWithLeaderboardIdentifier:leaderboardId];
     score.value = aScore;
@@ -181,6 +187,10 @@
 
 #pragma mark - Achievements
 - (void)checkAndUnlockAchievement:(NSString*)achievementId {
+	if (!gameCenterAvailable) return;
+	if (!self.authenticated) {
+        [self authenticateLocalUser];
+    }
     if (![self isAchievementUnlocked:achievementId])
     {
         [self reportAchievement:achievementId percentComplete:100];
@@ -188,7 +198,10 @@
 }
 
 - (void)unlockAchievementPercent:(NSString*)achievementId percentComplete:(double)percent {
-    if (percent > 100.0f) return;
+    if (!gameCenterAvailable || percent > 100.0f) return;
+    if (!self.authenticated) {
+        [self authenticateLocalUser];
+    }
     if ([self getAchievementPercent:achievementId] < percent)
     {
         [self reportAchievement:achievementId percentComplete:percent];
@@ -197,13 +210,15 @@
 
 - (BOOL)isAchievementUnlocked:(NSString*)achievementId {
     if (!gameCenterAvailable) return FALSE;
-    
+
     return [self getAchievementForID:achievementId].completed;
 }
 
 - (double)getAchievementPercent:(NSString*)achievementId {
     if (!gameCenterAvailable) return FALSE;
-    
+    if (!self.authenticated) {
+        [self authenticateLocalUser];
+    }
     return [self getAchievementForID:achievementId].percentComplete;
 }
 
@@ -262,6 +277,9 @@
 
 - (void)resetAchievements {
     if (!gameCenterAvailable) return;
+	if (!self.authenticated) {
+        [self authenticateLocalUser];
+    }
     [GKAchievement resetAchievementsWithCompletionHandler:^(NSError *error) {
         if (!error) {
             if (GAMEKITHELPER_LOGGING) NSLog(@"GameKitHelper: Achievements reset successfully.");

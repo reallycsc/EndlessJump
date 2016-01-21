@@ -23,8 +23,6 @@ bool CSC_IOSHelper::init()
 	bool bRet = false;
 	do
 	{
-		this->GameCenter_authenticateLocalUser();
-
 		bRet = true;
 	} while (false);
 	return bRet;
@@ -60,15 +58,15 @@ void CSC_IOSHelper::GameCenter_checkAndUnlockAchievement(const char* id)
 void CSC_IOSHelper::GameCenter_unlockAchievementPercent(const char* id, double percent)
 {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
-	[[GameKitHelper sharedHelper] unlockAchievementPercent :id 
-		percentComplete: percent];
+	[[GameKitHelper sharedHelper] unlockAchievementPercent:id
+		percentComplete : percent];
 #endif
 }
 
 void CSC_IOSHelper::GameCenter_showLeaderboard(const char* id)
 {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
-	[[GameKitHelper sharedHelper] showLeaderboard :id];
+	[[GameKitHelper sharedHelper] showLeaderboard:id];
 #endif
 }
 
@@ -89,7 +87,7 @@ void CSC_IOSHelper::GameCenter_showAchievements()
 void CSC_IOSHelper::GameCenter_reportScoreForLeaderboard(const char* id, const int score)
 {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
-	[[GameKitHelper sharedHelper] reportScore :score forLeaderboard : id];
+	[[GameKitHelper sharedHelper] reportScore:score forLeaderboard : id];
 #endif
 }
 
