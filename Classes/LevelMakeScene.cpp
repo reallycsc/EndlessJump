@@ -1,5 +1,5 @@
 #include "LevelMakeScene.h"
-#include "CSCClass\CommonFunctions.h"
+#include "CSCClass/CommonFunctions.h"
 #include "GameMediator.h"
 #include "MainMenuScene.h"
 
@@ -341,7 +341,7 @@ void LevelMakeScene::onDropDownList_Level(EventCustom* event)
 	auto roomsData = GameMediator::getInstance()->getGameLevelData()->at(index)->getRoomsData();
 	m_pDropDownListRoom->clearAllLabels();
 	for (size_t i = 0, length = roomsData->size(); i < length; i++)
-		m_pDropDownListRoom->addLabel(Label::createWithTTF(StringUtils::format("%d", i + 1), "fonts/fzzj.ttf", 20));
+		m_pDropDownListRoom->addLabel(Label::createWithTTF(StringUtils::format("%lu", i + 1), "fonts/fzzj.ttf", 20));
 	// load room 1 from this level
 	this->updateBlockTextFieldByNumber(TAG_LEVEL_ROOM_ID, 1);
 	m_pDropDownListRoom->setSelectedIndex(0);
@@ -600,7 +600,7 @@ void LevelMakeScene::buttonCallback_BlockAddRotate(Ref* pSender)
 	if(m_pCurEnemy->addAction(m_pCurAction))
 	{
 		auto id = m_pCurEnemy->getActions()->size() - 1;
-		m_pDropDownListBlockAction->addLabel(Label::createWithTTF(StringUtils::format("%d:Rotate", id), "fonts/fzzj.ttf", 20));
+		m_pDropDownListBlockAction->addLabel(Label::createWithTTF(StringUtils::format("%ld:Rotate", id), "fonts/fzzj.ttf", 20));
 		m_pDropDownListBlockAction->setSelectedIndex(id);
 		this->updateBlockTextFieldByCurAction();
 		this->updateBlockTextFieldEnableByCurActionType();
@@ -621,7 +621,7 @@ void LevelMakeScene::buttonCallback_BlockAddMove(Ref* pSender)
 	if (m_pCurEnemy->addAction(m_pCurAction))
 	{
 		auto id = m_pCurEnemy->getActions()->size() - 1;
-		m_pDropDownListBlockAction->addLabel(Label::createWithTTF(StringUtils::format("%d:Move", id), "fonts/fzzj.ttf", 20));
+		m_pDropDownListBlockAction->addLabel(Label::createWithTTF(StringUtils::format("%ld:Move", id), "fonts/fzzj.ttf", 20));
 		m_pDropDownListBlockAction->setSelectedIndex(id);
 		this->updateBlockTextFieldByCurAction();
 		this->updateBlockTextFieldEnableByCurActionType();

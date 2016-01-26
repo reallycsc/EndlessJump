@@ -51,10 +51,10 @@ bool AppDelegate::applicationDidFinishLaunching() {
     auto glview = director->getOpenGLView();
     if(!glview) {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32) || (CC_TARGET_PLATFORM == CC_PLATFORM_MAC) || (CC_TARGET_PLATFORM == CC_PLATFORM_LINUX)
-		glview = GLViewImpl::createWithRect("EndlessJump", Rect(0, 0, designResolutionSize.width, designResolutionSize.height));
+		glview = GLViewImpl::createWithRect("LifeisHARD", Rect(0, 0, designResolutionSize.width, designResolutionSize.height));
 
 #else
-        glview = GLViewImpl::create("EndlessJump");
+        glview = GLViewImpl::create("LifeisHARD");
 #endif
         director->setOpenGLView(glview);
     }
@@ -68,23 +68,24 @@ bool AppDelegate::applicationDidFinishLaunching() {
     director->setAnimationInterval(1.0f / 60);
 
     // Set the design resolution
-    glview->setDesignResolutionSize(designResolutionSize.width, designResolutionSize.height, ResolutionPolicy::SHOW_ALL);
+    glview->setDesignResolutionSize(designResolutionSize.width, designResolutionSize.height, ResolutionPolicy::FIXED_WIDTH);
     Size frameSize = glview->getFrameSize();
-    // if the frame's height is larger than the height of medium size.
-    if (frameSize.height > mediumResolutionSize.height)
-    {        
-        director->setContentScaleFactor(MIN(largeResolutionSize.height/designResolutionSize.height, largeResolutionSize.width/designResolutionSize.width));
-    }
-    // if the frame's height is larger than the height of small size.
-    else if (frameSize.height > smallResolutionSize.height)
-    {        
-        director->setContentScaleFactor(MIN(mediumResolutionSize.height/designResolutionSize.height, mediumResolutionSize.width/designResolutionSize.width));
-    }
-    // if the frame's height is smaller than the height of medium size.
-    else
-    {        
-        director->setContentScaleFactor(MIN(smallResolutionSize.height/designResolutionSize.height, smallResolutionSize.width/designResolutionSize.width));
-    }
+    director->setContentScaleFactor(MIN(frameSize.height/designResolutionSize.height, frameSize.width/designResolutionSize.width));
+//    // if the frame's height is larger than the height of medium size.
+//    if (frameSize.height > mediumResolutionSize.height)
+//    {        
+//        director->setContentScaleFactor(MIN(largeResolutionSize.height/designResolutionSize.height, largeResolutionSize.width/designResolutionSize.width));
+//    }
+//    // if the frame's height is larger than the height of small size.
+//    else if (frameSize.height > smallResolutionSize.height)
+//    {        
+//        director->setContentScaleFactor(MIN(mediumResolutionSize.height/designResolutionSize.height, mediumResolutionSize.width/designResolutionSize.width));
+//    }
+//    // if the frame's height is smaller than the height of medium size.
+//    else
+//    {        
+//        director->setContentScaleFactor(MIN(smallResolutionSize.height/designResolutionSize.height, smallResolutionSize.width/designResolutionSize.width));
+//    }
 
     register_all_packages();
 
@@ -92,7 +93,10 @@ bool AppDelegate::applicationDidFinishLaunching() {
 	//glEnable(GL_LINE_SMOOTH);
 	FileUtils::getInstance()->addSearchPath("res");
 	// set random seed
-	srand(timeGetTime());
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    unsigned int time = ((unsigned int)tv.tv_sec) * 1000 + tv.tv_usec / 1000;
+    srand(time);
 
 	GameMediator::getInstance();
 
@@ -129,7 +133,7 @@ void AppDelegate::applicationDidEnterBackground() {
     Director::getInstance()->stopAnimation();
 
     // if you use SimpleAudioEngine, it must be pause
-	CSCClass::AudioCtrl::getInstance()->pauseBackgroundMusic();
+    CSCClass::AudioCtrl::getInstance()->pauseBackgroundMusic();
 }
 
 // this function will be called when the app is active again
@@ -137,5 +141,7 @@ void AppDelegate::applicationWillEnterForeground() {
     Director::getInstance()->startAnimation();
 
     // if you use SimpleAudioEngine, it must resume here
-	CSCClass::AudioCtrl::getInstance()->resumeBackgroundMusic();
+    auto audio = CSCClass::AudioCtrl::getInstance();
+    if (audio->getIsListPlaying())
+        audio->resumeBackgroundMusic();
 }

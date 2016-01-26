@@ -23,8 +23,6 @@ bool Player::init(const Color3B &color, float speed, float jumpTime)
     {  
         CC_BREAK_IF(!Node::init());  
 
-		Size visibleSize = Director::getInstance()->getVisibleSize();
-
 		// set attribute
 		m_playerColor = Color4F(color);
 		Size playerSize = Size(32, 32);

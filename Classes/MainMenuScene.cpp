@@ -82,7 +82,7 @@ bool MainMenuScene::init()
 	int innerHeight = 0;
 	int curLevelHeight = 0;
 	int interval = 50;
-	for (size_t i = 0, length = pGameMediator->getGameLevelCount(); i < length; i++)
+	for (int i = 0, length = pGameMediator->getGameLevelCount(); i < length; i++)
 	{
 		auto levelData = levelsData->at(i);
 		int curDeadCount = levelDeadCounts->at(i);
@@ -101,7 +101,7 @@ bool MainMenuScene::init()
 		buttonLevel->setTag(i + 1);
 		buttonLevel->addClickEventListener(CC_CALLBACK_1(MainMenuScene::buttonCallback_LevelPlay, this));
 		// set button text
-		if (i > maxLevel - 1)
+		if (i > maxLevel - 1 && i != 0)
 		{
 			buttonLevel->setTitleText(StringUtils::format("%d", i + 1));
 			buttonLevel->setTitleFontSize(46);
@@ -117,7 +117,7 @@ bool MainMenuScene::init()
 		// get text
 		auto textDeadCount = dynamic_cast<Text*>(levelNode->getChildByName("Text_DeadTime"));
 		if (curDeadCount < 0)
-			if (i == maxLevel)
+			if (i == maxLevel && i != 0)
 			{
 				if (maxDeadCount == 1)
 					textDeadCount->setString(StringUtils::format("<%d dead", maxDeadCount));
@@ -236,11 +236,13 @@ void MainMenuScene::buttonCallback_Mute(Ref* pSender)
 	auto button = dynamic_cast<Button*>(pSender);
 	if (audio->getIsListPlaying())
 	{
+        audio->setIsListPlaying(false);
 		audio->pauseBackgroundMusic();
 		button->setTitleText("Music On");
 	}
 	else
 	{
+        audio->setIsListPlaying(true);
 		audio->resumeBackgroundMusic();
 		button->setTitleText("Music Off");
 	}

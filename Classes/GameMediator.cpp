@@ -48,7 +48,7 @@ bool GameMediator::init()
 			user->setIntegerForKey("TotalDead", -1);
 			for (size_t i = 0; i < m_nGameLevelCount; i++)
 			{
-				user->setIntegerForKey(StringUtils::format("Level%d-DeadCount", i + 1).c_str(), -1);
+				user->setIntegerForKey(StringUtils::format("Level%lu-DeadCount", i + 1).c_str(), -1);
 				m_vLevelMinDeadCount.push_back(-1);
 			}
 			m_nCurGameLevel = 1;
@@ -61,7 +61,7 @@ bool GameMediator::init()
 			auto maxDeadLevel = 0;
 			for (size_t i = 0; i < m_nGameLevelCount; i++)
 			{
-				auto levelDead = user->getIntegerForKey(StringUtils::format("Level%d-DeadCount", i + 1).c_str(), -1);
+				auto levelDead = user->getIntegerForKey(StringUtils::format("Level%lu-DeadCount", i + 1).c_str(), -1);
 				m_vLevelMinDeadCount.push_back(levelDead);
 				if (levelDead > 0)
 				{
@@ -172,7 +172,7 @@ bool GameMediator::saveGameLevelFile()
 		XMLElement *root = document->NewElement("GameLevel");
 		document->LinkEndChild(root);
 
-		m_nGameLevelCount = m_vGameLevelData.size();
+		m_nGameLevelCount = (int)m_vGameLevelData.size();
 		for (size_t i = 0; i < m_nGameLevelCount; i++)
 		{
 			XMLElement *surface1 = document->NewElement("Level");
@@ -220,7 +220,7 @@ bool GameMediator::saveGameLevelFile()
 				surface3->SetAttribute("color_b", iter2->enemy_color.b);
 				surface2->LinkEndChild(surface3);
 				auto enemysData = &(iter2->enemysData);
-				for (size_t i1 = 0, length1 = enemysData->size(); i1 < length1; i1++)
+				for (int i1 = 0, length1 = enemysData->size(); i1 < length1; i1++)
 				{
 					auto enemy_data = enemysData->at(i1);
 					XMLElement *surface4 = document->NewElement("Enemy");
@@ -295,7 +295,7 @@ bool GameMediator::saveGameLevelFile()
 		UserDefault* user = UserDefault::getInstance();
 		for (size_t i = 0; i < m_nGameLevelCount; i++)
 		{
-			string key = StringUtils::format("Level%d-DeadCount", i + 1);
+			string key = StringUtils::format("Level%lu-DeadCount", i + 1);
 			if (user->getIntegerForKey(key.c_str(), -100) == -100)
 				user->setIntegerForKey(key.c_str(), -1);
 		}

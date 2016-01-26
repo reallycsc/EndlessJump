@@ -17,7 +17,7 @@ public:
     CREATE_FUNC(GameScene);
 
 private:
-	void update(float dt);
+	void update(float dt) override;
 
 	void onEnter() override;
 	void onFrameEvent(Frame* frame);

@@ -264,7 +264,7 @@ void Enemy::addPlayerBlockForLevelMake(Size playerSize)
 		float shortRadius = playerSize.width / 2;
 		float sqrt2 = sqrtf(2.0f);
 		float longRadius = playerSize.width / sqrt2;
-		float longCenter = shortRadius / sqrt2;
+		//float longCenter = shortRadius / sqrt2;
 		// left 
 		//drawNode->drawRect(Point::ZERO - playerSize, Point::ZERO, color);
 		drawNode->drawCircle(Point(-shortRadius, -shortRadius), longRadius, 360, 20, false, color);

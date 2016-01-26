@@ -1,5 +1,5 @@
 #include "GameScene.h"
-#include "CSCClass\CSCAction\Shake.h"
+#include "CSCClass/CSCAction/Shake.h"
 #include "GamePauseScene.h"
 #include "GameOverScene.h"
 

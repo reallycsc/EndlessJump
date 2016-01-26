@@ -14,7 +14,7 @@ public:
     CREATE_FUNC(MainMenuScene);
 
 private:
-	void update(float dt);
+	void update(float dt) override;
 
 	void buttonCallback_LevelPlay(Ref* pSender);
 	void buttonCallback_LevelEditor(Ref* pSender);
