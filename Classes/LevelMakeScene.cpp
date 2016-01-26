@@ -453,7 +453,7 @@ void LevelMakeScene::buttonCallback_MainMenu(Ref* pSender)
 void LevelMakeScene::buttonCallback_AddNewLevel(Ref* pSender)
 {
 	auto levelsData = GameMediator::getInstance()->getGameLevelData();
-	int newLevelIndex = levelsData->size() + 1;
+	int newLevelIndex = (int)levelsData->size() + 1;
 	m_pDropDownListLevel->addLabel(Label::createWithTTF(StringUtils::format("%d", newLevelIndex), "fonts/fzzj.ttf", 20));
 	m_pDropDownListLevel->setSelectedIndex(newLevelIndex - 1);
 	m_pDropDownListRoom->clearAllLabels();
@@ -473,7 +473,7 @@ void LevelMakeScene::buttonCallback_AddNewRoom(Ref* pSender)
 	CS_RETURN_IF(levelsData->size() == 0);
 	int level = m_mTextFieldStructs.at(TAG_LEVEL_ID).number;
 	auto roomsData = levelsData->at(level - 1)->getRoomsData();
-	int newRoomIndex = roomsData->size() + 1;
+	int newRoomIndex = (int)roomsData->size() + 1;
 	m_pDropDownListRoom->addLabel(Label::createWithTTF(StringUtils::format("%d", newRoomIndex), "fonts/fzzj.ttf", 20));
 	m_pDropDownListRoom->setSelectedIndex(newRoomIndex - 1);
 	this->updateBlockTextFieldByNumber(TAG_LEVEL_ROOM_ID, newRoomIndex);
@@ -505,7 +505,7 @@ void LevelMakeScene::buttonCallback_RemoveBlock(Ref* pSender)
 		else
 		{
 			if (id != length)
-				for (size_t i = 0; i < length; i++)
+				for (int i = 0; i < length; i++)
 					m_vEnemys.at(i)->updateId(i);
 			if (id > 0)
 			{
@@ -599,8 +599,8 @@ void LevelMakeScene::buttonCallback_BlockAddRotate(Ref* pSender)
 	m_pCurAction = RotateActionData::create(0, 1, 0, 360, Vec2(0.5f, 0.5f)); // default rotate action
 	if(m_pCurEnemy->addAction(m_pCurAction))
 	{
-		auto id = m_pCurEnemy->getActions()->size() - 1;
-		m_pDropDownListBlockAction->addLabel(Label::createWithTTF(StringUtils::format("%ld:Rotate", id), "fonts/fzzj.ttf", 20));
+		auto id = (int)m_pCurEnemy->getActions()->size() - 1;
+		m_pDropDownListBlockAction->addLabel(Label::createWithTTF(StringUtils::format("%d:Rotate", id), "fonts/fzzj.ttf", 20));
 		m_pDropDownListBlockAction->setSelectedIndex(id);
 		this->updateBlockTextFieldByCurAction();
 		this->updateBlockTextFieldEnableByCurActionType();
@@ -620,8 +620,8 @@ void LevelMakeScene::buttonCallback_BlockAddMove(Ref* pSender)
 	m_pCurAction = MoveActionData::create(0, 1, 0, m_pCurEnemy->getPosition(), Point(200, 0)); // default move action
 	if (m_pCurEnemy->addAction(m_pCurAction))
 	{
-		auto id = m_pCurEnemy->getActions()->size() - 1;
-		m_pDropDownListBlockAction->addLabel(Label::createWithTTF(StringUtils::format("%ld:Move", id), "fonts/fzzj.ttf", 20));
+		auto id = (int)m_pCurEnemy->getActions()->size() - 1;
+		m_pDropDownListBlockAction->addLabel(Label::createWithTTF(StringUtils::format("%d:Move", id), "fonts/fzzj.ttf", 20));
 		m_pDropDownListBlockAction->setSelectedIndex(id);
 		this->updateBlockTextFieldByCurAction();
 		this->updateBlockTextFieldEnableByCurActionType();
@@ -641,7 +641,7 @@ void LevelMakeScene::buttonCallback_BlockAddBlink(Ref* pSender)
 	m_pCurAction = BlinkActionData::create(1, 1, 0); // default blink action
 	if (m_pCurEnemy->addAction(m_pCurAction))
 	{
-		auto id = m_pCurEnemy->getActions()->size() - 1;
+		auto id = (int)m_pCurEnemy->getActions()->size() - 1;
 		m_pDropDownListBlockAction->addLabel(Label::createWithTTF(StringUtils::format("%d:Blink", id), "fonts/fzzj.ttf", 20));
 		m_pDropDownListBlockAction->setSelectedIndex(id);
 		this->updateBlockTextFieldByCurAction();
@@ -662,7 +662,7 @@ void LevelMakeScene::buttonCallback_BlockAddScale(Ref* pSender)
 	m_pCurAction = ScaleActionData::create(0, 1, 0, 2, 2, Vec2(0.5f, 0.5f)); // default scale action
 	if (m_pCurEnemy->addAction(m_pCurAction))
 	{
-		auto id = m_pCurEnemy->getActions()->size() - 1;
+		auto id = (int)m_pCurEnemy->getActions()->size() - 1;
 		m_pDropDownListBlockAction->addLabel(Label::createWithTTF(StringUtils::format("%d:Scale", id), "fonts/fzzj.ttf", 20));
 		m_pDropDownListBlockAction->setSelectedIndex(id);
 		this->updateBlockTextFieldByCurAction();
@@ -763,12 +763,12 @@ void LevelMakeScene::updateDropDownListOfLevelAndRoom(vector<GameLevelData*>* le
 {
 	CS_RETURN_IF(!levelsData);
 	m_pDropDownListLevel->clearAllLabels();
-	for (size_t i = 0, j = levelsData->size(); i < j; i++)
+	for (int i = 0, j = (int)levelsData->size(); i < j; i++)
 		m_pDropDownListLevel->addLabel(Label::createWithTTF(StringUtils::format("%d", i + 1), "fonts/fzzj.ttf", 20));
 
 	auto roomsData = levelsData->at(m_pDropDownListLevel->getSelectedIndex())->getRoomsData();
 	m_pDropDownListRoom->clearAllLabels();
-	for (size_t i = 0, j = roomsData->size(); i < j; i++)
+	for (int i = 0, j = (int)roomsData->size(); i < j; i++)
 		m_pDropDownListRoom->addLabel(Label::createWithTTF(StringUtils::format("%d", i + 1), "fonts/fzzj.ttf", 20));
 }
 
@@ -790,7 +790,7 @@ void LevelMakeScene::addEnemy()
 	Color3B color = Color3B(m_mTextFieldStructs.at(TAG_ENEMY_COLOR_R).number, m_mTextFieldStructs.at(TAG_ENEMY_COLOR_G).number, m_mTextFieldStructs.at(TAG_ENEMY_COLOR_B).number);
 	Point position = Point(m_mTextFieldStructs.at(TAG_ENEMY_POSITION_X).number, m_mTextFieldStructs.at(TAG_ENEMY_POSITION_Y).number);
 
-	auto id = m_vEnemys.size();
+	auto id = (int)m_vEnemys.size();
 	m_pCurEnemy = Enemy::create(size, color, id);
 	m_pCurEnemy->setPosition(position);
 	this->addChild(m_pCurEnemy, 1, TAG_ENEMY);
@@ -942,7 +942,7 @@ void LevelMakeScene::updateCurEnemy(int tag)
 void LevelMakeScene::updateDropDownListOfEnemys()
 {
 	m_pDropDownListBlockId->clearAllLabels();
-	for (size_t i = 0, length = m_vEnemys.size(); i < length; i++)
+	for (int i = 0, length = (int)m_vEnemys.size(); i < length; i++)
 		m_pDropDownListBlockId->addLabel(Label::createWithTTF(StringUtils::format("%d", i), "fonts/fzzj.ttf", 20));
 }
 
@@ -1091,7 +1091,7 @@ void LevelMakeScene::updateDropDownListOfEnemyActions()
 	// Actions
 	m_pDropDownListBlockAction->clearAllLabels();
 	auto actions = m_pCurEnemy->getActions();
-	for (size_t i = 0, length = actions->size(); i < length; i++)
+	for (int i = 0, length = (int)actions->size(); i < length; i++)
 	{
 		int type = actions->at(i)->getType();
 		switch (type)
@@ -1253,7 +1253,7 @@ void LevelMakeScene::loadDataFrom(int level, int room)
 	// add enemys
 	auto enemys = &(roomData->enemysData);
 	m_pDropDownListBlockId->clearAllLabels();
-	for (size_t i = 0, length = enemys->size(); i < length; i++)
+	for (int i = 0, length = (int)enemys->size(); i < length; i++)
 	{
 		auto enemyData = &enemys->at(i);
 		Enemy* enemy = Enemy::create(enemyData->size, roomData->enemy_color, enemyData->id - 1);
@@ -1343,7 +1343,7 @@ void LevelMakeScene::saveDataTo(int level, int room)
 		m_mTextFieldStructs.at(TAG_ENEMY_COLOR_G).number,
 		m_mTextFieldStructs.at(TAG_ENEMY_COLOR_B).number);
 	pRoomData->enemysData.clear();
-	for (size_t i = 0, length = m_vEnemys.size(); i < length; i++)
+	for (int i = 0, length = (int)m_vEnemys.size(); i < length; i++)
 	{
 		EnemyData enemyData;
 		auto enemy = m_vEnemys.at(i);

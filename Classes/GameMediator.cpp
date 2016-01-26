@@ -220,7 +220,7 @@ bool GameMediator::saveGameLevelFile()
 				surface3->SetAttribute("color_b", iter2->enemy_color.b);
 				surface2->LinkEndChild(surface3);
 				auto enemysData = &(iter2->enemysData);
-				for (int i1 = 0, length1 = enemysData->size(); i1 < length1; i1++)
+				for (int i1 = 0, length1 = (int)enemysData->size(); i1 < length1; i1++)
 				{
 					auto enemy_data = enemysData->at(i1);
 					XMLElement *surface4 = document->NewElement("Enemy");
