@@ -45,7 +45,7 @@ void AudioCtrl::addBackgroundMusic(const char* pszFilePath)
 
 void AudioCtrl::playBackgroundMusicList(bool isRandom)
 {
-	int listSize = m_vBackgroundMusics.size();
+	int listSize = (int)m_vBackgroundMusics.size();
 	CS_RETURN_IF(listSize == 0);
 
 	// stop the background music which is playing
@@ -59,7 +59,7 @@ void AudioCtrl::playBackgroundMusicList(bool isRandom)
 	m_bIsRandom = isRandom;
 	if (m_bIsRandom)
 	{
-		m_nCurBackgroundMusicIndex = random(0, listSize - 1);
+        m_nCurBackgroundMusicIndex = random(0, listSize - 1);
 	}
 	else
 	{
@@ -80,13 +80,11 @@ void AudioCtrl::stopBackgroundMusic()
 
 void AudioCtrl::pauseBackgroundMusic()
 {
-	m_bIsListPlaying = false;
 	m_pSimpleAudioEngine->pauseBackgroundMusic();
 }
 
 void AudioCtrl::resumeBackgroundMusic()
 {
-	m_bIsListPlaying = true;
 	m_pSimpleAudioEngine->resumeBackgroundMusic();
 }
 

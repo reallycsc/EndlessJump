@@ -9,7 +9,7 @@ inline string eraseStringNonNumber(const string &str)
 	int index = tmpStr.size() - 1;
 	while (index != -1)
 	{
-		if (tmpStr[index] < '0' || tmpStr[index] > '9' && tmpStr[index] != '-')
+		if (tmpStr[index] < '0' || (tmpStr[index] > '9' && tmpStr[index] != '-'))
 		{
 			tmpStr.erase(index, 1);
 			index--;

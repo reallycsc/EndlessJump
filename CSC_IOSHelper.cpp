@@ -1,4 +1,10 @@
 #include "CSC_IOSHelper.h"
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
+#import "IOSHelper/GameKitHelper.h"
+#import "IOSHelper/IAPShare.h"
+#import "IOSHelper/ProgressHUD.h"
+#import "IOSHelper/Reachability.h"
+#endif
 
 NS_CSC_BEGIN
 static CSC_IOSHelper _sharedContext;
@@ -40,7 +46,7 @@ bool CSC_IOSHelper::GameCenter_isAuthenticated()
 {
 	bool ret = false;
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
-	if ([GameKitHelper sharedHelper].isAuthenticated == YES)
+	if ([[GameKitHelper sharedHelper] isAuthenticated] == YES)
 	{
 		ret = true;
 	}
@@ -51,14 +57,14 @@ bool CSC_IOSHelper::GameCenter_isAuthenticated()
 void CSC_IOSHelper::GameCenter_checkAndUnlockAchievement(const char* id)
 {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
-	[[GameKitHelper sharedHelper] checkAndUnlockAchievement:id];
+	[[GameKitHelper sharedHelper] checkAndUnlockAchievement:[[NSString alloc] initWithUTF8String:id]];
 #endif
 }
 
 void CSC_IOSHelper::GameCenter_unlockAchievementPercent(const char* id, double percent)
 {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
-	[[GameKitHelper sharedHelper] unlockAchievementPercent:id
+	[[GameKitHelper sharedHelper] unlockAchievementPercent:[[NSString alloc] initWithUTF8String:id]
 		percentComplete : percent];
 #endif
 }
@@ -66,14 +72,14 @@ void CSC_IOSHelper::GameCenter_unlockAchievementPercent(const char* id, double p
 void CSC_IOSHelper::GameCenter_showLeaderboard(const char* id)
 {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
-	[[GameKitHelper sharedHelper] showLeaderboard:id];
+	[[GameKitHelper sharedHelper] showLeaderboard:[[NSString alloc] initWithUTF8String:id]];
 #endif
 }
 
 void CSC_IOSHelper::GameCenter_retriveScoreFromLeaderboard(const char* id)
 {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
-	[[GameKitHelper sharedHelper] retirieveLocalPlayerScore:id];
+	[[GameKitHelper sharedHelper] retirieveLocalPlayerScore:[[NSString alloc] initWithUTF8String:id]];
 #endif
 }
 
@@ -87,7 +93,7 @@ void CSC_IOSHelper::GameCenter_showAchievements()
 void CSC_IOSHelper::GameCenter_reportScoreForLeaderboard(const char* id, const int score)
 {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
-	[[GameKitHelper sharedHelper] reportScore:score forLeaderboard : id];
+	[[GameKitHelper sharedHelper] reportScore:score forLeaderboard : [[NSString alloc] initWithUTF8String:id]];
 #endif
 }
 
@@ -101,13 +107,13 @@ void CSC_IOSHelper::GameCenter_resetAchievements()
 /////////////////////////// IAP ///////////////////////////
 void CSC_IOSHelper::IAP_initWithProductSet(vector<string>* products)
 {
-	int count = products->size();
+	int count = (int)products->size();
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
 	if (![IAPShare sharedHelper].iap) {
 		NSMutableSet  *productIdentifiers = [NSMutableSet setWithCapacity : count];
 		for (size_t i = 0; i < count; i++)
 		{
-			[productIdentifiers addObject : products->at(i).c_str()];
+			[productIdentifiers addObject : [[NSString alloc] initWithUTF8String:products->at(i).c_str()]];
 		}
 		[IAPShare sharedHelper].iap = [[IAPHelper alloc] initWithProductIdentifiers:productIdentifiers];
 	}
@@ -172,6 +178,7 @@ void CSC_IOSHelper::IAP_requestAllPurchasedProductsWithCallback(bool isTest, con
 
 		IAPHelper* helper = [IAPShare sharedHelper].iap;
 		for (NSString* identifier in helper.productIdentifiers) {
+            CCLOG("%s", [identifier UTF8String]);
 			if (helper.products == nil) {
 				if (isTest)
 					helper.production = NO; // No for test, YES for release
@@ -181,15 +188,13 @@ void CSC_IOSHelper::IAP_requestAllPurchasedProductsWithCallback(bool isTest, con
 				[helper requestProductsWithCompletion : ^ (SKProductsRequest* request, SKProductsResponse* response) {
 					if (response > 0) {
 						[ProgressHUD dismiss];
-						this->unschedule(schedule_selector(CSC_IOSHelper::waitingTimeOut));
-						//Director::getInstance()->getScheduler()->unschedule("waiting_time_out", this);
+                      	Director::getInstance()->getScheduler()->unschedule("waiting_time_out", this);
 						func();
 					}
 				}];
-				[ProgressHUD show : @"Downloading information, please wait¡­"
+				[ProgressHUD show : @"Downloading information, please wait.."
 					Interaction : FALSE];
-				this->scheduleOnce(schedule_selector(CSC_IOSHelper::waitingTimeOut), 10.0f);
-				//Director::getInstance()->getScheduler()->schedule(schedule_selector(CSC_IOSHelper::waitingTimeOut), this, 0, 0, 10, false, "waiting_time_out");
+                Director::getInstance()->getScheduler()->schedule(CC_CALLBACK_1(CSC_IOSHelper::waitingTimeOut, this), 0, 0, 10, "waiting_time_out");
 			}
 			else {
 				func();
@@ -203,7 +208,7 @@ void CSC_IOSHelper::IAP_requestAllPurchasedProductsWithCallback(bool isTest, con
 void CSC_IOSHelper::IAP_purchaseProduct(bool isTest, const char* id)
 {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
-	if ([[IAPShare sharedHelper].iap isPurchasedProductsIdentifier : id] == YES)
+	if ([[IAPShare sharedHelper].iap isPurchasedProductsIdentifier : [[NSString alloc] initWithUTF8String:id]] == YES)
 	{
 		// notify others to reset removead statues
 		Director::getInstance()->getEventDispatcher()->dispatchCustomEvent(EVENT_PURCHASED + id);
@@ -211,10 +216,10 @@ void CSC_IOSHelper::IAP_purchaseProduct(bool isTest, const char* id)
 	else
 	{
 		this->IAP_requestAllPurchasedProductsWithCallback(isTest,
-			[=](Ref* pSender)->void
+			[=]()->void
 		{
-			[[IAPShare sharedHelper] buyProductWithID:id];
-		})
+			[[IAPShare sharedHelper] buyProductWithID:[[NSString alloc] initWithUTF8String:id]];
+        });
 	}
 #endif
 }
@@ -231,7 +236,7 @@ unsigned long CSC_IOSHelper::IAP_getProductsCount()
 const char* CSC_IOSHelper::IAP_getProductID(int index)
 {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
-	return [[[IAPShare sharedHelper].iap.products objectAtIndex : index].productIdentifier UTF8String];
+	return [[[[IAPShare sharedHelper].iap.products objectAtIndex : index] productIdentifier] UTF8String];
 #else
 	return "#None";
 #endif
@@ -240,7 +245,7 @@ const char* CSC_IOSHelper::IAP_getProductID(int index)
 const char* CSC_IOSHelper::IAP_getProductTitle(int index)
 {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
-	return [[[IAPShare sharedHelper].iap.products objectAtIndex : index].localizedTitle UTF8String];
+	return [[[[IAPShare sharedHelper].iap.products objectAtIndex : index] localizedTitle] UTF8String];
 #else
 	return "#None";
 #endif
@@ -249,7 +254,7 @@ const char* CSC_IOSHelper::IAP_getProductTitle(int index)
 const char* CSC_IOSHelper::IAP_getProductDescription(int index)
 {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
-	return [[[IAPShare sharedHelper].iap.products objectAtIndex : index].localizedDescription UTF8String];
+	return [[[[IAPShare sharedHelper].iap.products objectAtIndex : index] localizedDescription] UTF8String];
 #else
 	return "#None";
 #endif
@@ -273,7 +278,7 @@ bool CSC_IOSHelper::IAP_isPurchased(const char* id)
 {
 	bool ret = false;
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
-	if ([[IAPShare sharedHelper].iap isPurchasedProductsIdentifier : id] == YES)
+	if ([[IAPShare sharedHelper].iap isPurchasedProductsIdentifier : [[NSString alloc] initWithUTF8String:id]] == YES)
 		ret = true;
 #endif
 	return ret;
@@ -303,15 +308,13 @@ void CSC_IOSHelper::IAP_restorePurchase()
 					Director::getInstance()->getEventDispatcher()->dispatchCustomEvent(EVENT_RESTORED+[identifier UTF8String]);
 				}
 				//[ProgressHUD dismiss];
-				this->unschedule(schedule_selector(CSC_IOSHelper::waitingTimeOut));
-				//Director::getInstance()->getScheduler()->unschedule("waiting_time_out", this);
+				Director::getInstance()->getScheduler()->unschedule("waiting_time_out", this);
 				[ProgressHUD showSuccess : @"Restore success."];
 			}
 		}];
-		[ProgressHUD show : @"Downloading information, please wait¡­"
+		[ProgressHUD show : @"Downloading information, please waitÂ°â‰ "
 			Interaction : FALSE];
-		this->scheduleOnce(schedule_selector(CSC_IOSHelper::waitingTimeOut), 10.0f);
-		//Director::getInstance()->getScheduler()->schedule(schedule_selector(CSC_IOSHelper::waitingTimeOut), this, 0, 0, 10, false, "waiting_time_out");
+		Director::getInstance()->getScheduler()->schedule(CC_CALLBACK_1(CSC_IOSHelper::waitingTimeOut, this), 0, 0, 10, "waiting_time_out");
 	} while (false);
 #endif
 }
