@@ -143,8 +143,8 @@ void DropDownList::selectedItemEvent(Ref *pSender, ListView::EventType type)
 	{
 		ListView* listView = static_cast<ListView*>(pSender);
 
-		int index = listView->getCurSelectedIndex();
-		m_nLastSelectedIndex = index;
+		auto index = listView->getCurSelectedIndex();
+		m_nLastSelectedIndex = (int)index;
 		m_pShowLabel->setString(m_vSelectLabels.at(index)->getString());
 
 		Director::getInstance()->getEventDispatcher()->dispatchCustomEvent(EVENT_DROPDOWNLIST_SELECTED + m_sSuffix); // dispatch event

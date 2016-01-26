@@ -6,7 +6,7 @@ NS_CSC_BEGIN
 inline string eraseStringNonNumber(const string &str)
 {
 	string tmpStr = str;
-	int index = tmpStr.size() - 1;
+	size_t index = tmpStr.size() - 1;
 	while (index != -1)
 	{
 		if (tmpStr[index] < '0' || (tmpStr[index] > '9' && tmpStr[index] != '-'))
