@@ -94,7 +94,7 @@ void AudioCtrl::update(float dt)
 	{
 		if (m_bIsRandom)
 		{
-			m_nCurBackgroundMusicIndex = random(0, static_cast<int>(m_vBackgroundMusics.size()));
+			m_nCurBackgroundMusicIndex = random(0, static_cast<int>(m_vBackgroundMusics.size() - 1));
 		}
 		else
 		{
