@@ -13,6 +13,7 @@ public:
 
 	bool loadGameLevelFile();
 	bool saveGameLevelFile();
+	bool loadGameLevelStoryFile();
 
 	void setDeadCount(int deadCount);
 	void setMaxGameLevel();
@@ -23,6 +24,7 @@ public:
 	vector<GameLevelData*>* getGameLevelData() { return &m_vGameLevelData; }
 	vector<int>* getLevelMinDeadCount() { return &m_vLevelMinDeadCount; }
 	int getDeadCountAll(int level);
+	vector<string>* getLevelStorylines(int level);
 
 private:
 	inline void addCustomEventLisenter(const string suffix, int* pScore);
@@ -37,6 +39,7 @@ public:
 private:
 	vector<GameLevelData*>	m_vGameLevelData;
 	vector<int>	m_vLevelMinDeadCount;
+	map<int, vector<string>> m_mLevelStorys;
 };
 
 

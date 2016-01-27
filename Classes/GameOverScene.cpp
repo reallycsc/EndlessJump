@@ -12,15 +12,8 @@ Scene* GameOverScene::createScene(int deadCount)
     
     // 'layer' is an autorelease object
 	auto layer = new(std::nothrow) GameOverScene();
-	if (layer && layer->init(deadCount))
-	{
-		layer->autorelease();
-	}
-	else
-	{
-		delete layer;
-		layer = NULL;
-	}
+	layer->init(deadCount);
+	layer->autorelease();
 
     // add layer as a child to scene
     scene->addChild(layer);

@@ -53,6 +53,8 @@ private:
 
 	ParticleMeteor*	m_pParticleTail;
 	Point	m_LastJumpPoint;
+
+	bool	m_bIsLevelFinished;
 };
 
 #endif // __GAME_SCENE_H__

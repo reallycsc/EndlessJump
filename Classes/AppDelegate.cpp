@@ -4,6 +4,7 @@
 #include "GameMediator.h"
 #include "CSCClass/AudioCtrl.h"
 #include "CSCClass/CSC_IOSHelper.h"
+#include "StoryScene.h"
 
 USING_NS_CC;
 
@@ -101,7 +102,9 @@ bool AppDelegate::applicationDidFinishLaunching() {
 	GameMediator::getInstance();
 
     // run
-    director->runWithScene(MainMenuScene::createScene());
+    //director->runWithScene(MainMenuScene::createScene());
+	GameMediator::getInstance()->setCurGameLevel(5);
+	director->runWithScene(StoryScene::createScene());
 
 	// load music
 	auto audio_engine = CSCClass::AudioCtrl::getInstance();

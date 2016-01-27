@@ -18,12 +18,14 @@ GameMediator::GameMediator(void): m_nGameLevelCount(0), m_nCurGameLevel(0), m_nM
 {
 	m_vGameLevelData.clear();
 	m_vLevelMinDeadCount.clear();
+	m_mLevelStorys.clear();
 }
 
 GameMediator::~GameMediator(void)
 {
 	m_vGameLevelData.clear();
 	m_vLevelMinDeadCount.clear();
+	m_mLevelStorys.clear();
 
 	EventDispatcher* dispatcher = Director::getInstance()->getEventDispatcher();
 	dispatcher->removeCustomEventListeners(EVENT_GAMECENTER_SCORERETRIVED + "MaxLevel");
@@ -37,6 +39,9 @@ bool GameMediator::init()
 	{
 		// get level config file
 		CC_BREAK_IF(!this->loadGameLevelFile());
+
+		// get level story file
+		CC_BREAK_IF(!this->loadGameLevelStoryFile());
 
 		// get local save data
 		UserDefault* user = UserDefault::getInstance();
@@ -58,7 +63,7 @@ bool GameMediator::init()
 		else
 		{
 			auto totalDead = 0;
-			auto maxDeadLevel = 0;
+			auto maxDeadLevel = 1;
 			for (size_t i = 0; i < m_nGameLevelCount; i++)
 			{
 				auto levelDead = user->getIntegerForKey(StringUtils::format("Level%lu-DeadCount", i + 1).c_str(), -1);
@@ -309,6 +314,35 @@ bool GameMediator::saveGameLevelFile()
 	return bRet;
 }
 
+bool GameMediator::loadGameLevelStoryFile()
+{
+	bool bRet = false;
+	do
+	{
+		tinyxml2::XMLDocument document;
+		string filename = FileUtils::getInstance()->fullPathForFilename("config/LevelStory.xml");
+		document.LoadFile(filename.c_str());
+		XMLElement* root = document.RootElement();
+		CC_BREAK_IF(!root);
+
+		// load workstation
+		m_mLevelStorys.clear();
+		for (XMLElement* surface1 = root->FirstChildElement("Level"); surface1 != NULL; surface1 = surface1->NextSiblingElement("Level"))
+		{
+			auto level = surface1->IntAttribute("level");
+			vector<string> storylines;
+			for (XMLElement* surface2 = surface1->FirstChildElement("Line"); surface2 != NULL; surface2 = surface2->NextSiblingElement("Line"))
+			{
+				storylines.push_back(surface2->Attribute("text"));
+			}
+			m_mLevelStorys.insert(pair<int, vector<string>>(level, storylines));
+		}
+		bRet = true;
+	} while (false);
+
+	return bRet;
+}
+
 void GameMediator::setDeadCount(int deadCount)
 {
 	int minDeadCount = m_vLevelMinDeadCount.at(m_nCurGameLevel - 1);
@@ -377,4 +411,12 @@ int GameMediator::getDeadCountAll(int level)
 			deadCountAll += deadCount;
 	}
 	return deadCountAll;
+}
+
+vector<string>* GameMediator::getLevelStorylines(int level)
+{
+	if (level > m_mLevelStorys.size())
+		return nullptr;
+	else
+		return &m_mLevelStorys.at(level);
 }

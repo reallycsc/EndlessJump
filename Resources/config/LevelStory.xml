@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LevelStory>
+    <Level level="1">
+    	<Line text="Good morning!"/>
+    	<Line text="It's time to play."/>
+    </Level>
+    <Level level="2">
+    	<Line text="It's a wonderful day."/>
+    	<Line text="Just relax, OK?"/>
+    </Level>
+    <Level level="3">
+    	<Line text="Everything is fine."/>
+    	<Line text="Have fun please."/>
+    </Level>
+    <Level level="4">
+    	<Line text="The season is spring now."/>
+    	<Line text="It's beautiful outside."/>
+    </Level>
+    <Level level="5">
+    	<Line text="The weather is great."/>
+    	<Line text="Children palying in the park."/>
+    	<Line text="People jogging around it."/>
+    </Level>
+    <Level level="6">
+    	<Line text="Suddenly the sky turned to red."/>
+    	<Line text="Be filled with the feeling of danger."/>
+    </Level>
+    <Level level="7">
+    	<Line text="Running to the city."/>
+    	<Line text="Everyone is screaming."/>
+    </Level>
+    <Level level="8">
+    	<Line text="Temperature rising up quickly."/>
+    	<Line text="Season turning to summer only in two hours."/>
+    </Level>
+    <Level level="9">
+    	<Line text="Getting lost in the city."/>
+    	<Line text="Can't find any family or friends."/>
+    </Level>
+    <Level level="10">
+    	<Line text="Looking up."/>
+    	<Line text="Seeing the ferris wheel of a carnival nearby."/>
+    </Level>
+    <Level level="11">
+    	<Line text="Finally arriving at the ferris wheel."/>
+    	<Line text="Nobody is here."/>
+    </Level>
+    <Level level="12">
+    	<Line text="Something alive aprroaching fast."/>
+    	<Line text="Trying to attck."/>
+    	<Line text="A racing flag drop from one of them."/>
+    </Level>
+    <Level level="13">
+    	<Line text="The season turning to autumn in just one hour."/>
+    	<Line text="There must be some reason for the climatic."/>
+    </Level>
+    <Level level="14">
+    	<Line text="Using modern transportation."/>
+    	<Line text="Heading to the racing track of this city."/>
+    </Level>
+</LevelStory>

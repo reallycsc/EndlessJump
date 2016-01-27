@@ -2,6 +2,7 @@
 #include "CSCClass/CSCAction/Shake.h"
 #include "GamePauseScene.h"
 #include "GameOverScene.h"
+#include "StoryScene.h"
 
 Scene* GameScene::createScene()
 {
@@ -39,6 +40,9 @@ void GameScene::onEnter()
 	touchListener->onTouchMoved = CC_CALLBACK_2(GameScene::onTouchMoved, this);
 	touchListener->onTouchEnded = CC_CALLBACK_2(GameScene::onTouchEnded, this);
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(touchListener, this);
+
+	if (m_bIsLevelFinished)
+		Director::getInstance()->replaceScene(GameOverScene::createScene(m_nDeadNumber));
 }
 
 bool GameScene::init()
@@ -57,6 +61,7 @@ bool GameScene::init()
 	m_pPlayer = nullptr;
 	m_pParticleTail = nullptr;
 	m_LastJumpPoint = Point(-100, -100);
+	m_bIsLevelFinished = false;
 
 	// get level data
 	auto levelsData = m_pGameMediator->getGameLevelData();
@@ -356,6 +361,7 @@ void GameScene::addPlayer()
 		else
 		{
 			// the last room
+			m_bIsLevelFinished = true;
 			RenderTexture* renderTexture = RenderTexture::create(visibleSize.width, visibleSize.height, Texture2D::PixelFormat::RGBA8888, GL_DEPTH24_STENCIL8);
 			// Go through all child of Game class and draw in renderTexture
 			// It's like screenshot
@@ -366,7 +372,12 @@ void GameScene::addPlayer()
 			Director::getInstance()->getRenderer()->render();// Must add this for version 3.0 or image goes black  
 			Director::getInstance()->getTextureCache()->addImage(renderTexture->newImage(), "GameOverImage");
 
-			Director::getInstance()->replaceScene(GameOverScene::createScene(m_nDeadNumber));
+			//if (deadCount == 0) // show storyline
+			auto storyScene = StoryScene::createScene();
+			if (storyScene)
+				Director::getInstance()->pushScene(storyScene);
+			else
+				Director::getInstance()->replaceScene(GameOverScene::createScene(m_nDeadNumber));
 		}
 	})));
 	this->addChild(m_pPlayer, 4);

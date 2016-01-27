@@ -2,6 +2,7 @@
 #include "GameScene.h"
 #include "LevelMakeScene.h"
 #include "CreditScene.h"
+#include "CSCClass/CSC_IOSHelper.h"
 #include "CSCClass/AudioCtrl.h"
 
 Scene* MainMenuScene::createScene()
@@ -62,6 +63,9 @@ bool MainMenuScene::init()
 	buttonCredit->addClickEventListener(CC_CALLBACK_1(MainMenuScene::buttonCallback_Credit, this));
 	auto buttonMute = dynamic_cast<Button*>(rootNode->getChildByName("Button_Mute"));
 	buttonMute->addClickEventListener(CC_CALLBACK_1(MainMenuScene::buttonCallback_Mute, this));
+	auto buttonGameCenter = dynamic_cast<Button*>(rootNode->getChildByName("Button_GameCenter"));
+	buttonGameCenter->addClickEventListener(CC_CALLBACK_1(MainMenuScene::buttonCallback_GameCenter, this));
+
 	// get text
 	auto textTotalDead = dynamic_cast<Text*>(rootNode->getChildByName("Text_TotalDead"));
 	auto textSubtitle = dynamic_cast<Text*>(rootNode->getChildByName("Text_Subtitle"));
@@ -245,6 +249,19 @@ void MainMenuScene::buttonCallback_Mute(Ref* pSender)
         audio->setIsListPlaying(true);
 		audio->resumeBackgroundMusic();
 		button->setTitleText("Music Off");
+	}
+}
+
+void MainMenuScene::buttonCallback_GameCenter(Ref* pSender)
+{
+	auto helper = CSCClass::CSC_IOSHelper::getInstance();
+	if (helper->GameCenter_isAuthenticated())
+	{
+		helper->GameCenter_showLeaderboard("com.reallycsc.lifeishard.leaderboard");
+	}
+	else
+	{
+		helper->GameCenter_authenticateLocalUser();
 	}
 }
 
