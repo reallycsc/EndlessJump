@@ -19,6 +19,7 @@ GameMediator::GameMediator(void): m_nGameLevelCount(0), m_nCurGameLevel(0), m_nM
 	m_vGameLevelData.clear();
 	m_vLevelMinDeadCount.clear();
 	m_mLevelStorys.clear();
+	m_mEndStorys.clear();
 }
 
 GameMediator::~GameMediator(void)
@@ -26,6 +27,7 @@ GameMediator::~GameMediator(void)
 	m_vGameLevelData.clear();
 	m_vLevelMinDeadCount.clear();
 	m_mLevelStorys.clear();
+	m_mEndStorys.clear();
 
 	EventDispatcher* dispatcher = Director::getInstance()->getEventDispatcher();
 	dispatcher->removeCustomEventListeners(EVENT_GAMECENTER_SCORERETRIVED + "MaxLevel");
@@ -88,11 +90,11 @@ bool GameMediator::init()
 				user->setIntegerForKey("CurLevel", m_nCurGameLevel);
 			}
 			m_nMaxGameLevel = user->getIntegerForKey("MaxLevel", 1);
-			if (m_nMaxGameLevel > maxDeadLevel || m_nMaxGameLevel < m_nCurGameLevel) // if delete some level or have bug
-			{
-				m_nMaxGameLevel = MAX(MIN(m_nMaxGameLevel, maxDeadLevel), m_nCurGameLevel);
-				user->setIntegerForKey("MaxLevel", m_nMaxGameLevel);
-			}
+			//if (m_nMaxGameLevel > maxDeadLevel || m_nMaxGameLevel < m_nCurGameLevel) // if delete some level or have bug
+			//{
+			//	m_nMaxGameLevel = MAX(MIN(m_nMaxGameLevel, maxDeadLevel), m_nCurGameLevel);
+			//	user->setIntegerForKey("MaxLevel", m_nMaxGameLevel);
+			//}
 		}
 
 		// get data from game center
@@ -325,18 +327,67 @@ bool GameMediator::loadGameLevelStoryFile()
 		XMLElement* root = document.RootElement();
 		CC_BREAK_IF(!root);
 
-		// load workstation
+		// load level storys
 		m_mLevelStorys.clear();
 		for (XMLElement* surface1 = root->FirstChildElement("Level"); surface1 != NULL; surface1 = surface1->NextSiblingElement("Level"))
 		{
 			auto level = surface1->IntAttribute("level");
-			vector<string> storylines;
+			StoryData story;
+			story.end = surface1->IntAttribute("end");
 			for (XMLElement* surface2 = surface1->FirstChildElement("Line"); surface2 != NULL; surface2 = surface2->NextSiblingElement("Line"))
 			{
-				storylines.push_back(surface2->Attribute("text"));
+				LineData storyline;
+				storyline.text = surface2->Attribute("text");
+				storyline.size = surface2->IntAttribute("fontsize");
+				if (storyline.size == 0)
+					storyline.size = 32;
+				auto color_r = surface2->IntAttribute("color_r");
+				auto color_g = surface2->IntAttribute("color_g");
+				auto color_b = surface2->IntAttribute("color_b");
+				if (color_r == 0 && color_g == 0 && color_b == 0)
+					storyline.color = Color3B::WHITE;
+				else
+					storyline.color = Color3B(color_r, color_g, color_b);
+				storyline.interval = surface2->IntAttribute("interval");
+
+				story.line_data.push_back(storyline);
 			}
-			m_mLevelStorys.insert(pair<int, vector<string>>(level, storylines));
+			m_mLevelStorys.insert(pair<int, StoryData>(level, story));
 		}
+
+		// load end storys
+		m_mEndStorys.clear();
+		for (XMLElement* surface1 = root->FirstChildElement("End"); surface1 != NULL; surface1 = surface1->NextSiblingElement("End"))
+		{
+			auto id = surface1->IntAttribute("id");
+			map<string, vector<LineData>> end_story;
+			for (XMLElement* surface2 = surface1->FirstChildElement("Subend"); surface2 != NULL; surface2 = surface2->NextSiblingElement("Subend"))
+			{
+				auto condition = surface2->Attribute("condition");
+				vector<LineData> storylines;
+				for (XMLElement* surface3 = surface2->FirstChildElement("Line"); surface3 != NULL; surface3 = surface3->NextSiblingElement("Line"))
+				{
+					LineData storyline;
+					storyline.text = surface3->Attribute("text");
+					storyline.size = surface3->IntAttribute("fontsize");
+					if (storyline.size == 0)
+						storyline.size = 32;
+					auto color_r = surface3->IntAttribute("color_r");
+					auto color_g = surface3->IntAttribute("color_g");
+					auto color_b = surface3->IntAttribute("color_b");
+					if (color_r == 0 && color_g == 0 && color_b == 0)
+						storyline.color = Color3B::WHITE;
+					else
+						storyline.color = Color3B(color_r, color_g, color_b);
+					storyline.interval = surface3->IntAttribute("interval");
+
+					storylines.push_back(storyline);
+				}
+				end_story.insert(pair<string, vector<LineData>>(condition, storylines));
+			}
+			m_mEndStorys.insert(pair<int, map<string, vector<LineData>>>(id, end_story));
+		}
+
 		bRet = true;
 	} while (false);
 
@@ -413,10 +464,18 @@ int GameMediator::getDeadCountAll(int level)
 	return deadCountAll;
 }
 
-vector<string>* GameMediator::getLevelStorylines(int level)
+StoryData* GameMediator::getLevelStoryLines(int level)
 {
-	if (level > m_mLevelStorys.size())
+	if (m_mLevelStorys.find(level) == m_mLevelStorys.end())
 		return nullptr;
 	else
 		return &m_mLevelStorys.at(level);
+}
+
+map<string, vector<LineData>>* GameMediator::getEndStoryLines(int id)
+{
+	if (m_mEndStorys.find(id) == m_mEndStorys.end())
+		return nullptr;
+	else
+		return &m_mEndStorys.at(id);
 }

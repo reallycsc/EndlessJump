@@ -1,61 +1,133 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LevelStory>
     <Level level="1">
-    	<Line text="Good morning!"/>
-    	<Line text="It's time to play."/>
+    	<Line text="    Good morning!"/>
+    	<Line text="    It's time to play."/>
     </Level>
     <Level level="2">
-    	<Line text="It's a wonderful day."/>
-    	<Line text="Just relax, OK?"/>
+    	<Line text="    It's a wonderful day."/>
+    	<Line text="    Just relax, OK?"/>
     </Level>
     <Level level="3">
-    	<Line text="Everything is fine."/>
-    	<Line text="Have fun please."/>
+    	<Line text="    Everything is fine."/>
+    	<Line text="    Have fun please."/>
     </Level>
     <Level level="4">
-    	<Line text="The season is spring now."/>
-    	<Line text="It's beautiful outside."/>
+    	<Line text="    The season is spring now."/>
+    	<Line text="    It's beautiful outside."/>
     </Level>
     <Level level="5">
-    	<Line text="The weather is great."/>
-    	<Line text="Children palying in the park."/>
-    	<Line text="People jogging around it."/>
+    	<Line text="    The weather is great."/>
+    	<Line text="    Children palying in the park."/>
+    	<Line text="    People jogging around it."/>
     </Level>
     <Level level="6">
-    	<Line text="Suddenly the sky turned to red."/>
-    	<Line text="Be filled with the feeling of danger."/>
+    	<Line text="    Suddenly the sky turned to red."/>
+    	<Line text="    Be filled with the feeling of danger."/>
     </Level>
     <Level level="7">
-    	<Line text="Running to the city."/>
-    	<Line text="Everyone is screaming."/>
+    	<Line text="    Running to the city."/>
+    	<Line text="    Everyone is screaming."/>
     </Level>
     <Level level="8">
-    	<Line text="Temperature rising up quickly."/>
-    	<Line text="Season turning to summer only in two hours."/>
+    	<Line text="    Temperature rising up quickly."/>
+    	<Line text="    Season turning to summer only in two hours."/>
     </Level>
     <Level level="9">
-    	<Line text="Getting lost in the city."/>
-    	<Line text="Can't find any family or friends."/>
+    	<Line text="    Getting lost in the city."/>
+    	<Line text="    Can't find any family or friends."/>
     </Level>
     <Level level="10">
-    	<Line text="Looking up."/>
-    	<Line text="Seeing the ferris wheel of a carnival nearby."/>
+    	<Line text="    Looking up."/>
+    	<Line text="    Seeing the ferris wheel of a carnival nearby."/>
     </Level>
     <Level level="11">
-    	<Line text="Finally arriving at the ferris wheel."/>
-    	<Line text="Nobody is here."/>
+    	<Line text="    Finally arriving at the ferris wheel."/>
+    	<Line text="    Nobody is here."/>
     </Level>
     <Level level="12">
-    	<Line text="Something alive aprroaching fast."/>
-    	<Line text="Trying to attck."/>
-    	<Line text="A racing flag drop from one of them."/>
+    	<Line text="    Something alive aprroaching fast."/>
+    	<Line text="    Trying to attck."/>
+    	<Line text="    A racing flag drop from one of them."/>
     </Level>
     <Level level="13">
-    	<Line text="The season turning to autumn in just one hour."/>
-    	<Line text="There must be some reason for the climatic."/>
+    	<Line text="    The season turning to autumn in just one hour."/>
+    	<Line text="    There must be some reason for the climatic."/>
     </Level>
     <Level level="14">
-    	<Line text="Using modern transportation."/>
-    	<Line text="Heading to the racing track of this city."/>
+    	<Line text="    Using modern transportation."/>
+    	<Line text="    Heading to the racing track of this city."/>
     </Level>
+    <Level level="15">
+    	<Line text="    In the racing track there are many cars racing with aliens in them."/>
+    	<Line text="    Was earth being attacked? "/>
+    </Level>
+    <Level level="16">
+    	<Line text="    Tracking the trail of green-sticky mucus."/>
+    	<Line text="    Entering an old factory."/>
+    	<Line text="    Deep in there is an enterance to the gold mine."/>
+    </Level>
+    <Level level="17">
+    	<Line text="    At the bottom of this gold mine."/>
+    	<Line text="    Find one alien craft."/>
+    	<Line text="    There is a blinking light spot at a graveyard outside the city on the radar."/>
+    </Level>
+    <Level level="18">
+    	<Line text="    When returning to the surface."/>
+    	<Line text="    Temperature dropping down to ten degrees below zero."/>
+    	<Line text="    The winter was already come in half an hour."/>
+    </Level>
+    <Level level="19">
+    	<Line text="    On the way to the graveyard."/>
+    	<Line text="    There are so many meteorites and alien crafts falling down from the sky."/>
+    </Level>
+    <Level level="20">
+    	<Line text="    There is a big hole in the middle of the graveyard."/>
+    	<Line text="    A gate of ruins revealing from the bottom."/>
+    </Level>
+    <Level level="21">
+    	<Line text="    Avoiding all the falling pillars and collapse wall."/>
+    	<Line text="    Discovering this acient stone with prophecy caving on it:"/>
+    	<Line text="    At the end of the world."/>
+    	<Line text="    Reapers from the shadow of the moon will falling."/>
+    	<Line text="    A new world will be born from the death."/>
+    </Level>
+    <Level level="22">
+    	<Line text="    With the helping of NASA and taking the acient stone."/>
+    	<Line text="    This rocket sucessfully landing on the moon."/>
+    </Level>
+    <Level level="23">
+    	<Line text="    Overcoming all these difficulties."/>
+    	<Line text="    Finally arriving the back shadow of the moon."/>
+    	<Line text="    Laying a huge alien monster with the mouth like a blackhole."/>
+    </Level>
+    <Level level="24" end="1">
+    </Level>
+    <End id="1">
+    	<Subend condition="deadCount>500">
+    		<Line text="    Finally the alien boss on the moon was defeated and the earth have been saved."/>
+    		<Line text="    But with you have failed so many times."/>
+    		<Line text="    More than 50% of people on the earth has lost their family and friends."/>
+    		<Line text="    After arrival at earth."/>
+    		<Line text="    Tens of thousands of people with all kinds of weapons rushed to you......"/>
+    		<Line text="        LIFE IS HARD" fontsize="60" color_r="255" color_g="0" color_b="0" interval="100"/>
+    	</Subend>
+    	<Subend condition="deadCount>0">
+    		<Line text="    Finally the alien boss on the moon was defeated and the earth have been saved."/>
+    		<Line text="    But with you have failed these several times."/>
+    		<Line text="    About 10% of people on the earth has lost their family and friends."/>
+    		<Line text="    After arrival at earth."/>
+    		<Line text="    Hundreds and thousands people welcomed you with flowers and songs."/>
+    		<Line text="    Five years later."/>
+    		<Line text="    Your body was found been shot down in the alley with 'REVENGE' written on the wall from your blood......"/>
+    		<Line text="        LIFE IS HARD" fontsize="60" color_r="255" color_g="0" color_b="0" interval="50"/>
+    	</Subend>
+    	<Subend condition="deadCount==0">
+    		<Line text="    Finally the alien boss on the moon was defeated and the earth have been saved."/>
+    		<Line text="    After arrival at earth."/>
+    		<Line text="    Tens of millions of people welcomed you with flowers and songs."/>
+    		<Line text="    You became the most famous people on the earth."/>
+    		<Line text="      YOU ARE THE HERO" fontsize="48" color_r="255" color_g="127" color_b="0" interval="100"/>
+    	</Subend>
+    </End>
 </LevelStory>

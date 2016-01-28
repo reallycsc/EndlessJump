@@ -102,19 +102,30 @@ bool MainMenuScene::init()
 		scrollView->addChild(levelNode);
 		// get button
 		auto buttonLevel = dynamic_cast<Button*>(levelNode->getChildByName("Button_Level"));
-		buttonLevel->setTag(i + 1);
+		auto level = levelData->getLevel();
+		buttonLevel->setTag(level);
 		buttonLevel->addClickEventListener(CC_CALLBACK_1(MainMenuScene::buttonCallback_LevelPlay, this));
 		// set button text
 		if (i > maxLevel - 1 && i != 0)
 		{
-			buttonLevel->setTitleText(StringUtils::format("%d", i + 1));
-			buttonLevel->setTitleFontSize(46);
-			buttonLevel->setEnabled(false);
-			buttonLevel->setColor(Color3B::GRAY);
+			if (i == maxLevel && levelDeadCounts->at(i - 1) >= 0 && totalDead >= maxDeadCount)
+			{
+				buttonLevel->setTitleText("Unlock Now");
+				buttonLevel->setTitleFontSize(36);
+				buttonLevel->setColor(Color3B::YELLOW);
+				buttonLevel->setTag(-1); // -1 for unlock
+			}
+			else
+			{
+				buttonLevel->setTitleText(StringUtils::format("%d", level));
+				buttonLevel->setTitleFontSize(46);
+				buttonLevel->setEnabled(false);
+				buttonLevel->setColor(Color3B::GRAY);
+			}
 		}
 		else
 		{
-			buttonLevel->setTitleText(StringUtils::format("%d:", i + 1) + levelData->getLevelName());
+			buttonLevel->setTitleText(StringUtils::format("%d:", level) + levelData->getLevelName());
 			buttonLevel->setTitleFontSize(26);
 			buttonLevel->setColor(levelData->getRoomsData()->at(0).color);
 		}
@@ -219,9 +230,20 @@ void MainMenuScene::buttonCallback_LevelPlay(Ref* pSender)
 {
 	Button*	button = static_cast<Button*>(pSender);
 	int curLevel = button->getTag();
-	GameMediator::getInstance()->setCurGameLevel(curLevel);
-	UserDefault::getInstance()->setIntegerForKey("CurLevel", curLevel);
-	Director::getInstance()->replaceScene(GameScene::createScene());
+	if (curLevel == -1) // unlock now
+	{
+#ifdef IAP_TEST
+		CSCClass::CSC_IOSHelper::getInstance()->IAP_purchaseProduct(false, "com.reallycsc.lifeishard.unlocklevel");
+#else
+		CSCClass::CSC_IOSHelper::getInstance()->IAP_purchaseProduct(false, "com.reallycsc.lifeishard.unlocklevel");
+#endif
+	}
+	else
+	{
+		GameMediator::getInstance()->setCurGameLevel(curLevel);
+		UserDefault::getInstance()->setIntegerForKey("CurLevel", curLevel);
+		Director::getInstance()->replaceScene(GameScene::createScene());
+	}
 }
 
 void MainMenuScene::buttonCallback_LevelEditor(Ref* pSender)

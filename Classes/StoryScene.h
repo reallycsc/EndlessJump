@@ -2,9 +2,7 @@
 #define __STORY_SCENE_H__
 
 #include "CommonHeader.h"
-
-const int FONT_SIZE = 32;
-const float WORD_DISPLAY_SPEED = 0.08f;
+#include "GameMediator.h"
 
 class StoryScene : public Layer
 {
@@ -21,12 +19,11 @@ private:
 	virtual void onTouchMoved(Touch* touch, Event* event) override;
 	virtual void onTouchEnded(Touch* touch, Event* event) override;
 
-	void showStoryline(Node* pSender, int index);
+	void showStoryline(Node* pSender, vector<LineData>* storylines, int index);
 
 private:
 	bool	m_bIsFinished;
-
-	vector<string>* m_pvStorylines;
+	float	m_fPositionY;
 };
 
 #endif // __STORY_SCENE_H__

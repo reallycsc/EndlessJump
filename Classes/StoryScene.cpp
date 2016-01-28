@@ -1,6 +1,5 @@
 #include "StoryScene.h"
 #include "GameMediator.h"
-#include "CSCClass/CSCAction/TextTypeWriting.h"
 
 Scene* StoryScene::createScene()
 {
@@ -30,13 +29,25 @@ bool StoryScene::init()
 	//////////////////////////////
 	GameMediator* pGameMediator = GameMediator::getInstance();
 	m_bIsFinished = false;
+	m_fPositionY = 0;
 
 	// add storyline
-	m_pvStorylines = pGameMediator->getLevelStorylines(pGameMediator->getCurGameLevel());
-	if (!m_pvStorylines)
+	auto story = pGameMediator->getLevelStoryLines(pGameMediator->getCurGameLevel());
+	if (!story)
 		return false;
-
-	this->showStoryline(NULL, 0);
+	if (story->end == 0)
+		this->showStoryline(NULL, &story->line_data, 0);
+	else
+	{
+		auto total_dead_count = GameMediator::getInstance()->getTotalDeadCount();
+		auto end_story = GameMediator::getInstance()->getEndStoryLines(story->end);
+		if (total_dead_count > 500)
+			this->showStoryline(NULL, &end_story->at("deadCount>500"), 0);
+		else if (total_dead_count > 0)
+			this->showStoryline(NULL, &end_story->at("deadCount>0"), 0);
+		else
+			this->showStoryline(NULL, &end_story->at("deadCount==0"), 0);
+	}
 
 	// bind touch event
 	auto touchListener = EventListenerTouchOneByOne::create();
@@ -66,16 +77,14 @@ void StoryScene::onTouchEnded(Touch* touch, Event* event)
 {
 }
 
-void StoryScene::showStoryline(Node* pSender, int index)
+void StoryScene::showStoryline(Node* pSender, vector<LineData>* storylines, int index)
 {
 	Size visibleSize = Director::getInstance()->getVisibleSize();
-	auto interval = FONT_SIZE * 2;
-	auto lines = m_pvStorylines->size();
-	if (index >= lines)
+	if (index >= storylines->size()) // storyline is end, add 'continue'
 	{
 		m_bIsFinished = true;
 		auto touchLabel = Label::createWithTTF("Continue", "fonts/fzzj.ttf", 24);
-		touchLabel->setPosition(visibleSize.width / 2, MIN(visibleSize.height * 0.2, visibleSize.height * 0.8 - (index + 1) * interval));
+		touchLabel->setPosition(visibleSize.width / 2, visibleSize.height * 0.1);
 		this->addChild(touchLabel);
 		touchLabel->setOpacity(0);
 		touchLabel->runAction(RepeatForever::create(Sequence::createWithTwoActions(
@@ -84,26 +93,59 @@ void StoryScene::showStoryline(Node* pSender, int index)
 		return;
 	}
 
-	auto str = m_pvStorylines->at(index);
-	auto storyline = Label::createWithTTF(str, "fonts/fzzj.ttf", FONT_SIZE);
-	
-	
-	auto stencil = DrawNode::create();
-	stencil->drawSolidRect(Point::ZERO, storyline->getContentSize(), Color4F::BLACK);
-	auto clippingNode = ClippingNode::create(stencil);
-	clippingNode->setInverted(true);
-	clippingNode->addChild(storyline);
-	clippingNode->setPosition(visibleSize.width / 2, visibleSize.height * 0.8 - index * interval);
-	this->addChild(clippingNode);
+	auto story_data = storylines->at(index);
 
+	// make label
+	auto textWidthNew = visibleSize.width - 20;
+	auto storyline = Label::createWithTTF(story_data.text, "fonts/fzzj.ttf", story_data.size, Size(textWidthNew, 0));
+	storyline->setColor(story_data.color);
 	auto storylineSize = storyline->getContentSize();
 	auto storylineHalfWidth = storylineSize.width / 2;
 	auto storylineHalfHeight = storylineSize.height / 2;
-	stencil->setPosition(-storylineHalfWidth, -storylineHalfHeight);
-	stencil->runAction(Sequence::create(
-		MoveTo::create(str.size() * WORD_DISPLAY_SPEED, Point(storylineHalfWidth, -storylineHalfHeight)),
-		DelayTime::create(0.5f),
-		CallFuncN::create(CC_CALLBACK_1(StoryScene::showStoryline, this, index + 1)),
-		NULL
-		));
+	
+	// clipping moveing
+	auto stencil = Node::create();
+	auto wrapLines = storyline->getStringNumLines();
+	auto singleLineHieght = storylineSize.height / wrapLines;
+	auto delay = 0.0f;
+	for (size_t i = 0; i < wrapLines; i++)
+	{
+		auto block = DrawNode::create();
+		block->drawSolidRect(Point::ZERO, Size(storylineSize.width, singleLineHieght), Color4F::BLACK);
+		auto position_y = storylineHalfHeight - singleLineHieght*(i + 1);
+		block->setPosition(-storylineHalfWidth, position_y);
+		stencil->addChild(block);
+
+		auto duration = 1.0f;
+		if (i == wrapLines - 1) // the last one
+			block->runAction(Sequence::create(
+				DelayTime::create(delay),
+				MoveTo::create(duration, Point(storylineHalfWidth, position_y)),
+				CallFuncN::create(CC_CALLBACK_1(StoryScene::showStoryline, this, storylines, index + 1)),
+				NULL
+				));
+		else
+			block->runAction(Sequence::createWithTwoActions(
+				DelayTime::create(delay),
+				MoveTo::create(duration, Point(storylineHalfWidth, position_y))
+				));
+		delay += duration;
+	}
+	
+	// set new position y
+	auto interval = story_data.interval;
+	if (interval == 0)
+		interval = story_data.size;
+	if (index == 0)
+		m_fPositionY = visibleSize.height * 0.9 - storylineHalfHeight;
+	else
+		m_fPositionY = m_fPositionY - interval - storylineHalfHeight;
+
+	auto clippingNode = ClippingNode::create(stencil);
+	clippingNode->setInverted(true);
+	clippingNode->addChild(storyline);
+	clippingNode->setPosition(20 + storylineHalfWidth, m_fPositionY);
+	this->addChild(clippingNode);
+
+	m_fPositionY -= storylineHalfHeight;
 }

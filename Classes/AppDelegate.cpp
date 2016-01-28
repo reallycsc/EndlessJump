@@ -102,9 +102,9 @@ bool AppDelegate::applicationDidFinishLaunching() {
 	GameMediator::getInstance();
 
     // run
-    //director->runWithScene(MainMenuScene::createScene());
-	GameMediator::getInstance()->setCurGameLevel(5);
-	director->runWithScene(StoryScene::createScene());
+    director->runWithScene(MainMenuScene::createScene());
+	//GameMediator::getInstance()->setCurGameLevel(23);
+	//director->runWithScene(StoryScene::createScene());
 
 	// load music
 	auto audio_engine = CSCClass::AudioCtrl::getInstance();
