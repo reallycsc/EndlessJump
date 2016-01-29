@@ -1,5 +1,6 @@
 #include "GameMediator.h"
 #include "CSCClass/CSC_IOSHelper.h"
+#include "CSCClass/AudioCtrl.h"
 
 static GameMediator _sharedContext;
 
@@ -45,11 +46,25 @@ bool GameMediator::init()
 		// get level story file
 		CC_BREAK_IF(!this->loadGameLevelStoryFile());
 
+		// load music
+		auto audio_engine = CSCClass::AudioCtrl::getInstance();
+		audio_engine->addBackgroundMusic("Alan Walker - Spectre.mp3");
+		audio_engine->addBackgroundMusic("Arty - Worlds Collide.mp3");
+		audio_engine->addBackgroundMusic("Calvin Harris - Iron.mp3");
+		audio_engine->addBackgroundMusic("Deorro - Play.mp3");
+		audio_engine->addBackgroundMusic("Hardwell - Jumper.mp3");
+		audio_engine->addBackgroundMusic("James Egbert - The Glory.mp3");
+
+		// set music volume
+		CocosDenshion::SimpleAudioEngine::getInstance()->setBackgroundMusicVolume(1.0);
+		audio_engine->playBackgroundMusicList(true);
+
 		// get local save data
 		UserDefault* user = UserDefault::getInstance();
 		if (!user->getBoolForKey("isHaveSaveFileXml"))
 		{
 			user->setBoolForKey("isHaveSaveFileXml", true);
+			user->setBoolForKey("Music", true);
 			user->setIntegerForKey("CurLevel", 1);
 			user->setIntegerForKey("MaxLevel", 1);
 			user->setIntegerForKey("TotalDead", -1);
@@ -64,6 +79,10 @@ bool GameMediator::init()
 		}
 		else
 		{
+			// pause the music due to user config
+			if (!user->getBoolForKey("Music", true))
+				audio_engine->stopBackgroundMusic();
+
 			auto totalDead = 0;
 			auto maxDeadLevel = 1;
 			for (size_t i = 0; i < m_nGameLevelCount; i++)
@@ -74,7 +93,7 @@ bool GameMediator::init()
 				{
 					totalDead += levelDead;
 					maxDeadLevel++;
-				}	
+				}
 			}
 			m_nTotalDeadCount = user->getIntegerForKey("TotalDead", -1);
 			if (m_nTotalDeadCount != totalDead) // if have bug or player cheat
@@ -430,6 +449,13 @@ void GameMediator::setMaxGameLevel()
 	}
 }
 
+void GameMediator::saveUserConfig()
+{
+	UserDefault* user = UserDefault::getInstance();
+	auto audio = CSCClass::AudioCtrl::getInstance();
+	user->setBoolForKey("Music", audio->getIsListPlaying() & !audio->getIsPause());
+}
+
 void GameMediator::gotoNextGameLevel()
 {
 	int nextLevel = m_nCurGameLevel + 1;
@@ -455,7 +481,7 @@ void GameMediator::gotoNextGameRoom()
 int GameMediator::getDeadCountAll(int level)
 {
 	int deadCountAll = 0;
-	for (size_t i = 0, length = level; i < length; i++)
+	for (size_t i = 0, length = MIN(level, m_nGameLevelCount); i < length; i++)
 	{
 		int deadCount = m_vLevelMinDeadCount.at(i);
 		if (deadCount > 0)

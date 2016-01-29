@@ -63,6 +63,11 @@ bool MainMenuScene::init()
 	buttonCredit->addClickEventListener(CC_CALLBACK_1(MainMenuScene::buttonCallback_Credit, this));
 	auto buttonMute = dynamic_cast<Button*>(rootNode->getChildByName("Button_Mute"));
 	buttonMute->addClickEventListener(CC_CALLBACK_1(MainMenuScene::buttonCallback_Mute, this));
+	if (CSCClass::AudioCtrl::getInstance()->getIsListPlaying())
+		buttonMute->setTitleText("Music Off");
+	else
+		buttonMute->setTitleText("Music On");
+
 	auto buttonGameCenter = dynamic_cast<Button*>(rootNode->getChildByName("Button_GameCenter"));
 	buttonGameCenter->addClickEventListener(CC_CALLBACK_1(MainMenuScene::buttonCallback_GameCenter, this));
 
@@ -260,18 +265,25 @@ void MainMenuScene::buttonCallback_Mute(Ref* pSender)
 {
 	auto audio = CSCClass::AudioCtrl::getInstance();
 	auto button = dynamic_cast<Button*>(pSender);
-	if (audio->getIsListPlaying())
+	if (!audio->getIsListPlaying())
 	{
-        audio->setIsListPlaying(false);
-		audio->pauseBackgroundMusic();
-		button->setTitleText("Music On");
+		audio->playBackgroundMusicList(true);
+		button->setTitleText("Music Off");
 	}
 	else
 	{
-        audio->setIsListPlaying(true);
-		audio->resumeBackgroundMusic();
-		button->setTitleText("Music Off");
+		if (audio->getIsPause())
+		{
+			audio->resumeBackgroundMusic();
+			button->setTitleText("Music Off");
+		}
+		else
+		{
+			audio->pauseBackgroundMusic();
+			button->setTitleText("Music On");
+		}
 	}
+	GameMediator::getInstance()->saveUserConfig();
 }
 
 void MainMenuScene::buttonCallback_GameCenter(Ref* pSender)

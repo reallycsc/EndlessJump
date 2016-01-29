@@ -31,6 +31,8 @@ public:
 
 	void setDeadCount(int deadCount);
 	void setMaxGameLevel();
+	void saveUserConfig();
+
 	void gotoNextGameLevel();
 	void gotoNextGameRoom();
 

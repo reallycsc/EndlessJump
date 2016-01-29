@@ -372,9 +372,8 @@ void GameScene::addPlayer()
 			Director::getInstance()->getRenderer()->render();// Must add this for version 3.0 or image goes black  
 			Director::getInstance()->getTextureCache()->addImage(renderTexture->newImage(), "GameOverImage");
 
-			//if (deadCount == 0) // show storyline
 			auto storyScene = StoryScene::createScene();
-			if (storyScene)
+			if (storyScene && m_nDeadNumber == 0)
 				Director::getInstance()->pushScene(storyScene);
 			else
 				Director::getInstance()->replaceScene(GameOverScene::createScene(m_nDeadNumber));

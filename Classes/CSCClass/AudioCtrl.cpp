@@ -14,7 +14,7 @@ AudioCtrl* AudioCtrl::getInstance()
 	return &_sharedContext;
 }
 
-AudioCtrl::AudioCtrl(): m_pSimpleAudioEngine(nullptr), m_nCurBackgroundMusicIndex(0), m_bIsListPlaying(false), m_bIsRandom(false)
+AudioCtrl::AudioCtrl(): m_pSimpleAudioEngine(nullptr), m_nCurBackgroundMusicIndex(0), m_bIsListPlaying(false), m_bIsPause(false), m_bIsRandom(false)
 {
 	m_vBackgroundMusics.clear();
 }
@@ -56,6 +56,7 @@ void AudioCtrl::playBackgroundMusicList(bool isRandom)
 
 	// start play in list
 	m_bIsListPlaying = true;
+	m_bIsPause = false;
 	m_bIsRandom = isRandom;
 	if (m_bIsRandom)
 	{
@@ -73,6 +74,7 @@ void AudioCtrl::playBackgroundMusicList(bool isRandom)
 void AudioCtrl::stopBackgroundMusic()
 {
 	m_bIsListPlaying = false;
+	m_bIsPause = false;
 	m_bIsRandom = false;
 	m_pSimpleAudioEngine->stopBackgroundMusic();
 	Director::getInstance()->getScheduler()->unschedule("update", this);
@@ -80,17 +82,21 @@ void AudioCtrl::stopBackgroundMusic()
 
 void AudioCtrl::pauseBackgroundMusic()
 {
+	m_bIsPause = true;
 	m_pSimpleAudioEngine->pauseBackgroundMusic();
 }
 
 void AudioCtrl::resumeBackgroundMusic()
 {
+	m_bIsPause = false;
 	m_pSimpleAudioEngine->resumeBackgroundMusic();
 }
 
 void AudioCtrl::update(float dt)
 {
-	if (m_bIsListPlaying && !m_pSimpleAudioEngine->isBackgroundMusicPlaying())
+	CS_RETURN_IF(!m_bIsListPlaying || m_bIsPause);
+
+	if (!m_pSimpleAudioEngine->isBackgroundMusicPlaying())
 	{
 		if (m_bIsRandom)
 		{

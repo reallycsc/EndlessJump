@@ -97,6 +97,9 @@ void StoryScene::showStoryline(Node* pSender, vector<LineData>* storylines, int 
 
 	// make label
 	auto textWidthNew = visibleSize.width - 20;
+#ifdef LEVEL_MAKER_MODE
+	textWidthNew = visibleSize.width / 2 - 20;
+#endif
 	auto storyline = Label::createWithTTF(story_data.text, "fonts/fzzj.ttf", story_data.size, Size(textWidthNew, 0));
 	storyline->setColor(story_data.color);
 	auto storylineSize = storyline->getContentSize();
@@ -116,7 +119,7 @@ void StoryScene::showStoryline(Node* pSender, vector<LineData>* storylines, int 
 		block->setPosition(-storylineHalfWidth, position_y);
 		stencil->addChild(block);
 
-		auto duration = 1.0f;
+		auto duration = 1.5f;
 		if (i == wrapLines - 1) // the last one
 			block->runAction(Sequence::create(
 				DelayTime::create(delay),
