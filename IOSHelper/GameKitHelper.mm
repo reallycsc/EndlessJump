@@ -96,12 +96,6 @@
             [self reportCachedScores];
             // get achievements from game center
             [self loadAllAchievements];
-            // get score from game center & notify player data to update
-            [self retirieveLocalPlayerScore:@"Highscore"];
-            [self retirieveLocalPlayerScore:@"GoldNumber"];
-            [self retirieveLocalPlayerScore:@"GoldNumberAll"];
-            [self retirieveLocalPlayerScore:@"ReviveNumber"];
-            [self retirieveLocalPlayerScore:@"DoubleNumber"];
             // notify mainmenu to reset purchase status
             cocos2d::Director::getInstance()->getEventDispatcher()->dispatchCustomEvent(EVENT_GAMECENTER_AUTHENTICATED);
         }
