@@ -1,6 +1,9 @@
 #include "GameMediator.h"
 #include "CSCClass/CSC_IOSHelper.h"
 #include "CSCClass/AudioCtrl.h"
+#include "CSCClass/CSC_Encryption.h"
+
+USING_NS_CSC;
 
 static GameMediator _sharedContext;
 
@@ -31,8 +34,9 @@ GameMediator::~GameMediator(void)
 	m_mEndStorys.clear();
 
 	EventDispatcher* dispatcher = Director::getInstance()->getEventDispatcher();
-	dispatcher->removeCustomEventListeners(EVENT_GAMECENTER_SCORERETRIVED + "MaxLevel");
-	dispatcher->removeCustomEventListeners(EVENT_GAMECENTER_SCORERETRIVED + "TotalDead");
+	dispatcher->removeCustomEventListeners(EVENT_GAMECENTER_AUTHENTICATED);
+	dispatcher->removeCustomEventListeners(EVENT_GAMECENTER_SCORERETRIVED + "com.reallycsc.lifeishard.maxlevel");
+	dispatcher->removeCustomEventListeners(EVENT_GAMECENTER_SCORERETRIVED + "com.reallycsc.lifeishard.totaldeadcount");
 }
 
 bool GameMediator::init()
@@ -40,6 +44,21 @@ bool GameMediator::init()
 	bool bRet = false;
 	do
 	{
+		// login-in GameCenter
+		auto helper = CSC_IOSHelper::getInstance();
+		helper->GameCenter_authenticateLocalUser();
+		auto listener = EventListenerCustom::create(EVENT_GAMECENTER_AUTHENTICATED, [=](EventCustom* event) {
+			// get data from game center
+			helper->GameCenter_retriveScoreFromLeaderboard("com.reallycsc.lifeishard.maxlevel");
+			helper->GameCenter_retriveScoreFromLeaderboard("com.reallycsc.lifeishard.totaldeadcount");
+		});
+		Director::getInstance()->getEventDispatcher()->addEventListenerWithFixedPriority(listener, 1);
+#ifdef IAP_TEST
+		helper->IAP_requestAllPurchasedProducts(true);
+#else
+		helper->IAP_requestAllPurchasedProducts(false);
+#endif
+
 		// get level config file
 		CC_BREAK_IF(!this->loadGameLevelFile());
 
@@ -47,7 +66,7 @@ bool GameMediator::init()
 		CC_BREAK_IF(!this->loadGameLevelStoryFile());
 
 		// load music
-		auto audio_engine = CSCClass::AudioCtrl::getInstance();
+		auto audio_engine = AudioCtrl::getInstance();
 		audio_engine->addBackgroundMusic("Alan Walker - Spectre.mp3");
 		audio_engine->addBackgroundMusic("Arty - Worlds Collide.mp3");
 		audio_engine->addBackgroundMusic("Calvin Harris - Iron.mp3");
@@ -58,19 +77,20 @@ bool GameMediator::init()
 		// set music volume
 		CocosDenshion::SimpleAudioEngine::getInstance()->setBackgroundMusicVolume(1.0);
 		audio_engine->playBackgroundMusicList(true);
-
+		
+		// make key string
 		// get local save data
 		UserDefault* user = UserDefault::getInstance();
 		if (!user->getBoolForKey("isHaveSaveFileXml"))
 		{
 			user->setBoolForKey("isHaveSaveFileXml", true);
 			user->setBoolForKey("Music", true);
-			user->setIntegerForKey("CurLevel", 1);
-			user->setIntegerForKey("MaxLevel", 1);
-			user->setIntegerForKey("TotalDead", -1);
+			this->saveDataForKey(CURRENT_LEVEL, 1);
+			this->saveDataForKey(MAX_LEVEL, 1);
+			this->saveDataForKey(TOTAL_DEAD, -1);
 			for (size_t i = 0; i < m_nGameLevelCount; i++)
 			{
-				user->setIntegerForKey(StringUtils::format("Level%lu-DeadCount", i + 1).c_str(), -1);
+				this->saveDataForKey(LEVEL_DEAD_START + i, -1);
 				m_vLevelMinDeadCount.push_back(-1);
 			}
 			m_nCurGameLevel = 1;
@@ -87,7 +107,7 @@ bool GameMediator::init()
 			auto maxDeadLevel = 1;
 			for (size_t i = 0; i < m_nGameLevelCount; i++)
 			{
-				auto levelDead = user->getIntegerForKey(StringUtils::format("Level%lu-DeadCount", i + 1).c_str(), -1);
+				auto levelDead = this->loadDataForKey(LEVEL_DEAD_START + i, -1);
 				m_vLevelMinDeadCount.push_back(levelDead);
 				if (levelDead > 0)
 				{
@@ -95,33 +115,24 @@ bool GameMediator::init()
 					maxDeadLevel++;
 				}
 			}
-			m_nTotalDeadCount = user->getIntegerForKey("TotalDead", -1);
+			m_nTotalDeadCount = this->loadDataForKey(TOTAL_DEAD, -1);
 			if (m_nTotalDeadCount != totalDead) // if have bug or player cheat
 			{
 				m_nTotalDeadCount = totalDead;
-				user->setIntegerForKey("TotalDead", m_nTotalDeadCount);
+				this->saveDataForKey(TOTAL_DEAD, m_nTotalDeadCount);
 			}
-
-			m_nCurGameLevel = user->getIntegerForKey("CurLevel", 1);
+			m_nCurGameLevel = this->loadDataForKey(CURRENT_LEVEL, 1);
 			if (m_nCurGameLevel > maxDeadLevel) // if delete some level or have bug
 			{
 				m_nCurGameLevel = maxDeadLevel;
-				user->setIntegerForKey("CurLevel", m_nCurGameLevel);
+				this->saveDataForKey(CURRENT_LEVEL, m_nCurGameLevel);
 			}
-			m_nMaxGameLevel = user->getIntegerForKey("MaxLevel", 1);
-			//if (m_nMaxGameLevel > maxDeadLevel || m_nMaxGameLevel < m_nCurGameLevel) // if delete some level or have bug
-			//{
-			//	m_nMaxGameLevel = MAX(MIN(m_nMaxGameLevel, maxDeadLevel), m_nCurGameLevel);
-			//	user->setIntegerForKey("MaxLevel", m_nMaxGameLevel);
-			//}
+			m_nMaxGameLevel = this->loadDataForKey(MAX_LEVEL, 1);
 		}
 
-		// get data from game center
-		CSCClass::CSC_IOSHelper::getInstance()->GameCenter_retriveScoreFromLeaderboard("MaxLevel");
-		CSCClass::CSC_IOSHelper::getInstance()->GameCenter_retriveScoreFromLeaderboard("TotalDead");
 		// add custom event lisenter
-		this->addCustomEventLisenter("MaxLevel", &m_nMaxGameLevel);
-		this->addCustomEventLisenter("TotalDead", &m_nTotalDeadCount);
+		this->addCustomEventLisenter("com.reallycsc.lifeishard.maxlevel", &m_nMaxGameLevel, MAX_LEVEL);
+		this->addCustomEventLisenter("com.reallycsc.lifeishard.totaldeadcount", &m_nTotalDeadCount, TOTAL_DEAD);
 
 		// set current room 
 		m_nCurGameRoom = 1;
@@ -132,7 +143,7 @@ bool GameMediator::init()
 	return bRet;
 }
 
-inline void GameMediator::addCustomEventLisenter(const string suffix, int* pScore)
+inline void GameMediator::addCustomEventLisenter(const string &suffix, int* pScore, const int &key)
 {
 	EventDispatcher* dispatcher = Director::getInstance()->getEventDispatcher();
 	auto listener = EventListenerCustom::create(EVENT_GAMECENTER_SCORERETRIVED + suffix, [=](EventCustom* event) {
@@ -144,11 +155,21 @@ inline void GameMediator::addCustomEventLisenter(const string suffix, int* pScor
 		{
 			(*pScore) = score_int;
 			// save to local data
-			UserDefault::getInstance()->setIntegerForKey(suffix.c_str(), score_int);
+			this->saveDataForKey(key, score_int);
 			dispatcher->dispatchCustomEvent(EVENT_PLARERDATA_SCOREUPDATED + suffix);
 		}
 	});
 	dispatcher->addEventListenerWithFixedPriority(listener, 1);
+}
+
+void GameMediator::saveDataForKey(const int& key, const int& data)
+{
+	UserDefault::getInstance()->setStringForKey(StringUtils::format("CSC%d", key).c_str(), csc_encode_base64(StringUtils::format("%d", data)));
+}
+
+int GameMediator::loadDataForKey(const int& key, const int& default_data)
+{
+	return atoi(csc_decode_base64(UserDefault::getInstance()->getStringForKey(StringUtils::format("CSC%d", key).c_str(), csc_encode_base64(StringUtils::format("%d", default_data)))));
 }
 
 bool GameMediator::loadGameLevelFile()
@@ -419,8 +440,7 @@ void GameMediator::setDeadCount(int deadCount)
 	if (minDeadCount < 0 || deadCount < minDeadCount)
 	{
 		m_vLevelMinDeadCount.at(m_nCurGameLevel - 1) = deadCount;
-		UserDefault* user = UserDefault::getInstance();
-		user->setIntegerForKey(StringUtils::format("Level%d-DeadCount", m_nCurGameLevel).c_str(), deadCount);
+		this->saveDataForKey(LEVEL_DEAD_START + m_nCurGameLevel - 1, deadCount);
 		// update total dead
 		m_nTotalDeadCount = 0;
 		for (size_t i = 0; i < m_nGameLevelCount; i++)
@@ -429,12 +449,12 @@ void GameMediator::setDeadCount(int deadCount)
 			if (levelDeadCount > 0)
 				m_nTotalDeadCount += levelDeadCount;
 		}
-		user->setIntegerForKey("TotalDead", m_nTotalDeadCount);
-		CSCClass::CSC_IOSHelper::getInstance()->GameCenter_reportScoreForLeaderboard("TotalDead", m_nTotalDeadCount);
+		this->saveDataForKey(TOTAL_DEAD, m_nTotalDeadCount);
+		CSC_IOSHelper::getInstance()->GameCenter_reportScoreForLeaderboard("com.reallycsc.lifeishard.totaldeadcount", m_nTotalDeadCount);
 		if (deadCount == 0)
-			CSCClass::CSC_IOSHelper::getInstance()->GameCenter_checkAndUnlockAchievement(StringUtils::format("com.reallycsc.lifeishard.level%d", m_nCurGameLevel).c_str());
-		else if (deadCount >= 1000)
-			CSCClass::CSC_IOSHelper::getInstance()->GameCenter_checkAndUnlockAchievement("com.reallycsc.lifeishard.dead1000");
+			CSC_IOSHelper::getInstance()->GameCenter_checkAndUnlockAchievement(StringUtils::format("com.reallycsc.lifeishard.level%d", m_nCurGameLevel).c_str());
+		else if (deadCount >= 500)
+			CSC_IOSHelper::getInstance()->GameCenter_checkAndUnlockAchievement("com.reallycsc.lifeishard.dead500");
 	}
 }
 
@@ -444,16 +464,15 @@ void GameMediator::setMaxGameLevel()
 	if (nextLevel <= m_nGameLevelCount && nextLevel > m_nMaxGameLevel)
 	{
 		m_nMaxGameLevel = nextLevel;
-		UserDefault::getInstance()->setIntegerForKey("MaxLevel", m_nMaxGameLevel);
-		CSCClass::CSC_IOSHelper::getInstance()->GameCenter_reportScoreForLeaderboard("MaxLevel", m_nMaxGameLevel);
+		this->saveDataForKey(MAX_LEVEL, m_nMaxGameLevel);
+		CSC_IOSHelper::getInstance()->GameCenter_reportScoreForLeaderboard("com.reallycsc.lifeishard.maxlevel", m_nMaxGameLevel);
 	}
 }
 
 void GameMediator::saveUserConfig()
 {
-	UserDefault* user = UserDefault::getInstance();
-	auto audio = CSCClass::AudioCtrl::getInstance();
-	user->setBoolForKey("Music", audio->getIsListPlaying() & !audio->getIsPause());
+	auto audio = AudioCtrl::getInstance();
+	UserDefault::getInstance()->setBoolForKey("Music", audio->getIsListPlaying() & !audio->getIsPause());
 }
 
 void GameMediator::gotoNextGameLevel()
@@ -462,12 +481,12 @@ void GameMediator::gotoNextGameLevel()
 	if (nextLevel <= m_nGameLevelCount)
 	{
 		m_nCurGameLevel = nextLevel;
-		UserDefault::getInstance()->setIntegerForKey("CurLevel", m_nCurGameLevel);
+		this->saveDataForKey(CURRENT_LEVEL, m_nCurGameLevel);
 		if (m_nCurGameLevel > m_nMaxGameLevel)
 		{
 			m_nMaxGameLevel = m_nCurGameLevel;
-			UserDefault::getInstance()->setIntegerForKey("MaxLevel", m_nMaxGameLevel);
-			CSCClass::CSC_IOSHelper::getInstance()->GameCenter_reportScoreForLeaderboard("MaxLevel", m_nMaxGameLevel);
+			this->saveDataForKey(MAX_LEVEL, m_nMaxGameLevel);
+			CSC_IOSHelper::getInstance()->GameCenter_reportScoreForLeaderboard("com.reallycsc.lifeishard.maxlevel", m_nMaxGameLevel);
 		}
 	}
 	m_nCurGameRoom = 1;

@@ -107,15 +107,6 @@ bool AppDelegate::applicationDidFinishLaunching() {
 	//GameMediator::getInstance()->setCurGameLevel(24);
 	//director->runWithScene(StoryScene::createScene());
 
-	// login-in GameCenter
-	CSCClass::CSC_IOSHelper::getInstance()->GameCenter_authenticateLocalUser();
-
-#ifdef IAP_TEST
-	CSCClass::CSC_IOSHelper::getInstance()->IAP_requestAllPurchasedProducts(true);
-#else
-	CSCClass::CSC_IOSHelper::getInstance()->IAP_requestAllPurchasedProducts(false);
-#endif
-
     return true;
 }
 

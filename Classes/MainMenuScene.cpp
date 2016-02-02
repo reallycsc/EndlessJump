@@ -186,11 +186,11 @@ bool MainMenuScene::init()
 #endif
 
 	// add event listener
-	auto listener = EventListenerCustom::create(EVENT_PLARERDATA_SCOREUPDATED + "TotalDead", [=](EventCustom* event) {
+	auto listener = EventListenerCustom::create(EVENT_PLARERDATA_SCOREUPDATED + "com.reallycsc.lifeishard.totaldeadcount", [=](EventCustom* event) {
 		Director::getInstance()->replaceScene(MainMenuScene::createScene());
 	});
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
-	listener = EventListenerCustom::create(EVENT_PLARERDATA_SCOREUPDATED + "MaxLevel", [=](EventCustom* event) {
+	listener = EventListenerCustom::create(EVENT_PLARERDATA_SCOREUPDATED + "com.reallycsc.lifeishard.maxlevel", [=](EventCustom* event) {
 		Director::getInstance()->replaceScene(MainMenuScene::createScene());
 	});
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
@@ -246,7 +246,7 @@ void MainMenuScene::buttonCallback_LevelPlay(Ref* pSender)
 	else
 	{
 		GameMediator::getInstance()->setCurGameLevel(curLevel);
-		UserDefault::getInstance()->setIntegerForKey("CurLevel", curLevel);
+		GameMediator::getInstance()->saveDataForKey(CURRENT_LEVEL, curLevel);
 		Director::getInstance()->replaceScene(GameScene::createScene());
 	}
 }

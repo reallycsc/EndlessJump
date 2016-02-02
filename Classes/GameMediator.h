@@ -16,6 +16,14 @@ typedef struct tagStoryData
 	vector<LineData>	line_data;
 }StoryData;
 
+enum UserData
+{
+	CURRENT_LEVEL = 1,
+	MAX_LEVEL,
+	TOTAL_DEAD,
+	LEVEL_DEAD_START,
+};
+
 class GameMediator
 {
 public:
@@ -32,6 +40,7 @@ public:
 	void setDeadCount(int deadCount);
 	void setMaxGameLevel();
 	void saveUserConfig();
+	inline void saveDataForKey(const int &key, const int &data);
 
 	void gotoNextGameLevel();
 	void gotoNextGameRoom();
@@ -44,7 +53,8 @@ public:
 	map<string, vector<LineData>>* getEndStoryLines(int id);
 
 private:
-	inline void addCustomEventLisenter(const string suffix, int* pScore);
+	inline void addCustomEventLisenter(const string &suffix, int* pScore, const int &key);
+	inline int loadDataForKey(const int &key, const int &default_data);
 
 public:
 	CC_SYNTHESIZE(int, m_nGameLevelCount, GameLevelCount);
