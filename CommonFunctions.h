@@ -101,4 +101,11 @@ inline void spriteToGray(Node* pNode, float percent)
 	CHECK_GL_ERROR_DEBUG();
 }
 
+inline bool isTwoColorNear(const Color3B &color1, const Color3B &color2)
+{
+	if (abs(color1.r - color2.r) + abs(color1.g - color2.g) + abs(color1.b - color2.b) < 100)
+		return true;
+	else
+		return false;
+}
 NS_CSC_END
