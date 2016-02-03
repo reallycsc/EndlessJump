@@ -164,12 +164,15 @@ inline void GameMediator::addCustomEventLisenter(const string &suffix, int* pSco
 
 void GameMediator::saveDataForKey(const int& key, const int& data)
 {
-	UserDefault::getInstance()->setStringForKey(StringUtils::format("CSC%d", key).c_str(), csc_encode_base64(StringUtils::format("%d", data)));
+	int data_encode = data^key; // XOR
+	UserDefault::getInstance()->setStringForKey(StringUtils::format("CSC%d", key).c_str(), csc_encode_base64(StringUtils::format("%d", data_encode)));
 }
 
 int GameMediator::loadDataForKey(const int& key, const int& default_data)
 {
-	return atoi(csc_decode_base64(UserDefault::getInstance()->getStringForKey(StringUtils::format("CSC%d", key).c_str(), csc_encode_base64(StringUtils::format("%d", default_data)))));
+	int default_data_encode = default_data^key; // XOR
+	int data_decode = atoi(csc_decode_base64(UserDefault::getInstance()->getStringForKey(StringUtils::format("CSC%d", key).c_str(), csc_encode_base64(StringUtils::format("%d", default_data_encode)))));
+	return data_decode^key; // XOR
 }
 
 bool GameMediator::loadGameLevelFile()
