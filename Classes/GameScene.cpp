@@ -71,10 +71,8 @@ bool GameScene::init()
 	
 	// load scene
 	auto rootNode = CSLoader::createNode("GameScene.csb");
-	m_pAnimate = CSLoader::createTimeline("GameScene.csb");
-	m_pAnimate->setFrameEventCallFunc(CC_CALLBACK_1(GameScene::onFrameEvent, this));
-	rootNode->runAction(m_pAnimate);
-	m_pAnimate->pause();
+    rootNode->setContentSize(visibleSize);
+    ui::Helper::doLayout(rootNode);
 	this->addChild(rootNode, 100);
 	// get button
 	m_pButtonPause = dynamic_cast<Button*>(rootNode->getChildByName("Button_Pause"));
@@ -102,7 +100,23 @@ bool GameScene::init()
 	this->addChild(m_pBlackLayer, 99);
 
 	// play animate
-	m_pAnimate->play("Scene_Start", false);
+    m_pButtonPause->setPositionY(visibleSize.height + 70);
+    m_pButtonPause->runAction(Sequence::create(DelayTime::create(0.5f),
+                                               MoveTo::create(0.5f, m_pButtonPause->getPosition() - Point(0, 80)),
+                                               NULL));
+    m_pButtonRetry->setPositionY(visibleSize.height + 70);
+    m_pButtonRetry->runAction(Sequence::create(DelayTime::create(0.5f),
+                                               MoveTo::create(0.5f, m_pButtonRetry->getPosition() - Point(0, 80)),
+                                               NULL));
+    levelName->setPosition(Point(visibleSize.width / 2, visibleSize.height / 2));
+    levelName->runAction(Sequence::create(DelayTime::create(0.5f),
+                                          MoveTo::create(0.5f, Point(visibleSize.width - 10 - levelName->getContentSize().width, visibleSize.height - 74)),
+                                          NULL));
+    levelNumber->setPosition(Point(visibleSize.width / 2, visibleSize.height / 2 + 50));
+    levelNumber->runAction(Sequence::create(DelayTime::create(0.5f),
+                                            MoveTo::create(0.5f, Point(10 + levelNumber->getContentSize().width, visibleSize.height - 74)),
+                                            CallFuncN::create(CC_CALLBACK_0(GameScene::onSceneAnimateEnd, this)),
+                                            NULL));
 
 	this->scheduleUpdate();
 
@@ -121,33 +135,25 @@ void GameScene::update(float dt)
 	}
 }
 
-void GameScene::onFrameEvent(Frame* frame)
+void GameScene::onSceneAnimateEnd()
 {
-	EventFrame* event = dynamic_cast<EventFrame*>(frame);
-	if (!event)
-		return;
-
-	string str = event->getEvent();
-	if (str == "Scene_Start_End")
-	{
-		m_pButtonPause->setEnabled(true);
-		m_pButtonRetry->setEnabled(true);
-		// get level data
-		auto roomsData = m_pCurLevelData->getRoomsData();
-		m_pGameMediator->setCurGameRoom(1);
-		m_pCurRoomData = &roomsData->at(0);
-
+    m_pButtonPause->setEnabled(true);
+    m_pButtonRetry->setEnabled(true);
+    // get level data
+    auto roomsData = m_pCurLevelData->getRoomsData();
+    m_pGameMediator->setCurGameRoom(1);
+    m_pCurRoomData = &roomsData->at(0);
+    
 #ifdef SHOW_ALL_ROOM_MODE
-		// add all room
-		for (size_t i = 0, length = roomsData->size(); i < length; i++)
-			this->addRoom(&roomsData->at(i));
+    // add all room
+    for (size_t i = 0, length = roomsData->size(); i < length; i++)
+        this->addRoom(&roomsData->at(i));
 #else
-		// add first room
-		this->addRoom(m_pCurRoomData);
+    // add first room
+    this->addRoom(m_pCurRoomData);
 #endif
-		// add player
-		this->addPlayer();
-	}
+    // add player
+    this->addPlayer();
 }
 
 bool GameScene::onTouchBegan(Touch *touch, Event *event)
@@ -268,7 +274,8 @@ bool GameScene::onContactBegin(const PhysicsContact& contact)
 			m_pTextDeadNum->setString(StringUtils::format("%d", m_nDeadNumber));
 		else
 			m_pTextDeadNum->setString(StringUtils::format("%d/%d", m_nDeadNumber, m_nDeadNumberMin));
-		m_pAnimate->play("DeadTextEnlarge", false);
+        
+        m_pTextDeadNum->runAction(Sequence::createWithTwoActions(ScaleTo::create(0.1f, 1.5f), ScaleTo::create(0.1f,1)));
 
 		this->runAction(Sequence::createWithTwoActions(
 			DelayTime::create(0.01f),

@@ -43,10 +43,9 @@ bool GameOverScene::init(int deadCount)
 
 	// load csb
 	auto rootNode = CSLoader::createNode("GameOverScene.csb");
-	auto animate = CSLoader::createTimeline("GameOverScene.csb");
-	rootNode->runAction(animate);
-	animate->gotoFrameAndPlay(0, false);
-	this->addChild(rootNode);
+    rootNode->setContentSize(visibleSize);
+    ui::Helper::doLayout(rootNode);
+    this->addChild(rootNode);
 
 	auto layout = dynamic_cast<Layout*>(rootNode->getChildByName("Panel_GameOver"));
 	// get button
@@ -126,6 +125,11 @@ bool GameOverScene::init(int deadCount)
 		Director::getInstance()->replaceScene(GameScene::createScene());
 	});
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
+    
+    // play animate
+    auto layout_half_width = layout->getContentSize().width / 2;
+    layout->setPositionX(-layout_half_width);
+    layout->runAction(MoveTo::create(0.25f, Point(layout_half_width, layout->getPositionY())));
 
     return true;
 }

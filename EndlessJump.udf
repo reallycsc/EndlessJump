@@ -4,7 +4,7 @@
       <Value ctype="CocosRecentOperation">
         <LastPublishType Value="Resource" />
         <IsLastPublish Value="True" />
-        <LastRunType Value="Windows" />
+        <LastRunType Value="Mac" />
       </Value>
     </Item>
     <Item Key="PackageParamsKey">
@@ -12,31 +12,20 @@
         <LuaIsEncrypt Value="False" />
         <LuaEncryptKey Value="" />
         <LuaEncryptSign Value="" />
-        <Android_PackageName Value="org.cocos.EndlessJump" />
+        <Android_PackageName Value="com.reallycsc.lifeishard" />
         <AndroidkeyStore Value="" />
         <AndroidVersion Value="android-22" />
         <iOS_Target Value="EndlessJump iOS" />
-        <iOS_BundleID Value="" />
+        <iOS_BundleID Value="iPhone Developer: Suchao Chen (Y5R9X5WPGL)" />
         <Platform Value="None" />
         <RunPlatform Value="None" />
         <FrameworkVersion Value="cocos2d-x-3.6" />
         <IsDebugKeystore Value="True" />
+        <KeystorePassword Value="" />
+        <KeystoreAliasName Value="" />
+        <KeystoreAliasPassword Value="" />
         <EnableSourceMap Value="False" />
         <EnableHTML5Advanced Value="False" />
-      </Value>
-    </Item>
-    <Item Key="TabsParamsKey">
-      <Value ctype="TabsInfo">
-        <OpenedDocuments>
-          <FilePathData Path="LevelMakeScene.csd" />
-          <FilePathData Path="MainMenuScene.csd" />
-          <FilePathData Path="MainMenuScene_NodeLevel.csd" />
-          <FilePathData Path="GamePauseScene.csd" />
-          <FilePathData Path="GameScene.csd" />
-          <FilePathData Path="GameOverScene.csd" />
-          <FilePathData Path="CreditScene.csd" />
-        </OpenedDocuments>
-        <ActiveDocument Path="GamePauseScene.csd" />
       </Value>
     </Item>
   </Properties>

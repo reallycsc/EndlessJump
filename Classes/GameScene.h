@@ -20,7 +20,7 @@ private:
 	void update(float dt) override;
 
 	void onEnter() override;
-	void onFrameEvent(Frame* frame);
+	void onSceneAnimateEnd();
 	virtual bool onTouchBegan(Touch* touch, Event* event) override;
 	virtual void onTouchMoved(Touch* touch, Event* event) override;
 	virtual void onTouchEnded(Touch* touch, Event* event) override;
@@ -35,7 +35,6 @@ private:
 
 private:
 	GameMediator*	m_pGameMediator;
-	ActionTimeline*	m_pAnimate;
 
 	GameLevelData*	m_pCurLevelData;
 	RoomData*	m_pCurRoomData;

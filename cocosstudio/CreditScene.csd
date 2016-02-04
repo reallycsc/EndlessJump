@@ -6,10 +6,10 @@
       <ObjectData Name="Scene" Tag="151" ctype="GameNodeObjectData">
         <Size X="1536.0000" Y="1024.0000" />
         <Children>
-          <AbstractNodeData Name="ScrollView_Credit" ActionTag="-1133123757" Tag="172" IconVisible="False" PositionPercentXEnabled="True" RightMargin="768.0000" TouchEnable="True" ClipAble="False" BackColorAlpha="102" ColorAngle="90.0000" Scale9Width="1" Scale9Height="1" IsBounceEnabled="True" ScrollDirectionType="Vertical" ctype="ScrollViewObjectData">
-            <Size X="768.0000" Y="1024.0000" />
+          <AbstractNodeData Name="ScrollView_Credit" ActionTag="-1133123757" Tag="172" IconVisible="False" PositionPercentXEnabled="True" PercentWidthEnable="True" PercentHeightEnable="True" PercentWidthEnabled="True" PercentHeightEnabled="True" VerticalEdge="TopEdge" TouchEnable="True" ClipAble="False" BackColorAlpha="102" ColorAngle="90.0000" Scale9Width="1" Scale9Height="1" IsBounceEnabled="True" ScrollDirectionType="Vertical" ctype="ScrollViewObjectData">
+            <Size X="1536.0000" Y="1024.0000" />
             <Children>
-              <AbstractNodeData Name="Panel_Credit_Finished" ActionTag="322015379" Tag="174" IconVisible="False" PositionPercentXEnabled="True" VerticalEdge="TopEdge" TopMargin="974.0000" BottomMargin="-1450.0000" TouchEnable="True" ClipAble="False" BackColorAlpha="102" ColorAngle="90.0000" Scale9Width="1" Scale9Height="1" ctype="PanelObjectData">
+              <AbstractNodeData Name="Panel_Credit_Finished" ActionTag="322015379" Tag="174" IconVisible="False" VerticalEdge="BottomEdge" RightMargin="768.0000" TopMargin="974.0000" BottomMargin="-1450.0000" TouchEnable="True" ClipAble="False" BackColorAlpha="102" ColorAngle="90.0000" Scale9Width="1" Scale9Height="1" ctype="PanelObjectData">
                 <Size X="768.0000" Y="1500.0000" />
                 <Children>
                   <AbstractNodeData Name="Text_Title" ActionTag="-671847744" Tag="199" IconVisible="False" PositionPercentXEnabled="True" VerticalEdge="TopEdge" LeftMargin="74.0000" RightMargin="74.0000" TopMargin="50.0000" BottomMargin="1327.0000" FontSize="100" LabelText="Life is HARD" OutlineSize="4" OutlineEnabled="True" ShadowOffsetX="4.0000" ShadowOffsetY="-4.0000" ShadowEnabled="True" ctype="TextObjectData">
@@ -173,14 +173,14 @@
                     <OutlineColor A="255" R="255" G="0" B="0" />
                     <ShadowColor A="255" R="0" G="0" B="0" />
                   </AbstractNodeData>
-                  <AbstractNodeData Name="Button_MainMenu" ActionTag="-1548373402" Tag="164" IconVisible="False" PositionPercentXEnabled="True" LeftMargin="324.0000" RightMargin="324.0000" TopMargin="1410.0000" BottomMargin="50.0000" TouchEnable="True" FontSize="24" ButtonText="Return" Scale9Enable="True" LeftEage="15" RightEage="15" TopEage="11" BottomEage="11" Scale9OriginX="15" Scale9OriginY="11" Scale9Width="16" Scale9Height="14" ShadowOffsetX="2.0000" ShadowOffsetY="-2.0000" ctype="ButtonObjectData">
-                    <Size X="120.0000" Y="40.0000" />
+                  <AbstractNodeData Name="Button_MainMenu" ActionTag="-1548373402" Tag="164" IconVisible="False" PositionPercentXEnabled="True" LeftMargin="304.0000" RightMargin="304.0000" TopMargin="1390.0000" BottomMargin="50.0000" TouchEnable="True" FontSize="32" ButtonText="Return" Scale9Enable="True" LeftEage="15" RightEage="15" TopEage="11" BottomEage="11" Scale9OriginX="15" Scale9OriginY="11" Scale9Width="16" Scale9Height="14" ShadowOffsetX="2.0000" ShadowOffsetY="-2.0000" ctype="ButtonObjectData">
+                    <Size X="160.0000" Y="60.0000" />
                     <AnchorPoint ScaleX="0.5000" />
                     <Position X="384.0000" Y="50.0000" />
                     <Scale ScaleX="1.0000" ScaleY="1.0000" />
                     <CColor A="255" R="173" G="216" B="230" />
                     <PrePosition X="0.5000" Y="0.0333" />
-                    <PreSize X="0.1563" Y="0.0267" />
+                    <PreSize X="0.2083" Y="0.0400" />
                     <FontResource Type="Normal" Path="Resource/fzzj.ttf" Plist="" />
                     <TextColor A="255" R="65" G="65" B="70" />
                     <DisabledFileData Type="Default" Path="Default/Button_Disable.png" Plist="" />
@@ -194,14 +194,14 @@
                 <Position X="384.0000" Y="50.0000" />
                 <Scale ScaleX="1.0000" ScaleY="1.0000" />
                 <CColor A="255" R="255" G="255" B="255" />
-                <PrePosition X="0.5000" Y="0.0488" />
-                <PreSize X="1.0000" Y="1.4648" />
+                <PrePosition X="0.2500" Y="0.0488" />
+                <PreSize X="0.5000" Y="1.4648" />
                 <SingleColor A="255" R="150" G="200" B="255" />
                 <FirstColor A="255" R="150" G="200" B="255" />
                 <EndColor A="255" R="255" G="255" B="255" />
                 <ColorVector ScaleY="1.0000" />
               </AbstractNodeData>
-              <AbstractNodeData Name="Panel_Credit_Unfinished" Visible="False" ActionTag="-489781330" Tag="175" IconVisible="False" PositionPercentXEnabled="True" VerticalEdge="TopEdge" TopMargin="974.0000" BottomMargin="-974.0000" TouchEnable="True" ClipAble="False" BackColorAlpha="102" ColorAngle="90.0000" Scale9Width="1" Scale9Height="1" ctype="PanelObjectData">
+              <AbstractNodeData Name="Panel_Credit_Unfinished" ActionTag="-489781330" Tag="175" IconVisible="False" VerticalEdge="BottomEdge" RightMargin="768.0000" TopMargin="974.0000" BottomMargin="-974.0000" TouchEnable="True" ClipAble="False" BackColorAlpha="102" ColorAngle="90.0000" Scale9Width="1" Scale9Height="1" ctype="PanelObjectData">
                 <Size X="768.0000" Y="1024.0000" />
                 <Children>
                   <AbstractNodeData Name="Text_Title" ActionTag="1597493576" Tag="188" IconVisible="False" PositionPercentXEnabled="True" VerticalEdge="TopEdge" LeftMargin="74.0000" RightMargin="74.0000" TopMargin="50.0000" BottomMargin="851.0000" FontSize="100" LabelText="Life is HARD" OutlineSize="4" OutlineEnabled="True" ShadowOffsetX="4.0000" ShadowOffsetY="-4.0000" ShadowEnabled="True" ctype="TextObjectData">
@@ -317,14 +317,14 @@
                     <PrePosition X="0.5000" Y="0.7559" />
                     <PreSize X="0.0000" Y="0.0000" />
                   </AbstractNodeData>
-                  <AbstractNodeData Name="Button_MainMenu" ActionTag="602821696" Tag="187" IconVisible="False" PositionPercentXEnabled="True" LeftMargin="324.0000" RightMargin="324.0000" TopMargin="934.0000" BottomMargin="50.0000" TouchEnable="True" FontSize="24" ButtonText="Return" Scale9Enable="True" LeftEage="15" RightEage="15" TopEage="11" BottomEage="11" Scale9OriginX="15" Scale9OriginY="11" Scale9Width="16" Scale9Height="14" ShadowOffsetX="2.0000" ShadowOffsetY="-2.0000" ctype="ButtonObjectData">
-                    <Size X="120.0000" Y="40.0000" />
+                  <AbstractNodeData Name="Button_MainMenu" ActionTag="602821696" Tag="187" IconVisible="False" PositionPercentXEnabled="True" LeftMargin="304.0000" RightMargin="304.0000" TopMargin="914.0000" BottomMargin="50.0000" TouchEnable="True" FontSize="32" ButtonText="Return" Scale9Enable="True" LeftEage="15" RightEage="15" TopEage="11" BottomEage="11" Scale9OriginX="15" Scale9OriginY="11" Scale9Width="16" Scale9Height="14" ShadowOffsetX="2.0000" ShadowOffsetY="-2.0000" ctype="ButtonObjectData">
+                    <Size X="160.0000" Y="60.0000" />
                     <AnchorPoint ScaleX="0.5000" />
                     <Position X="384.0000" Y="50.0000" />
                     <Scale ScaleX="1.0000" ScaleY="1.0000" />
                     <CColor A="255" R="173" G="216" B="230" />
                     <PrePosition X="0.5000" Y="0.0488" />
-                    <PreSize X="0.1563" Y="0.0391" />
+                    <PreSize X="0.2083" Y="0.0586" />
                     <FontResource Type="Normal" Path="Resource/fzzj.ttf" Plist="" />
                     <TextColor A="255" R="65" G="65" B="70" />
                     <DisabledFileData Type="Default" Path="Default/Button_Disable.png" Plist="" />
@@ -338,8 +338,8 @@
                 <Position X="384.0000" Y="50.0000" />
                 <Scale ScaleX="1.0000" ScaleY="1.0000" />
                 <CColor A="255" R="255" G="255" B="255" />
-                <PrePosition X="0.5000" Y="0.0488" />
-                <PreSize X="1.0000" Y="1.0000" />
+                <PrePosition X="0.2500" Y="0.0488" />
+                <PreSize X="0.5000" Y="1.0000" />
                 <SingleColor A="255" R="150" G="200" B="255" />
                 <FirstColor A="255" R="150" G="200" B="255" />
                 <EndColor A="255" R="255" G="255" B="255" />
@@ -347,16 +347,16 @@
               </AbstractNodeData>
             </Children>
             <AnchorPoint ScaleX="0.5000" ScaleY="1.0000" />
-            <Position X="384.0000" Y="1024.0000" />
+            <Position X="768.0000" Y="1024.0000" />
             <Scale ScaleX="1.0000" ScaleY="1.0000" />
             <CColor A="255" R="255" G="255" B="255" />
-            <PrePosition X="0.2500" Y="1.0000" />
-            <PreSize X="0.5000" Y="1.0000" />
+            <PrePosition X="0.5000" Y="1.0000" />
+            <PreSize X="1.0000" Y="1.0000" />
             <SingleColor A="255" R="255" G="150" B="100" />
             <FirstColor A="255" R="255" G="150" B="100" />
             <EndColor A="255" R="255" G="255" B="255" />
             <ColorVector ScaleY="1.0000" />
-            <InnerNodeSize Width="768" Height="1024" />
+            <InnerNodeSize Width="1536" Height="1024" />
           </AbstractNodeData>
         </Children>
       </ObjectData>

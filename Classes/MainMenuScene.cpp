@@ -55,6 +55,8 @@ bool MainMenuScene::init()
 
 	// load csb
 	auto rootNode = CSLoader::createNode("MainMenuScene.csb");
+    rootNode->setContentSize(visibleSize);
+    ui::Helper::doLayout(rootNode);
 	this->addChild(rootNode, 2);
 	// get button
 	auto buttonEditor = dynamic_cast<Button*>(rootNode->getChildByName("Button_LevelEditor"));
@@ -291,7 +293,7 @@ void MainMenuScene::buttonCallback_GameCenter(Ref* pSender)
 	auto helper = CSCClass::CSC_IOSHelper::getInstance();
 	if (helper->GameCenter_isAuthenticated())
 	{
-		helper->GameCenter_showLeaderboard("com.reallycsc.lifeishard.leaderboard");
+		helper->GameCenter_showLeaderboard("com.reallycsc.lifeishard.maxlevel");
 	}
 	else
 	{

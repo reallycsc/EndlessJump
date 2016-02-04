@@ -39,6 +39,8 @@ bool CreditScene::init()
 	Size visibleSize = Director::getInstance()->getVisibleSize();
 	// load csb
 	auto rootNode = CSLoader::createNode("CreditScene.csb");
+    rootNode->setContentSize(visibleSize);
+    ui::Helper::doLayout(rootNode);
 	this->addChild(rootNode);
 
 	auto scrollView = dynamic_cast<ScrollView*>(rootNode->getChildByName("ScrollView_Credit"));
