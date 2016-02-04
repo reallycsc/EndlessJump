@@ -5,7 +5,7 @@
 
 # use git subtree command to add this in the project
 ## git remote add -f CSCClass https://github.com/reallycsc/CSCClass.git
-## git subtree add --prefix=Classes/CSCClass CSCClass master --squash
+## git subtree add --prefix=Classes/CSCClass CSCClass master
 ## git fetch CSCClass master
-## git subtree pull --prefix=Classes/CSCClass CSCClass master --squash
+## git subtree pull --prefix=Classes/CSCClass CSCClass master
 ## git subtree push --prefix=Classes/CSCClass CSCClass master
