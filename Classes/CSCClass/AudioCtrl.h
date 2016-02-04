@@ -28,6 +28,7 @@ private:
 
 public:
 	CC_SYNTHESIZE(bool, m_bIsListPlaying, IsListPlaying);
+	CC_SYNTHESIZE(bool, m_bIsPause, IsPause);
 
 private:
 	CocosDenshion::SimpleAudioEngine*	m_pSimpleAudioEngine;
