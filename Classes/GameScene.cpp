@@ -2,6 +2,8 @@
 #include "CSCClass/CSCAction/Shake.h"
 #include "GamePauseScene.h"
 #include "GameOverScene.h"
+#include "StoryScene.h"
+#include "CSCClass/CommonFunctions.h"
 
 Scene* GameScene::createScene()
 {
@@ -39,6 +41,9 @@ void GameScene::onEnter()
 	touchListener->onTouchMoved = CC_CALLBACK_2(GameScene::onTouchMoved, this);
 	touchListener->onTouchEnded = CC_CALLBACK_2(GameScene::onTouchEnded, this);
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(touchListener, this);
+
+	if (m_bIsLevelFinished)
+		Director::getInstance()->replaceScene(GameOverScene::createScene(m_nDeadNumber));
 }
 
 bool GameScene::init()
@@ -57,6 +62,7 @@ bool GameScene::init()
 	m_pPlayer = nullptr;
 	m_pParticleTail = nullptr;
 	m_LastJumpPoint = Point(-100, -100);
+	m_bIsLevelFinished = false;
 
 	// get level data
 	auto levelsData = m_pGameMediator->getGameLevelData();
@@ -201,6 +207,9 @@ void GameScene::buttonCallback_Retry(Ref* pSender)
 	m_vEnemys.clear();
 	m_nRoomCount = 0;
 
+	this->removeChildByName("LastContactPoint");
+	this->removeChildByName("LastJumpPoint");
+
 	// get room data
 	auto roomsData = m_pCurLevelData->getRoomsData();
 	m_pGameMediator->setCurGameRoom(1);
@@ -246,7 +255,8 @@ bool GameScene::onContactBegin(const PhysicsContact& contact)
 		particle->setSpeedVar(300);
 		particle->setLife(0.5f);
 		particle->setLifeVar(0.2f);
-		particle->setPosition(contact.getContactData()->points[0]);
+		auto contactPoint = contact.getContactData()->points[0];
+		particle->setPosition(contactPoint);
 		this->addChild(particle, 5);
 
 		m_pPlayer->die();
@@ -268,11 +278,25 @@ bool GameScene::onContactBegin(const PhysicsContact& contact)
 			this->addPlayer();
 		})));
 
+		auto color_contact = Color4F::RED;
+		auto color_jump = Color4F::BLUE;
+		if (CSCClass::isTwoColorNear(m_pCurRoomData->color, Color3B::RED) || CSCClass::isTwoColorNear(m_pCurRoomData->color, Color3B::BLUE))
+		{
+			color_contact = Color4F::WHITE;
+			color_jump = Color4F::GREEN;
+		}
+
+		// show last contact point
+		this->removeChildByName("LastContactPoint");
+		DrawNode* point_contact = DrawNode::create();
+		point_contact->drawPoint(contactPoint, 4, color_contact);
+		this->addChild(point_contact, 98, "LastContactPoint");
+
 		// show last dead jump point
 		this->removeChildByName("LastJumpPoint");
-		DrawNode* point = DrawNode::create();
-		point->drawPoint(m_LastJumpPoint, 4, m_pCurRoomData->color == Color3B::RED ? Color4F::GREEN : Color4F::RED);
-		this->addChild(point, 98, "LastJumpPoint");
+		DrawNode* point_jump = DrawNode::create();
+		point_jump->drawPoint(m_LastJumpPoint, 4, color_jump);
+		this->addChild(point_jump, 98, "LastJumpPoint");
 	}
 
 	return false;
@@ -356,6 +380,7 @@ void GameScene::addPlayer()
 		else
 		{
 			// the last room
+			m_bIsLevelFinished = true;
 			RenderTexture* renderTexture = RenderTexture::create(visibleSize.width, visibleSize.height, Texture2D::PixelFormat::RGBA8888, GL_DEPTH24_STENCIL8);
 			// Go through all child of Game class and draw in renderTexture
 			// It's like screenshot
@@ -366,7 +391,24 @@ void GameScene::addPlayer()
 			Director::getInstance()->getRenderer()->render();// Must add this for version 3.0 or image goes black  
 			Director::getInstance()->getTextureCache()->addImage(renderTexture->newImage(), "GameOverImage");
 
-			Director::getInstance()->replaceScene(GameOverScene::createScene(m_nDeadNumber));
+			auto story = m_pGameMediator->getLevelStoryLines(m_pGameMediator->getCurGameLevel());
+			if (story)
+				if (story->end == 0)
+				{
+					auto storyScene = StoryScene::createScene();
+					if (storyScene && m_nDeadNumber == 0)
+						Director::getInstance()->pushScene(storyScene);
+					else
+						Director::getInstance()->replaceScene(GameOverScene::createScene(m_nDeadNumber));
+				}
+				else
+				{
+					auto storyScene = StoryScene::createScene();
+					if (storyScene)
+						Director::getInstance()->pushScene(storyScene);
+				}
+			else
+				Director::getInstance()->replaceScene(GameOverScene::createScene(m_nDeadNumber));
 		}
 	})));
 	this->addChild(m_pPlayer, 4);

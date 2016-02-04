@@ -1,5 +1,9 @@
 #include "GameMediator.h"
 #include "CSCClass/CSC_IOSHelper.h"
+#include "CSCClass/AudioCtrl.h"
+#include "CSCClass/CSC_Encryption.h"
+
+USING_NS_CSC;
 
 static GameMediator _sharedContext;
 
@@ -18,16 +22,21 @@ GameMediator::GameMediator(void): m_nGameLevelCount(0), m_nCurGameLevel(0), m_nM
 {
 	m_vGameLevelData.clear();
 	m_vLevelMinDeadCount.clear();
+	m_mLevelStorys.clear();
+	m_mEndStorys.clear();
 }
 
 GameMediator::~GameMediator(void)
 {
 	m_vGameLevelData.clear();
 	m_vLevelMinDeadCount.clear();
+	m_mLevelStorys.clear();
+	m_mEndStorys.clear();
 
 	EventDispatcher* dispatcher = Director::getInstance()->getEventDispatcher();
-	dispatcher->removeCustomEventListeners(EVENT_GAMECENTER_SCORERETRIVED + "MaxLevel");
-	dispatcher->removeCustomEventListeners(EVENT_GAMECENTER_SCORERETRIVED + "TotalDead");
+	dispatcher->removeCustomEventListeners(EVENT_GAMECENTER_AUTHENTICATED);
+	dispatcher->removeCustomEventListeners(EVENT_GAMECENTER_SCORERETRIVED + "com.reallycsc.lifeishard.maxlevel");
+	dispatcher->removeCustomEventListeners(EVENT_GAMECENTER_SCORERETRIVED + "com.reallycsc.lifeishard.totaldeadcount");
 }
 
 bool GameMediator::init()
@@ -35,20 +44,53 @@ bool GameMediator::init()
 	bool bRet = false;
 	do
 	{
+		// login-in GameCenter
+		auto helper = CSC_IOSHelper::getInstance();
+		helper->GameCenter_authenticateLocalUser();
+		auto listener = EventListenerCustom::create(EVENT_GAMECENTER_AUTHENTICATED, [=](EventCustom* event) {
+			// get data from game center
+			helper->GameCenter_retriveScoreFromLeaderboard("com.reallycsc.lifeishard.maxlevel");
+			helper->GameCenter_retriveScoreFromLeaderboard("com.reallycsc.lifeishard.totaldeadcount");
+		});
+		Director::getInstance()->getEventDispatcher()->addEventListenerWithFixedPriority(listener, 1);
+#ifdef IAP_TEST
+		helper->IAP_requestAllPurchasedProducts(true);
+#else
+		helper->IAP_requestAllPurchasedProducts(false);
+#endif
+
 		// get level config file
 		CC_BREAK_IF(!this->loadGameLevelFile());
 
+		// get level story file
+		CC_BREAK_IF(!this->loadGameLevelStoryFile());
+
+		// load music
+		auto audio_engine = AudioCtrl::getInstance();
+		audio_engine->addBackgroundMusic("Alan Walker - Spectre.mp3");
+		audio_engine->addBackgroundMusic("Arty - Worlds Collide.mp3");
+		audio_engine->addBackgroundMusic("Calvin Harris - Iron.mp3");
+		audio_engine->addBackgroundMusic("Deorro - Play.mp3");
+		audio_engine->addBackgroundMusic("Hardwell - Jumper.mp3");
+		audio_engine->addBackgroundMusic("James Egbert - The Glory.mp3");
+
+		// set music volume
+		CocosDenshion::SimpleAudioEngine::getInstance()->setBackgroundMusicVolume(1.0);
+		audio_engine->playBackgroundMusicList(true);
+		
+		// make key string
 		// get local save data
 		UserDefault* user = UserDefault::getInstance();
 		if (!user->getBoolForKey("isHaveSaveFileXml"))
 		{
 			user->setBoolForKey("isHaveSaveFileXml", true);
-			user->setIntegerForKey("CurLevel", 1);
-			user->setIntegerForKey("MaxLevel", 1);
-			user->setIntegerForKey("TotalDead", -1);
+			user->setBoolForKey("Music", true);
+			this->saveDataForKey(CURRENT_LEVEL, 1);
+			this->saveDataForKey(MAX_LEVEL, 1);
+			this->saveDataForKey(TOTAL_DEAD, -1);
 			for (size_t i = 0; i < m_nGameLevelCount; i++)
 			{
-				user->setIntegerForKey(StringUtils::format("Level%lu-DeadCount", i + 1).c_str(), -1);
+				this->saveDataForKey(LEVEL_DEAD_START + i, -1);
 				m_vLevelMinDeadCount.push_back(-1);
 			}
 			m_nCurGameLevel = 1;
@@ -57,45 +99,40 @@ bool GameMediator::init()
 		}
 		else
 		{
+			// pause the music due to user config
+			if (!user->getBoolForKey("Music", true))
+				audio_engine->stopBackgroundMusic();
+
 			auto totalDead = 0;
-			auto maxDeadLevel = 0;
+			auto maxDeadLevel = 1;
 			for (size_t i = 0; i < m_nGameLevelCount; i++)
 			{
-				auto levelDead = user->getIntegerForKey(StringUtils::format("Level%lu-DeadCount", i + 1).c_str(), -1);
+				auto levelDead = this->loadDataForKey(LEVEL_DEAD_START + i, -1);
 				m_vLevelMinDeadCount.push_back(levelDead);
 				if (levelDead > 0)
 				{
 					totalDead += levelDead;
 					maxDeadLevel++;
-				}	
+				}
 			}
-			m_nTotalDeadCount = user->getIntegerForKey("TotalDead", -1);
+			m_nTotalDeadCount = this->loadDataForKey(TOTAL_DEAD, -1);
 			if (m_nTotalDeadCount != totalDead) // if have bug or player cheat
 			{
 				m_nTotalDeadCount = totalDead;
-				user->setIntegerForKey("TotalDead", m_nTotalDeadCount);
+				this->saveDataForKey(TOTAL_DEAD, m_nTotalDeadCount);
 			}
-
-			m_nCurGameLevel = user->getIntegerForKey("CurLevel", 1);
+			m_nCurGameLevel = this->loadDataForKey(CURRENT_LEVEL, 1);
 			if (m_nCurGameLevel > maxDeadLevel) // if delete some level or have bug
 			{
 				m_nCurGameLevel = maxDeadLevel;
-				user->setIntegerForKey("CurLevel", m_nCurGameLevel);
+				this->saveDataForKey(CURRENT_LEVEL, m_nCurGameLevel);
 			}
-			m_nMaxGameLevel = user->getIntegerForKey("MaxLevel", 1);
-			if (m_nMaxGameLevel > maxDeadLevel || m_nMaxGameLevel < m_nCurGameLevel) // if delete some level or have bug
-			{
-				m_nMaxGameLevel = MAX(MIN(m_nMaxGameLevel, maxDeadLevel), m_nCurGameLevel);
-				user->setIntegerForKey("MaxLevel", m_nMaxGameLevel);
-			}
+			m_nMaxGameLevel = this->loadDataForKey(MAX_LEVEL, 1);
 		}
 
-		// get data from game center
-		CSCClass::CSC_IOSHelper::getInstance()->GameCenter_retriveScoreFromLeaderboard("MaxLevel");
-		CSCClass::CSC_IOSHelper::getInstance()->GameCenter_retriveScoreFromLeaderboard("TotalDead");
 		// add custom event lisenter
-		this->addCustomEventLisenter("MaxLevel", &m_nMaxGameLevel);
-		this->addCustomEventLisenter("TotalDead", &m_nTotalDeadCount);
+		this->addCustomEventLisenter("com.reallycsc.lifeishard.maxlevel", &m_nMaxGameLevel, MAX_LEVEL);
+		this->addCustomEventLisenter("com.reallycsc.lifeishard.totaldeadcount", &m_nTotalDeadCount, TOTAL_DEAD);
 
 		// set current room 
 		m_nCurGameRoom = 1;
@@ -106,7 +143,7 @@ bool GameMediator::init()
 	return bRet;
 }
 
-inline void GameMediator::addCustomEventLisenter(const string suffix, int* pScore)
+inline void GameMediator::addCustomEventLisenter(const string &suffix, int* pScore, const int &key)
 {
 	EventDispatcher* dispatcher = Director::getInstance()->getEventDispatcher();
 	auto listener = EventListenerCustom::create(EVENT_GAMECENTER_SCORERETRIVED + suffix, [=](EventCustom* event) {
@@ -118,11 +155,24 @@ inline void GameMediator::addCustomEventLisenter(const string suffix, int* pScor
 		{
 			(*pScore) = score_int;
 			// save to local data
-			UserDefault::getInstance()->setIntegerForKey(suffix.c_str(), score_int);
+			this->saveDataForKey(key, score_int);
 			dispatcher->dispatchCustomEvent(EVENT_PLARERDATA_SCOREUPDATED + suffix);
 		}
 	});
 	dispatcher->addEventListenerWithFixedPriority(listener, 1);
+}
+
+void GameMediator::saveDataForKey(const int& key, const int& data)
+{
+	int data_encode = data^key; // XOR
+	UserDefault::getInstance()->setStringForKey(StringUtils::format("CSC%d", key).c_str(), csc_encode_base64(StringUtils::format("%d", data_encode)));
+}
+
+int GameMediator::loadDataForKey(const int& key, const int& default_data)
+{
+	int default_data_encode = default_data^key; // XOR
+	int data_decode = atoi(csc_decode_base64(UserDefault::getInstance()->getStringForKey(StringUtils::format("CSC%d", key).c_str(), csc_encode_base64(StringUtils::format("%d", default_data_encode)))));
+	return data_decode^key; // XOR
 }
 
 bool GameMediator::loadGameLevelFile()
@@ -309,14 +359,91 @@ bool GameMediator::saveGameLevelFile()
 	return bRet;
 }
 
+bool GameMediator::loadGameLevelStoryFile()
+{
+	bool bRet = false;
+	do
+	{
+		tinyxml2::XMLDocument document;
+		string filename = FileUtils::getInstance()->fullPathForFilename("config/LevelStory.xml");
+		document.LoadFile(filename.c_str());
+		XMLElement* root = document.RootElement();
+		CC_BREAK_IF(!root);
+
+		// load level storys
+		m_mLevelStorys.clear();
+		for (XMLElement* surface1 = root->FirstChildElement("Level"); surface1 != NULL; surface1 = surface1->NextSiblingElement("Level"))
+		{
+			auto level = surface1->IntAttribute("level");
+			StoryData story;
+			story.end = surface1->IntAttribute("end");
+			for (XMLElement* surface2 = surface1->FirstChildElement("Line"); surface2 != NULL; surface2 = surface2->NextSiblingElement("Line"))
+			{
+				LineData storyline;
+				storyline.text = surface2->Attribute("text");
+				storyline.size = surface2->IntAttribute("fontsize");
+				if (storyline.size == 0)
+					storyline.size = 32;
+				auto color_r = surface2->IntAttribute("color_r");
+				auto color_g = surface2->IntAttribute("color_g");
+				auto color_b = surface2->IntAttribute("color_b");
+				if (color_r == 0 && color_g == 0 && color_b == 0)
+					storyline.color = Color3B::WHITE;
+				else
+					storyline.color = Color3B(color_r, color_g, color_b);
+				storyline.interval = surface2->IntAttribute("interval");
+
+				story.line_data.push_back(storyline);
+			}
+			m_mLevelStorys.insert(pair<int, StoryData>(level, story));
+		}
+
+		// load end storys
+		m_mEndStorys.clear();
+		for (XMLElement* surface1 = root->FirstChildElement("End"); surface1 != NULL; surface1 = surface1->NextSiblingElement("End"))
+		{
+			auto id = surface1->IntAttribute("id");
+			map<string, vector<LineData>> end_story;
+			for (XMLElement* surface2 = surface1->FirstChildElement("Subend"); surface2 != NULL; surface2 = surface2->NextSiblingElement("Subend"))
+			{
+				auto condition = surface2->Attribute("condition");
+				vector<LineData> storylines;
+				for (XMLElement* surface3 = surface2->FirstChildElement("Line"); surface3 != NULL; surface3 = surface3->NextSiblingElement("Line"))
+				{
+					LineData storyline;
+					storyline.text = surface3->Attribute("text");
+					storyline.size = surface3->IntAttribute("fontsize");
+					if (storyline.size == 0)
+						storyline.size = 32;
+					auto color_r = surface3->IntAttribute("color_r");
+					auto color_g = surface3->IntAttribute("color_g");
+					auto color_b = surface3->IntAttribute("color_b");
+					if (color_r == 0 && color_g == 0 && color_b == 0)
+						storyline.color = Color3B::WHITE;
+					else
+						storyline.color = Color3B(color_r, color_g, color_b);
+					storyline.interval = surface3->IntAttribute("interval");
+
+					storylines.push_back(storyline);
+				}
+				end_story.insert(pair<string, vector<LineData>>(condition, storylines));
+			}
+			m_mEndStorys.insert(pair<int, map<string, vector<LineData>>>(id, end_story));
+		}
+
+		bRet = true;
+	} while (false);
+
+	return bRet;
+}
+
 void GameMediator::setDeadCount(int deadCount)
 {
 	int minDeadCount = m_vLevelMinDeadCount.at(m_nCurGameLevel - 1);
 	if (minDeadCount < 0 || deadCount < minDeadCount)
 	{
 		m_vLevelMinDeadCount.at(m_nCurGameLevel - 1) = deadCount;
-		UserDefault* user = UserDefault::getInstance();
-		user->setIntegerForKey(StringUtils::format("Level%d-DeadCount", m_nCurGameLevel).c_str(), deadCount);
+		this->saveDataForKey(LEVEL_DEAD_START + m_nCurGameLevel - 1, deadCount);
 		// update total dead
 		m_nTotalDeadCount = 0;
 		for (size_t i = 0; i < m_nGameLevelCount; i++)
@@ -325,12 +452,12 @@ void GameMediator::setDeadCount(int deadCount)
 			if (levelDeadCount > 0)
 				m_nTotalDeadCount += levelDeadCount;
 		}
-		user->setIntegerForKey("TotalDead", m_nTotalDeadCount);
-		CSCClass::CSC_IOSHelper::getInstance()->GameCenter_reportScoreForLeaderboard("TotalDead", m_nTotalDeadCount);
+		this->saveDataForKey(TOTAL_DEAD, m_nTotalDeadCount);
+		CSC_IOSHelper::getInstance()->GameCenter_reportScoreForLeaderboard("com.reallycsc.lifeishard.totaldeadcount", m_nTotalDeadCount);
 		if (deadCount == 0)
-			CSCClass::CSC_IOSHelper::getInstance()->GameCenter_checkAndUnlockAchievement(StringUtils::format("com.reallycsc.lifeishard.level%d", m_nCurGameLevel).c_str());
-		else if (deadCount >= 1000)
-			CSCClass::CSC_IOSHelper::getInstance()->GameCenter_checkAndUnlockAchievement("com.reallycsc.lifeishard.dead1000");
+			CSC_IOSHelper::getInstance()->GameCenter_checkAndUnlockAchievement(StringUtils::format("com.reallycsc.lifeishard.level%d", m_nCurGameLevel).c_str());
+		else if (deadCount >= 500)
+			CSC_IOSHelper::getInstance()->GameCenter_checkAndUnlockAchievement("com.reallycsc.lifeishard.dead500");
 	}
 }
 
@@ -340,9 +467,15 @@ void GameMediator::setMaxGameLevel()
 	if (nextLevel <= m_nGameLevelCount && nextLevel > m_nMaxGameLevel)
 	{
 		m_nMaxGameLevel = nextLevel;
-		UserDefault::getInstance()->setIntegerForKey("MaxLevel", m_nMaxGameLevel);
-		CSCClass::CSC_IOSHelper::getInstance()->GameCenter_reportScoreForLeaderboard("MaxLevel", m_nMaxGameLevel);
+		this->saveDataForKey(MAX_LEVEL, m_nMaxGameLevel);
+		CSC_IOSHelper::getInstance()->GameCenter_reportScoreForLeaderboard("com.reallycsc.lifeishard.maxlevel", m_nMaxGameLevel);
 	}
+}
+
+void GameMediator::saveUserConfig()
+{
+	auto audio = AudioCtrl::getInstance();
+	UserDefault::getInstance()->setBoolForKey("Music", audio->getIsListPlaying() & !audio->getIsPause());
 }
 
 void GameMediator::gotoNextGameLevel()
@@ -351,12 +484,12 @@ void GameMediator::gotoNextGameLevel()
 	if (nextLevel <= m_nGameLevelCount)
 	{
 		m_nCurGameLevel = nextLevel;
-		UserDefault::getInstance()->setIntegerForKey("CurLevel", m_nCurGameLevel);
+		this->saveDataForKey(CURRENT_LEVEL, m_nCurGameLevel);
 		if (m_nCurGameLevel > m_nMaxGameLevel)
 		{
 			m_nMaxGameLevel = m_nCurGameLevel;
-			UserDefault::getInstance()->setIntegerForKey("MaxLevel", m_nMaxGameLevel);
-			CSCClass::CSC_IOSHelper::getInstance()->GameCenter_reportScoreForLeaderboard("MaxLevel", m_nMaxGameLevel);
+			this->saveDataForKey(MAX_LEVEL, m_nMaxGameLevel);
+			CSC_IOSHelper::getInstance()->GameCenter_reportScoreForLeaderboard("com.reallycsc.lifeishard.maxlevel", m_nMaxGameLevel);
 		}
 	}
 	m_nCurGameRoom = 1;
@@ -370,11 +503,27 @@ void GameMediator::gotoNextGameRoom()
 int GameMediator::getDeadCountAll(int level)
 {
 	int deadCountAll = 0;
-	for (size_t i = 0, length = level; i < length; i++)
+	for (size_t i = 0, length = MIN(level, m_nGameLevelCount); i < length; i++)
 	{
 		int deadCount = m_vLevelMinDeadCount.at(i);
 		if (deadCount > 0)
 			deadCountAll += deadCount;
 	}
 	return deadCountAll;
+}
+
+StoryData* GameMediator::getLevelStoryLines(int level)
+{
+	if (m_mLevelStorys.find(level) == m_mLevelStorys.end())
+		return nullptr;
+	else
+		return &m_mLevelStorys.at(level);
+}
+
+map<string, vector<LineData>>* GameMediator::getEndStoryLines(int id)
+{
+	if (m_mEndStorys.find(id) == m_mEndStorys.end())
+		return nullptr;
+	else
+		return &m_mEndStorys.at(id);
 }

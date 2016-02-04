@@ -20,6 +20,7 @@ private:
 	void buttonCallback_LevelEditor(Ref* pSender);
 	void buttonCallback_Credit(Ref* pSender);
 	void buttonCallback_Mute(Ref* pSender);
+	void buttonCallback_GameCenter(Ref* pSender);
 
 	inline LayerGradient* createLayerColor();
 private:

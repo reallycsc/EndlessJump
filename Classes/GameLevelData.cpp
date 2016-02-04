@@ -1,6 +1,6 @@
 #include "GameLevelData.h"
 
-GameLevelData::GameLevelData(void)
+GameLevelData::GameLevelData(void): m_nLevel(0), m_nMaxDeadTime(0)
 {
 	m_vRoomsData.clear();
 }
@@ -13,16 +13,8 @@ GameLevelData::~GameLevelData(void)
 GameLevelData* GameLevelData::create(GameLevelData* gamedata)
 {	
 	GameLevelData* pRet = new(std::nothrow) GameLevelData();
-	if (pRet && pRet->init(gamedata))
-	{
-		return pRet;
-	}
-	else
-	{
-		delete pRet;
-		pRet = NULL;
-		return NULL;
-	}
+	pRet->init(gamedata);
+	return pRet;
 }
 
 bool GameLevelData::init(GameLevelData* gamedata)

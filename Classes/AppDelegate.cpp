@@ -4,6 +4,7 @@
 #include "GameMediator.h"
 #include "CSCClass/AudioCtrl.h"
 #include "CSCClass/CSC_IOSHelper.h"
+#include "StoryScene.h"
 
 USING_NS_CC;
 
@@ -18,6 +19,7 @@ AppDelegate::AppDelegate() {
 
 AppDelegate::~AppDelegate() 
 {
+	CocosDenshion::SimpleAudioEngine::getInstance()->end();
 }
 
 //if you want a different context,just modify the value of glContextAttrs
@@ -102,28 +104,8 @@ bool AppDelegate::applicationDidFinishLaunching() {
 
     // run
     director->runWithScene(MainMenuScene::createScene());
-
-	// load music
-	auto audio_engine = CSCClass::AudioCtrl::getInstance();
-	audio_engine->addBackgroundMusic("Alan Walker - Spectre.mp3");
-	audio_engine->addBackgroundMusic("Arty - Worlds Collide.mp3");
-	audio_engine->addBackgroundMusic("Calvin Harris - Iron.mp3");
-	audio_engine->addBackgroundMusic("Deorro - Play.mp3");
-	audio_engine->addBackgroundMusic("Hardwell - Jumper.mp3");
-	audio_engine->addBackgroundMusic("James Egbert - The Glory.mp3");
-
-	// Play music
-	CocosDenshion::SimpleAudioEngine::getInstance()->setBackgroundMusicVolume(1.0);
-	audio_engine->playBackgroundMusicList(true);
-
-	// login-in GameCenter
-	CSCClass::CSC_IOSHelper::getInstance()->GameCenter_authenticateLocalUser();
-
-#ifdef IAP_TEST
-	CSCClass::CSC_IOSHelper::getInstance()->IAP_requestAllPurchasedProducts(true);
-#else
-	CSCClass::CSC_IOSHelper::getInstance()->IAP_requestAllPurchasedProducts(false);
-#endif
+	//GameMediator::getInstance()->setCurGameLevel(24);
+	//director->runWithScene(StoryScene::createScene());
 
     return true;
 }

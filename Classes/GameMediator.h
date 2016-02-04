@@ -2,6 +2,28 @@
 #include "CommonHeader.h"
 #include "GameLevelData.h"
 
+typedef struct tagLineData
+{
+	string	text;
+	int		size;
+	Color3B	color;
+	int		interval;
+}LineData;
+
+typedef struct tagStoryData
+{
+	int	end;
+	vector<LineData>	line_data;
+}StoryData;
+
+enum UserData
+{
+	CURRENT_LEVEL = 1,
+	MAX_LEVEL,
+	TOTAL_DEAD,
+	LEVEL_DEAD_START,
+};
+
 class GameMediator
 {
 public:
@@ -13,9 +35,13 @@ public:
 
 	bool loadGameLevelFile();
 	bool saveGameLevelFile();
+	bool loadGameLevelStoryFile();
 
 	void setDeadCount(int deadCount);
 	void setMaxGameLevel();
+	void saveUserConfig();
+	inline void saveDataForKey(const int &key, const int &data);
+
 	void gotoNextGameLevel();
 	void gotoNextGameRoom();
 
@@ -23,9 +49,12 @@ public:
 	vector<GameLevelData*>* getGameLevelData() { return &m_vGameLevelData; }
 	vector<int>* getLevelMinDeadCount() { return &m_vLevelMinDeadCount; }
 	int getDeadCountAll(int level);
+	StoryData* getLevelStoryLines(int level);
+	map<string, vector<LineData>>* getEndStoryLines(int id);
 
 private:
-	inline void addCustomEventLisenter(const string suffix, int* pScore);
+	inline void addCustomEventLisenter(const string &suffix, int* pScore, const int &key);
+	inline int loadDataForKey(const int &key, const int &default_data);
 
 public:
 	CC_SYNTHESIZE(int, m_nGameLevelCount, GameLevelCount);
@@ -37,6 +66,8 @@ public:
 private:
 	vector<GameLevelData*>	m_vGameLevelData;
 	vector<int>	m_vLevelMinDeadCount;
+	map<int, StoryData> m_mLevelStorys;
+	map<int,map<string, vector<LineData>>> m_mEndStorys;
 };
 
 

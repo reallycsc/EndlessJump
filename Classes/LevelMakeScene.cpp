@@ -159,9 +159,9 @@ bool LevelMakeScene::init()
 	this->getLevelNodeAndInit(dynamic_cast<Node*>(panelBlock->getChildByName("Node_Angle")), TAG_ENEMY_ANGLE, -360, -360, 360);
 	this->getLevelNodeAndInit(dynamic_cast<Node*>(panelBlock->getChildByName("Node_ScaleX")), TAG_ENEMY_SCALE_X10, 0, 20, 100);
 	this->getLevelNodeAndInit(dynamic_cast<Node*>(panelBlock->getChildByName("Node_ScaleY")), TAG_ENEMY_SCALE_Y10, 0, 20, 100);
-	this->getLevelNodeAndInit(dynamic_cast<Node*>(panelBlock->getChildByName("Node_Delay")), TAG_ENEMY_DELAY10, 0, 10, 999);
-	this->getLevelNodeAndInit(dynamic_cast<Node*>(panelBlock->getChildByName("Node_Duration")), TAG_ENEMY_DURATION10, 1, 10, 999);
-	this->getLevelNodeAndInit(dynamic_cast<Node*>(panelBlock->getChildByName("Node_PostDelay")), TAG_ENEMY_POSTDELAY10, 0, 10, 999);
+	this->getLevelNodeAndInit(dynamic_cast<Node*>(panelBlock->getChildByName("Node_Delay")), TAG_ENEMY_DELAY10, 0, 0, 999);
+	this->getLevelNodeAndInit(dynamic_cast<Node*>(panelBlock->getChildByName("Node_Duration")), TAG_ENEMY_DURATION10, 1, 5, 999);
+	this->getLevelNodeAndInit(dynamic_cast<Node*>(panelBlock->getChildByName("Node_PostDelay")), TAG_ENEMY_POSTDELAY10, 0, 15, 999);
 	auto buttonAddRotate = dynamic_cast<Button*>(panelBlock->getChildByName("Button_AddRotate"));
 	buttonAddRotate->addClickEventListener(CC_CALLBACK_1(LevelMakeScene::buttonCallback_BlockAddRotate, this));
 	auto buttonAddMove = dynamic_cast<Button*>(panelBlock->getChildByName("Button_AddMove"));
@@ -638,7 +638,7 @@ void LevelMakeScene::buttonCallback_BlockAddMove(Ref* pSender)
 
 void LevelMakeScene::buttonCallback_BlockAddBlink(Ref* pSender)
 {
-	m_pCurAction = BlinkActionData::create(1, 1, 0); // default blink action
+	m_pCurAction = BlinkActionData::create(0, 0.5, 1.5); // default blink action
 	if (m_pCurEnemy->addAction(m_pCurAction))
 	{
 		auto id = (int)m_pCurEnemy->getActions()->size() - 1;
@@ -1574,7 +1574,7 @@ void LevelMakeScene::AddPlayerPositionForTime(const int& speed, const float& wid
 	{
 		auto t = interval * i;
 		Text* text = Text::create(StringUtils::format("%.1f", t), "fonts/fzzj.ttf", 12);
-		text->setPosition(Point(speed * t, height));
+		text->setPosition(Point(speed * t, height + 50));
 		textNode->addChild(text);
 	}
 	this->addChild(textNode, 1, TAG_PLAYERPOSTEXT);
