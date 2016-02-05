@@ -58,6 +58,22 @@
             <OutlineColor A="255" R="255" G="0" B="0" />
             <ShadowColor A="255" R="110" G="110" B="110" />
           </AbstractNodeData>
+          <AbstractNodeData Name="Button_DataEncryption" ActionTag="-1540397454" Tag="16" IconVisible="False" PositionPercentXEnabled="True" PositionPercentYEnabled="True" LeftMargin="1072.0000" RightMargin="304.0000" TopMargin="942.8000" BottomMargin="21.2000" TouchEnable="True" FontSize="20" ButtonText="Data Encryption" Scale9Enable="True" LeftEage="15" RightEage="15" TopEage="11" BottomEage="11" Scale9OriginX="15" Scale9OriginY="11" Scale9Width="16" Scale9Height="14" ShadowOffsetX="2.0000" ShadowOffsetY="-2.0000" ctype="ButtonObjectData">
+            <Size X="160.0000" Y="60.0000" />
+            <AnchorPoint ScaleX="0.5000" ScaleY="0.5000" />
+            <Position X="1152.0000" Y="51.2000" />
+            <Scale ScaleX="1.0000" ScaleY="1.0000" />
+            <CColor A="255" R="144" G="238" B="144" />
+            <PrePosition X="0.7500" Y="0.0500" />
+            <PreSize X="0.1042" Y="0.0586" />
+            <FontResource Type="Normal" Path="Resource/fzzj.ttf" Plist="" />
+            <TextColor A="255" R="65" G="65" B="70" />
+            <DisabledFileData Type="Default" Path="Default/Button_Disable.png" Plist="" />
+            <PressedFileData Type="Default" Path="Default/Button_Press.png" Plist="" />
+            <NormalFileData Type="Default" Path="Default/Button_Normal.png" Plist="" />
+            <OutlineColor A="255" R="255" G="0" B="0" />
+            <ShadowColor A="255" R="110" G="110" B="110" />
+          </AbstractNodeData>
           <AbstractNodeData Name="ScrollView_Levels" ActionTag="-1886580383" Tag="110" IconVisible="False" PositionPercentYEnabled="True" PercentHeightEnable="True" PercentHeightEnabled="True" LeftMargin="34.0000" RightMargin="802.0000" TopMargin="314.4192" BottomMargin="109.6192" TouchEnable="True" ClipAble="True" BackColorAlpha="51" ColorAngle="90.0000" Scale9Width="1" Scale9Height="1" IsBounceEnabled="True" ScrollDirectionType="Vertical" ctype="ScrollViewObjectData">
             <Size X="700.0000" Y="599.9616" />
             <AnchorPoint ScaleX="0.5000" ScaleY="0.5000" />

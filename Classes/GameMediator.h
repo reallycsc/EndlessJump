@@ -45,6 +45,8 @@ public:
 	void gotoNextGameLevel();
 	void gotoNextGameRoom();
 
+	void encodeAllFiles();
+
 	// getter function
 	vector<GameLevelData*>* getGameLevelData() { return &m_vGameLevelData; }
 	vector<int>* getLevelMinDeadCount() { return &m_vLevelMinDeadCount; }
@@ -68,6 +70,8 @@ private:
 	vector<int>	m_vLevelMinDeadCount;
 	map<int, StoryData> m_mLevelStorys;
 	map<int,map<string, vector<LineData>>> m_mEndStorys;
+
+	int m_nFirstStoryMaxGameLevel;
 };
 
 

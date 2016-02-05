@@ -17,6 +17,7 @@ private:
 	void update(float dt) override;
 
 	void buttonCallback_LevelPlay(Ref* pSender);
+	void buttonCallback_DataEncryption(Ref* pSender);
 	void buttonCallback_LevelEditor(Ref* pSender);
 	void buttonCallback_Credit(Ref* pSender);
 	void buttonCallback_Mute(Ref* pSender);

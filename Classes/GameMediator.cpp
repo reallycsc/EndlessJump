@@ -1,7 +1,7 @@
 #include "GameMediator.h"
 #include "CSCClass/CSC_IOSHelper.h"
 #include "CSCClass/AudioCtrl.h"
-#include "CSCClass/CSC_Encryption.h"
+#include "CSCClass/CSCData/CSC_Encryption.h"
 
 USING_NS_CSC;
 
@@ -18,7 +18,7 @@ GameMediator* GameMediator::getInstance()
 	return &_sharedContext; 
 }
 
-GameMediator::GameMediator(void): m_nGameLevelCount(0), m_nCurGameLevel(0), m_nMaxGameLevel(0), m_nCurGameRoom(0), m_nTotalDeadCount(0)
+GameMediator::GameMediator(void): m_nGameLevelCount(0), m_nCurGameLevel(0), m_nMaxGameLevel(0), m_nCurGameRoom(0), m_nTotalDeadCount(0), m_nFirstStoryMaxGameLevel(0)
 {
 	m_vGameLevelData.clear();
 	m_vLevelMinDeadCount.clear();
@@ -32,11 +32,6 @@ GameMediator::~GameMediator(void)
 	m_vLevelMinDeadCount.clear();
 	m_mLevelStorys.clear();
 	m_mEndStorys.clear();
-
-	EventDispatcher* dispatcher = Director::getInstance()->getEventDispatcher();
-	dispatcher->removeCustomEventListeners(EVENT_GAMECENTER_AUTHENTICATED);
-	dispatcher->removeCustomEventListeners(EVENT_GAMECENTER_SCORERETRIVED + "com.reallycsc.lifeishard.maxlevel");
-	dispatcher->removeCustomEventListeners(EVENT_GAMECENTER_SCORERETRIVED + "com.reallycsc.lifeishard.totaldeadcount");
 }
 
 bool GameMediator::init()
@@ -47,12 +42,6 @@ bool GameMediator::init()
 		// login-in GameCenter
 		auto helper = CSC_IOSHelper::getInstance();
 		helper->GameCenter_authenticateLocalUser();
-		auto listener = EventListenerCustom::create(EVENT_GAMECENTER_AUTHENTICATED, [=](EventCustom* event) {
-			// get data from game center
-			helper->GameCenter_retriveScoreFromLeaderboard("com.reallycsc.lifeishard.maxlevel");
-			helper->GameCenter_retriveScoreFromLeaderboard("com.reallycsc.lifeishard.totaldeadcount");
-		});
-		Director::getInstance()->getEventDispatcher()->addEventListenerWithFixedPriority(listener, 1);
 #ifdef IAP_TEST
 		helper->IAP_requestAllPurchasedProducts(true);
 #else
@@ -130,10 +119,6 @@ bool GameMediator::init()
 			m_nMaxGameLevel = this->loadDataForKey(MAX_LEVEL, 1);
 		}
 
-		// add custom event lisenter
-		this->addCustomEventLisenter("com.reallycsc.lifeishard.maxlevel", &m_nMaxGameLevel, MAX_LEVEL);
-		this->addCustomEventLisenter("com.reallycsc.lifeishard.totaldeadcount", &m_nTotalDeadCount, TOTAL_DEAD);
-
 		// set current room 
 		m_nCurGameRoom = 1;
 		
@@ -141,25 +126,6 @@ bool GameMediator::init()
 	} while (false);
 	
 	return bRet;
-}
-
-inline void GameMediator::addCustomEventLisenter(const string &suffix, int* pScore, const int &key)
-{
-	EventDispatcher* dispatcher = Director::getInstance()->getEventDispatcher();
-	auto listener = EventListenerCustom::create(EVENT_GAMECENTER_SCORERETRIVED + suffix, [=](EventCustom* event) {
-		char* buf = static_cast<char*>(event->getUserData());
-		long long score;
-		sscanf(buf, "%lld", &score);
-		int score_int = static_cast<int>(score);
-		if ((*pScore) != score_int)
-		{
-			(*pScore) = score_int;
-			// save to local data
-			this->saveDataForKey(key, score_int);
-			dispatcher->dispatchCustomEvent(EVENT_PLARERDATA_SCOREUPDATED + suffix);
-		}
-	});
-	dispatcher->addEventListenerWithFixedPriority(listener, 1);
 }
 
 void GameMediator::saveDataForKey(const int& key, const int& data)
@@ -181,8 +147,15 @@ bool GameMediator::loadGameLevelFile()
 	do
 	{
 		tinyxml2::XMLDocument document;
-        string filename = FileUtils::getInstance()->fullPathForFilename("config/LevelMake_Workstation.xml");
-		document.LoadFile(filename.c_str());
+		// Decryption
+        //string filename = FileUtils::getInstance()->fullPathForFilename("config/GameLevels.xml");
+		//document.LoadFile(filename.c_str());
+		string filename = FileUtils::getInstance()->fullPathForFilename("config/GameLevels_Encryption.dat");
+		string file_string = FileUtils::getInstance()->getStringFromFile(filename);
+		unsigned char* buffer;
+		int decoded_length = base64Decode((unsigned char*)file_string.c_str(), file_string.length(), &buffer);
+		string xml_data_decoded = csc_decode_aes(buffer, decoded_length);
+		document.Parse(xml_data_decoded.c_str(), xml_data_decoded.size());
 		XMLElement* root = document.RootElement();
 		CC_BREAK_IF(!root);
 
@@ -336,10 +309,9 @@ bool GameMediator::saveGameLevelFile()
 			}
 		}
 
-		string filename1 = FileUtils::getInstance()->fullPathForFilename("config/LevelMake_Workstation.xml");
-		document->SaveFile(filename1.c_str());
-		string filename2 = FileUtils::getInstance()->fullPathForFilename("../../Resources/config/LevelMake_Workstation.xml");
-		document->SaveFile(filename2.c_str());
+		auto fileCtrl = FileUtils::getInstance();
+		document->SaveFile(fileCtrl->fullPathForFilename("config/GameLevels.xml").c_str());
+		document->SaveFile(fileCtrl->fullPathForFilename("../../Resources/config/GameLevels.xml").c_str());
 
 		// if has new level than update save file
 		UserDefault* user = UserDefault::getInstance();
@@ -365,8 +337,14 @@ bool GameMediator::loadGameLevelStoryFile()
 	do
 	{
 		tinyxml2::XMLDocument document;
-		string filename = FileUtils::getInstance()->fullPathForFilename("config/LevelStory.xml");
-		document.LoadFile(filename.c_str());
+		//string filename = FileUtils::getInstance()->fullPathForFilename("config/GameStorys.xml");
+		//document.LoadFile(filename.c_str());
+		string filename = FileUtils::getInstance()->fullPathForFilename("config/GameStorys_Encryption.dat");
+		string file_string = FileUtils::getInstance()->getStringFromFile(filename);
+		unsigned char* buffer;
+		int decoded_length = base64Decode((unsigned char*)file_string.c_str(), file_string.length(), &buffer);
+		string xml_data_decoded = csc_decode_aes(buffer, decoded_length);
+		document.Parse(xml_data_decoded.c_str(), xml_data_decoded.size());
 		XMLElement* root = document.RootElement();
 		CC_BREAK_IF(!root);
 
@@ -377,6 +355,8 @@ bool GameMediator::loadGameLevelStoryFile()
 			auto level = surface1->IntAttribute("level");
 			StoryData story;
 			story.end = surface1->IntAttribute("end");
+			if (story.end == 1)
+				m_nFirstStoryMaxGameLevel = level;
 			for (XMLElement* surface2 = surface1->FirstChildElement("Line"); surface2 != NULL; surface2 = surface2->NextSiblingElement("Line"))
 			{
 				LineData storyline;
@@ -453,7 +433,10 @@ void GameMediator::setDeadCount(int deadCount)
 				m_nTotalDeadCount += levelDeadCount;
 		}
 		this->saveDataForKey(TOTAL_DEAD, m_nTotalDeadCount);
-		CSC_IOSHelper::getInstance()->GameCenter_reportScoreForLeaderboard("com.reallycsc.lifeishard.totaldeadcount", m_nTotalDeadCount);
+		if (m_nMaxGameLevel >= m_nFirstStoryMaxGameLevel && m_nCurGameLevel <= m_nFirstStoryMaxGameLevel)
+			CSC_IOSHelper::getInstance()->GameCenter_reportScoreForLeaderboard("com.reallycsc.lifeishard.totaldeadcount1", this->getDeadCountAll(m_nFirstStoryMaxGameLevel));
+		if (m_nMaxGameLevel == m_nGameLevelCount)
+			CSC_IOSHelper::getInstance()->GameCenter_reportScoreForLeaderboard("com.reallycsc.lifeishard.totaldeadcount_all", m_nTotalDeadCount);
 		if (deadCount == 0)
 			CSC_IOSHelper::getInstance()->GameCenter_checkAndUnlockAchievement(StringUtils::format("com.reallycsc.lifeishard.level%d", m_nCurGameLevel).c_str());
 		else if (deadCount >= 500)
@@ -498,6 +481,20 @@ void GameMediator::gotoNextGameLevel()
 void GameMediator::gotoNextGameRoom()
 {
 	m_nCurGameRoom++;
+}
+
+void GameMediator::encodeAllFiles()
+{
+	auto fileCtrl = FileUtils::getInstance();
+	// Encryption Game Level File
+	string gameLevel_data_encoded = csc_encode_base64(csc_encode_aes(fileCtrl->getStringFromFile(fileCtrl->fullPathForFilename("config/GameLevels.xml"))));
+	fileCtrl->writeStringToFile(gameLevel_data_encoded, fileCtrl->fullPathForFilename("config/GameLevels_Encryption.dat"));
+	fileCtrl->writeStringToFile(gameLevel_data_encoded, fileCtrl->fullPathForFilename("../../Resources/config/GameLevels_Encryption.dat"));
+
+	// Encryption Game Story File
+	string gameStory_data_encoded = csc_encode_base64(csc_encode_aes(fileCtrl->getStringFromFile(fileCtrl->fullPathForFilename("config/GameStorys.xml"))));
+	fileCtrl->writeStringToFile(gameStory_data_encoded, fileCtrl->fullPathForFilename("config/GameStorys_Encryption.dat"));
+	fileCtrl->writeStringToFile(gameStory_data_encoded, fileCtrl->fullPathForFilename("../../Resources/config/GameStorys_Encryption.dat"));
 }
 
 int GameMediator::getDeadCountAll(int level)

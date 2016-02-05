@@ -61,6 +61,8 @@ bool MainMenuScene::init()
 	// get button
 	auto buttonEditor = dynamic_cast<Button*>(rootNode->getChildByName("Button_LevelEditor"));
 	buttonEditor->addClickEventListener(CC_CALLBACK_1(MainMenuScene::buttonCallback_LevelEditor, this));
+	auto buttonDataEncryption = dynamic_cast<Button*>(rootNode->getChildByName("Button_DataEncryption"));
+	buttonDataEncryption->addClickEventListener(CC_CALLBACK_1(MainMenuScene::buttonCallback_DataEncryption, this));
 	auto buttonCredit = dynamic_cast<Button*>(rootNode->getChildByName("Button_Credit"));
 	buttonCredit->addClickEventListener(CC_CALLBACK_1(MainMenuScene::buttonCallback_Credit, this));
 	auto buttonMute = dynamic_cast<Button*>(rootNode->getChildByName("Button_Mute"));
@@ -187,16 +189,6 @@ bool MainMenuScene::init()
 	buttonEditor->setVisible(false);
 #endif
 
-	// add event listener
-	auto listener = EventListenerCustom::create(EVENT_PLARERDATA_SCOREUPDATED + "com.reallycsc.lifeishard.totaldeadcount", [=](EventCustom* event) {
-		Director::getInstance()->replaceScene(MainMenuScene::createScene());
-	});
-	_eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
-	listener = EventListenerCustom::create(EVENT_PLARERDATA_SCOREUPDATED + "com.reallycsc.lifeishard.maxlevel", [=](EventCustom* event) {
-		Director::getInstance()->replaceScene(MainMenuScene::createScene());
-	});
-	_eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
-
 	this->scheduleUpdate();
 
     return true;
@@ -251,6 +243,11 @@ void MainMenuScene::buttonCallback_LevelPlay(Ref* pSender)
 		GameMediator::getInstance()->saveDataForKey(CURRENT_LEVEL, curLevel);
 		Director::getInstance()->replaceScene(GameScene::createScene());
 	}
+}
+
+void MainMenuScene::buttonCallback_DataEncryption(Ref* pSender)
+{
+	GameMediator::getInstance()->encodeAllFiles();
 }
 
 void MainMenuScene::buttonCallback_LevelEditor(Ref* pSender)

@@ -4,7 +4,7 @@
       <Value ctype="CocosRecentOperation">
         <LastPublishType Value="Resource" />
         <IsLastPublish Value="True" />
-        <LastRunType Value="Mac" />
+        <LastRunType Value="Windows" />
       </Value>
     </Item>
     <Item Key="PackageParamsKey">
@@ -37,7 +37,7 @@
           <FilePathData Path="MainMenuScene.csd" />
           <FilePathData Path="CreditScene.csd" />
         </OpenedDocuments>
-        <ActiveDocument Path="CreditScene.csd" />
+        <ActiveDocument Path="MainMenuScene.csd" />
       </Value>
     </Item>
   </Properties>
