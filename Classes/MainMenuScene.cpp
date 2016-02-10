@@ -187,6 +187,8 @@ bool MainMenuScene::init()
 #ifndef LEVEL_MAKER_MODE
 	buttonEditor->setEnabled(false);
 	buttonEditor->setVisible(false);
+	buttonDataEncryption->setEnabled(false);
+	buttonDataEncryption->setVisible(false);
 #endif
 
 	this->scheduleUpdate();
