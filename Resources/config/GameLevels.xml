@@ -1920,7 +1920,7 @@
         <Room id="2" width="768" height="204" x="0" y="204" color_r="55" color_g="55" color_b="45">
             <Player speed="300" jumpTime="0.6" color_r="164" color_g="155" color_b="144"/>
             <Enemys color_r="164" color_g="155" color_b="144">
-                <Enemy id="1" width="30" height="100" x="615" y="35">
+                <Enemy id="1" width="30" height="90" x="615" y="35">
                     <Action type="2" isRepeat="1" isReverse="0" delay="0" postDelay="0" rotateDuration="2" angle="360" anchor_x="0.5" anchor_y="0.5"/>
                     <Action type="4" isRepeat="1" isReverse="0" delay="0" postDelay="0.5" blinkDuration="0.5"/>
                 </Enemy>
@@ -2076,7 +2076,7 @@
         <Room id="4" width="768" height="204" x="0" y="612" color_r="214" color_g="188" color_b="255">
             <Player speed="300" jumpTime="0.6" color_r="229" color_g="222" color_b="235"/>
             <Enemys color_r="229" color_g="222" color_b="235">
-                <Enemy id="1" width="50" height="50" x="228" y="36">
+                <Enemy id="1" width="50" height="50" x="220" y="36">
                     <Action type="2" isRepeat="1" isReverse="0" delay="0" postDelay="0" rotateDuration="1.5" angle="-360" anchor_x="0.5" anchor_y="0.5"/>
                     <Action type="4" isRepeat="1" isReverse="0" delay="0" postDelay="0.3" blinkDuration="0.3"/>
                 </Enemy>
@@ -2084,15 +2084,15 @@
                     <Action type="2" isRepeat="1" isReverse="0" delay="0" postDelay="0" rotateDuration="3" angle="360" anchor_x="0.5" anchor_y="0.5"/>
                     <Action type="4" isRepeat="1" isReverse="0" delay="0" postDelay="0.5" blinkDuration="0.5"/>
                 </Enemy>
-                <Enemy id="3" width="100" height="100" x="383" y="104">
+                <Enemy id="3" width="100" height="100" x="375" y="104">
                     <Action type="2" isRepeat="1" isReverse="0" delay="0" postDelay="0" rotateDuration="2.5" angle="360" anchor_x="0.5" anchor_y="0.5"/>
                     <Action type="4" isRepeat="1" isReverse="0" delay="0" postDelay="0.5" blinkDuration="0.5"/>
                 </Enemy>
-                <Enemy id="4" width="50" height="50" x="492" y="17">
+                <Enemy id="4" width="50" height="50" x="484" y="17">
                     <Action type="2" isRepeat="1" isReverse="0" delay="0" postDelay="0" rotateDuration="1" angle="-360" anchor_x="0.5" anchor_y="0.5"/>
                     <Action type="4" isRepeat="1" isReverse="0" delay="0" postDelay="0.3" blinkDuration="0.3"/>
                 </Enemy>
-                <Enemy id="5" width="115" height="20" x="705" y="19">
+                <Enemy id="5" width="110" height="20" x="705" y="19">
                     <Action type="4" isRepeat="1" isReverse="0" delay="0" postDelay="1.5" blinkDuration="0.5"/>
                 </Enemy>
             </Enemys>
