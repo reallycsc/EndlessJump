@@ -38,7 +38,7 @@ bool GameMediator::init()
 {
 	bool bRet = false;
 	do
-	{
+	{        
 		// login-in GameCenter
 		auto helper = CSC_IOSHelper::getInstance();
 		helper->GameCenter_authenticateLocalUser();
@@ -437,8 +437,6 @@ void GameMediator::setDeadCount(int deadCount)
 			CSC_IOSHelper::getInstance()->GameCenter_reportScoreForLeaderboard("com.reallycsc.lifeishard.totaldeadcount1", this->getDeadCountAll(m_nFirstStoryMaxGameLevel));
 		if (m_nMaxGameLevel == m_nGameLevelCount)
 			CSC_IOSHelper::getInstance()->GameCenter_reportScoreForLeaderboard("com.reallycsc.lifeishard.totaldeadcount_all", m_nTotalDeadCount);
-		if (deadCount == 0)
-			CSC_IOSHelper::getInstance()->GameCenter_checkAndUnlockAchievement(StringUtils::format("com.reallycsc.lifeishard.level%d", m_nCurGameLevel).c_str());
 		else if (deadCount >= 500)
 			CSC_IOSHelper::getInstance()->GameCenter_checkAndUnlockAchievement("com.reallycsc.lifeishard.dead500");
 	}
