@@ -13,6 +13,7 @@ typedef struct tagLineData
 typedef struct tagStoryData
 {
 	int	end;
+	int condition; // the condition of dead_count for show story
 	vector<LineData>	line_data;
 }StoryData;
 

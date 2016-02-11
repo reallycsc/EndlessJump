@@ -32,7 +32,6 @@ bool GameOverScene::init(int deadCount)
     }
 	//////////////////////////////
 	GameMediator* pGameMediator = GameMediator::getInstance();
-	pGameMediator->setDeadCount(deadCount);
 	int totalDeadCount = pGameMediator->getTotalDeadCount();
 
 	// add background screenshot

@@ -1,5 +1,6 @@
 #include "StoryScene.h"
 #include "GameMediator.h"
+#include "CSCClass/CSC_IOSHelper.h"
 
 Scene* StoryScene::createScene()
 {
@@ -39,14 +40,30 @@ bool StoryScene::init()
 		this->showStoryline(NULL, &story->line_data, 0);
 	else
 	{
-		auto total_dead_count = GameMediator::getInstance()->getTotalDeadCount();
-		auto end_story = GameMediator::getInstance()->getEndStoryLines(story->end);
+		// show the end
+		auto total_dead_count = pGameMediator->getTotalDeadCount();
+		auto end_story = pGameMediator->getEndStoryLines(story->end);
 		if (total_dead_count > 500)
 			this->showStoryline(NULL, &end_story->at("deadCount>500"), 0);
 		else if (total_dead_count > 0)
 			this->showStoryline(NULL, &end_story->at("deadCount>0"), 0);
 		else
 			this->showStoryline(NULL, &end_story->at("deadCount==0"), 0);
+		// for the whole story achievement
+		auto min_dead_vector = pGameMediator->getLevelMinDeadCount();
+		bool is_whole = true;
+		for (size_t i = 0, length = min_dead_vector->size(); i < length; i++)
+		{
+			auto min_dead = min_dead_vector->at(i);
+			auto story_data = pGameMediator->getLevelStoryLines(i + 1);
+			if (min_dead >= story_data->condition)
+			{
+				is_whole = false;
+				break;
+			}
+		}
+		if (is_whole)
+			CSCClass::CSC_IOSHelper::getInstance()->GameCenter_checkAndUnlockAchievement("com.reallycsc.lifeishard.showallstory");
 	}
 
 	// bind touch event

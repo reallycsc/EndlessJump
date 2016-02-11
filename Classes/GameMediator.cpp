@@ -317,9 +317,8 @@ bool GameMediator::saveGameLevelFile()
 		UserDefault* user = UserDefault::getInstance();
 		for (size_t i = 0; i < m_nGameLevelCount; i++)
 		{
-			string key = StringUtils::format("Level%lu-DeadCount", i + 1);
-			if (user->getIntegerForKey(key.c_str(), -100) == -100)
-				user->setIntegerForKey(key.c_str(), -1);
+			if (this->loadDataForKey(LEVEL_DEAD_START + i, -100) == -100)
+				this->saveDataForKey(LEVEL_DEAD_START + i, -1);
 		}
 		// if has new level than add new dead count
 		for (size_t i = m_vLevelMinDeadCount.size(); i < m_nGameLevelCount; i++)
@@ -354,6 +353,7 @@ bool GameMediator::loadGameLevelStoryFile()
 		{
 			auto level = surface1->IntAttribute("level");
 			StoryData story;
+			story.condition = surface1->IntAttribute("condition");
 			story.end = surface1->IntAttribute("end");
 			if (story.end == 1)
 				m_nFirstStoryMaxGameLevel = level;

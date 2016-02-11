@@ -398,24 +398,23 @@ void GameScene::addPlayer()
 			Director::getInstance()->getRenderer()->render();// Must add this for version 3.0 or image goes black  
 			Director::getInstance()->getTextureCache()->addImage(renderTexture->newImage(), "GameOverImage");
 
-			auto story = m_pGameMediator->getLevelStoryLines(m_pGameMediator->getCurGameLevel());
-			if (story)
-				if (story->end == 0)
-				{
-					auto storyScene = StoryScene::createScene();
-					if (storyScene && m_nDeadNumber == 0)
-						Director::getInstance()->pushScene(storyScene);
-					else
-						Director::getInstance()->replaceScene(GameOverScene::createScene(m_nDeadNumber));
-				}
+			m_pGameMediator->setDeadCount(m_nDeadNumber);
+			// show story
+			auto curLevel = m_pGameMediator->getCurGameLevel();
+			auto story = m_pGameMediator->getLevelStoryLines(curLevel);
+			if (story) // there is a story to show
+			{
+				auto storyScene = StoryScene::createScene();
+				auto condition = story->condition;
+				if (storyScene && (story->end == 1 || // end story
+					(m_pGameMediator->getMaxGameLevel() == curLevel || // first finish this level
+					m_pGameMediator->getLevelMinDeadCount()->at(curLevel - 1) >= condition) && m_nDeadNumber < condition)) // not first finish but first meet the condition
+					Director::getInstance()->pushScene(storyScene);
 				else
-				{
-					auto storyScene = StoryScene::createScene();
-					if (storyScene)
-						Director::getInstance()->pushScene(storyScene);
-				}
+					Director::getInstance()->replaceScene(GameOverScene::createScene(m_nDeadNumber));
+			}
 			else
-				Director::getInstance()->replaceScene(GameOverScene::createScene(m_nDeadNumber));
+				Director::getInstance()->replaceScene(GameOverScene::createScene(m_nDeadNumber));;
 		}
 	})));
 	this->addChild(m_pPlayer, 4);
