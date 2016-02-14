@@ -74,6 +74,8 @@ bool MainMenuScene::init()
 
 	auto buttonGameCenter = dynamic_cast<Button*>(rootNode->getChildByName("Button_GameCenter"));
 	buttonGameCenter->addClickEventListener(CC_CALLBACK_1(MainMenuScene::buttonCallback_GameCenter, this));
+	auto buttonDataReset = dynamic_cast<Button*>(rootNode->getChildByName("Button_DataReset"));
+	buttonDataReset->addClickEventListener(CC_CALLBACK_1(MainMenuScene::buttonCallback_DataReset, this));
 
 	// get text
 	auto textTotalDead = dynamic_cast<Text*>(rootNode->getChildByName("Text_TotalDead"));
@@ -298,6 +300,22 @@ void MainMenuScene::buttonCallback_GameCenter(Ref* pSender)
 	{
 		helper->GameCenter_authenticateLocalUser();
 	}
+}
+
+void MainMenuScene::buttonCallback_DataReset(Ref* pSender)
+{
+	auto helper = CSCClass::CSC_IOSHelper::getInstance();
+	if (helper->GameCenter_isAuthenticated())
+	{
+		helper->GameCenter_resetAchievements();
+	}
+	else
+	{
+		helper->GameCenter_authenticateLocalUser();
+	}
+
+	GameMediator::getInstance()->resetData();
+	Director::getInstance()->replaceScene(MainMenuScene::createScene());
 }
 
 LayerGradient* MainMenuScene::createLayerColor()

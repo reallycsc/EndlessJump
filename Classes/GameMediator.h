@@ -42,6 +42,7 @@ public:
 	void setMaxGameLevel();
 	void saveUserConfig();
 	inline void saveDataForKey(const int &key, const int &data);
+	void resetData();
 
 	void gotoNextGameLevel();
 	void gotoNextGameRoom();

@@ -134,6 +134,17 @@ void GameMediator::saveDataForKey(const int& key, const int& data)
 	UserDefault::getInstance()->setStringForKey(StringUtils::format("CSC%d", key).c_str(), csc_encode_base64(StringUtils::format("%d", data_encode)));
 }
 
+void GameMediator::resetData()
+{
+	for (size_t i = 0; i < m_nGameLevelCount; i++)
+	{
+		this->saveDataForKey(LEVEL_DEAD_START + i, -1);
+		m_vLevelMinDeadCount.at(i) = -1;
+	}
+	this->saveDataForKey(TOTAL_DEAD, -1);
+	m_nTotalDeadCount = -1;
+}
+
 int GameMediator::loadDataForKey(const int& key, const int& default_data)
 {
 	int default_data_encode = default_data^key; // XOR

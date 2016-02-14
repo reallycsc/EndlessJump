@@ -22,6 +22,7 @@ private:
 	void buttonCallback_Credit(Ref* pSender);
 	void buttonCallback_Mute(Ref* pSender);
 	void buttonCallback_GameCenter(Ref* pSender);
+	void buttonCallback_DataReset(Ref* pSender);
 
 	inline LayerGradient* createLayerColor();
 private:
