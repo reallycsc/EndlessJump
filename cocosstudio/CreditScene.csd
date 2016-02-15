@@ -12,14 +12,14 @@
               <AbstractNodeData Name="Panel_Credit_Finished" ActionTag="322015379" Tag="174" IconVisible="False" VerticalEdge="BottomEdge" RightMargin="768.0000" TopMargin="974.0000" BottomMargin="-1450.0000" TouchEnable="True" ClipAble="False" BackColorAlpha="102" ColorAngle="90.0000" Scale9Width="1" Scale9Height="1" ctype="PanelObjectData">
                 <Size X="768.0000" Y="1500.0000" />
                 <Children>
-                  <AbstractNodeData Name="Text_Title" ActionTag="-671847744" Tag="199" IconVisible="False" PositionPercentXEnabled="True" VerticalEdge="TopEdge" LeftMargin="74.0000" RightMargin="74.0000" TopMargin="50.0000" BottomMargin="1327.0000" FontSize="100" LabelText="Life is HARD" OutlineSize="4" OutlineEnabled="True" ShadowOffsetX="4.0000" ShadowOffsetY="-4.0000" ShadowEnabled="True" ctype="TextObjectData">
-                    <Size X="620.0000" Y="123.0000" />
+                  <AbstractNodeData Name="Text_Title" ActionTag="-671847744" Tag="199" IconVisible="False" PositionPercentXEnabled="True" VerticalEdge="TopEdge" LeftMargin="13.5000" RightMargin="13.5000" TopMargin="50.0000" BottomMargin="1352.0000" FontSize="78" LabelText="This Game is HARD" OutlineSize="4" OutlineEnabled="True" ShadowOffsetX="4.0000" ShadowOffsetY="-4.0000" ShadowEnabled="True" ctype="TextObjectData">
+                    <Size X="741.0000" Y="98.0000" />
                     <AnchorPoint ScaleX="0.5000" ScaleY="1.0000" />
                     <Position X="384.0000" Y="1450.0000" />
                     <Scale ScaleX="1.0000" ScaleY="1.0000" />
                     <CColor A="255" R="255" G="0" B="0" />
                     <PrePosition X="0.5000" Y="0.9667" />
-                    <PreSize X="0.8073" Y="0.0820" />
+                    <PreSize X="0.9648" Y="0.0653" />
                     <FontResource Type="Normal" Path="Resource/fzzj.ttf" Plist="" />
                     <OutlineColor A="255" R="30" G="144" B="255" />
                     <ShadowColor A="255" R="0" G="0" B="0" />
@@ -204,14 +204,14 @@
               <AbstractNodeData Name="Panel_Credit_Unfinished" ActionTag="-489781330" Tag="175" IconVisible="False" VerticalEdge="BottomEdge" RightMargin="768.0000" TopMargin="974.0000" BottomMargin="-974.0000" TouchEnable="True" ClipAble="False" BackColorAlpha="102" ColorAngle="90.0000" Scale9Width="1" Scale9Height="1" ctype="PanelObjectData">
                 <Size X="768.0000" Y="1024.0000" />
                 <Children>
-                  <AbstractNodeData Name="Text_Title" ActionTag="1597493576" Tag="188" IconVisible="False" PositionPercentXEnabled="True" VerticalEdge="TopEdge" LeftMargin="74.0000" RightMargin="74.0000" TopMargin="50.0000" BottomMargin="851.0000" FontSize="100" LabelText="Life is HARD" OutlineSize="4" OutlineEnabled="True" ShadowOffsetX="4.0000" ShadowOffsetY="-4.0000" ShadowEnabled="True" ctype="TextObjectData">
-                    <Size X="620.0000" Y="123.0000" />
+                  <AbstractNodeData Name="Text_Title" ActionTag="1597493576" Tag="188" IconVisible="False" PositionPercentXEnabled="True" VerticalEdge="TopEdge" LeftMargin="13.5000" RightMargin="13.5000" TopMargin="50.0000" BottomMargin="876.0000" FontSize="78" LabelText="This Game is HARD" OutlineSize="4" OutlineEnabled="True" ShadowOffsetX="4.0000" ShadowOffsetY="-4.0000" ShadowEnabled="True" ctype="TextObjectData">
+                    <Size X="741.0000" Y="98.0000" />
                     <AnchorPoint ScaleX="0.5000" ScaleY="1.0000" />
                     <Position X="384.0000" Y="974.0000" />
                     <Scale ScaleX="1.0000" ScaleY="1.0000" />
                     <CColor A="255" R="255" G="0" B="0" />
                     <PrePosition X="0.5000" Y="0.9512" />
-                    <PreSize X="0.8073" Y="0.1201" />
+                    <PreSize X="0.9648" Y="0.0957" />
                     <FontResource Type="Normal" Path="Resource/fzzj.ttf" Plist="" />
                     <OutlineColor A="255" R="30" G="144" B="255" />
                     <ShadowColor A="255" R="0" G="0" B="0" />
