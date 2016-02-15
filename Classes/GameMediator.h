@@ -40,6 +40,7 @@ public:
 
 	void setDeadCount(int deadCount);
 	void setMaxGameLevel();
+    void setCurGameLevel(const int &level);
 	void saveUserConfig();
 	inline void saveDataForKey(const int &key, const int &data);
 	void resetData();
@@ -55,6 +56,7 @@ public:
 	int getDeadCountAll(int level);
 	StoryData* getLevelStoryLines(int level);
 	map<string, vector<LineData>>* getEndStoryLines(int id);
+    int getCurGameLevel() { return m_nCurGameLevel; }
 
 private:
 	inline void addCustomEventLisenter(const string &suffix, int* pScore, const int &key);
@@ -62,7 +64,6 @@ private:
 
 public:
 	CC_SYNTHESIZE(int, m_nGameLevelCount, GameLevelCount);
-	CC_SYNTHESIZE(int, m_nCurGameLevel, CurGameLevel);
 	CC_SYNTHESIZE(int, m_nMaxGameLevel, MaxGameLevel);
 	CC_SYNTHESIZE(int, m_nCurGameRoom, CurGameRoom);
 	CC_SYNTHESIZE(int, m_nTotalDeadCount, TotalDeadCount);
@@ -73,6 +74,7 @@ private:
 	map<int, StoryData> m_mLevelStorys;
 	map<int,map<string, vector<LineData>>> m_mEndStorys;
 
+    int m_nCurGameLevel;
 	int m_nFirstStoryMaxGameLevel;
 };
 

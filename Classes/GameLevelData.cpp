@@ -126,9 +126,12 @@ bool GameLevelData::setRoomDataWithFile(XMLElement* surface)
 					default:
 						break;
 					}
-					actionData->setIsRepeat(isRepeat);
-					actionData->setIsReverse(isReverse);
-					enemy.actionsData.pushBack(actionData);
+                    if (actionData)
+                    {
+                        actionData->setIsRepeat(isRepeat);
+                        actionData->setIsReverse(isReverse);
+                        enemy.actionsData.pushBack(actionData);
+                    }
 				}
 				room.enemysData.push_back(enemy);
 			}

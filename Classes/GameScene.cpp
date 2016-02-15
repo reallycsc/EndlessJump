@@ -407,8 +407,8 @@ void GameScene::addPlayer()
 				auto storyScene = StoryScene::createScene();
 				auto condition = story->condition;
 				if (storyScene && (story->end == 1 || // end story
-					(m_pGameMediator->getMaxGameLevel() == curLevel || // first finish this level
-					m_pGameMediator->getLevelMinDeadCount()->at(curLevel - 1) > condition) && m_nDeadNumber <= condition)) // not first finish but first meet the condition
+					((m_pGameMediator->getMaxGameLevel() == curLevel || // first finish this level
+					m_pGameMediator->getLevelMinDeadCount()->at(curLevel - 1) > condition) && m_nDeadNumber <= condition))) // not first finish but first meet the condition
 					Director::getInstance()->pushScene(storyScene);
 				else
 					Director::getInstance()->replaceScene(GameOverScene::createScene(m_nDeadNumber));

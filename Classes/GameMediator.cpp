@@ -468,6 +468,12 @@ void GameMediator::setMaxGameLevel()
 	}
 }
 
+void GameMediator::setCurGameLevel(const int &level)
+{
+    m_nCurGameLevel = level;
+    this->saveDataForKey(CURRENT_LEVEL, m_nCurGameLevel);
+}
+
 void GameMediator::saveUserConfig()
 {
 	auto audio = AudioCtrl::getInstance();

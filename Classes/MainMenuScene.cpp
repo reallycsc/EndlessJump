@@ -250,7 +250,6 @@ void MainMenuScene::buttonCallback_LevelPlay(Ref* pSender)
 	else
 	{
 		GameMediator::getInstance()->setCurGameLevel(curLevel);
-		GameMediator::getInstance()->saveDataForKey(CURRENT_LEVEL, curLevel);
 		Director::getInstance()->replaceScene(GameScene::createScene());
 	}
 }
