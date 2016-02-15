@@ -62,12 +62,14 @@ bool MainMenuScene::init()
 	auto buttonEditor = dynamic_cast<Button*>(rootNode->getChildByName("Button_LevelEditor"));
 	buttonEditor->addClickEventListener(CC_CALLBACK_1(MainMenuScene::buttonCallback_LevelEditor, this));
 	auto buttonDataEncryption = dynamic_cast<Button*>(rootNode->getChildByName("Button_DataEncryption"));
-	buttonDataEncryption->addClickEventListener(CC_CALLBACK_1(MainMenuScene::buttonCallback_DataEncryption, this));
+	//buttonDataEncryption->addClickEventListener(CC_CALLBACK_1(MainMenuScene::buttonCallback_DataEncryption, this));
+	buttonDataEncryption->removeFromParent();
 	auto buttonCredit = dynamic_cast<Button*>(rootNode->getChildByName("Button_Credit"));
 	buttonCredit->addClickEventListener(CC_CALLBACK_1(MainMenuScene::buttonCallback_Credit, this));
 	auto buttonMute = dynamic_cast<Button*>(rootNode->getChildByName("Button_Mute"));
 	buttonMute->addClickEventListener(CC_CALLBACK_1(MainMenuScene::buttonCallback_Mute, this));
-	if (CSCClass::AudioCtrl::getInstance()->getIsListPlaying())
+	auto audio = CSCClass::AudioCtrl::getInstance();
+	if (audio->getIsListPlaying() && !audio->getIsPause())
 		buttonMute->setTitleText("Music Off");
 	else
 		buttonMute->setTitleText("Music On");
@@ -75,15 +77,19 @@ bool MainMenuScene::init()
 	auto buttonGameCenter = dynamic_cast<Button*>(rootNode->getChildByName("Button_GameCenter"));
 	buttonGameCenter->addClickEventListener(CC_CALLBACK_1(MainMenuScene::buttonCallback_GameCenter, this));
 	auto buttonDataReset = dynamic_cast<Button*>(rootNode->getChildByName("Button_DataReset"));
-	buttonDataReset->addClickEventListener(CC_CALLBACK_1(MainMenuScene::buttonCallback_DataReset, this));
+	//buttonDataReset->addClickEventListener(CC_CALLBACK_1(MainMenuScene::buttonCallback_DataReset, this));
+	buttonDataReset->removeFromParent();
 
 	// get text
 	auto textTotalDead = dynamic_cast<Text*>(rootNode->getChildByName("Text_TotalDead"));
-	auto textSubtitle = dynamic_cast<Text*>(rootNode->getChildByName("Text_Subtitle"));
-	textSubtitle->setVisible(false);
-	textSubtitle->runAction(RepeatForever::create(Sequence::createWithTwoActions(
+	auto textTitle = dynamic_cast<Text*>(rootNode->getChildByName("Text_Title"));
+	textTitle->runAction(RepeatForever::create(Sequence::create(
 		DelayTime::create(10.0f),
-		Blink::create(0.1f, 1))));
+		CallFunc::create([=]()->void{textTitle->setString("This   Life  is HARD");}),
+		DelayTime::create(0.1f),
+		CallFunc::create([=]()->void {textTitle->setString("This Game is HARD"); }),
+		NULL
+		)));
 	int maxLevel = pGameMediator->getMaxGameLevel();
 	int curLevel = pGameMediator->getCurGameLevel();
 	int totalDead = pGameMediator->getDeadCountAll(maxLevel);
@@ -275,14 +281,14 @@ void MainMenuScene::buttonCallback_Mute(Ref* pSender)
 	}
 	else
 	{
-		if (audio->getIsPause())
+		if (audio->getIsMute())
 		{
-			audio->resumeBackgroundMusic();
+			audio->muteBackgroundMusic();
 			button->setTitleText("Music Off");
 		}
 		else
 		{
-			audio->pauseBackgroundMusic();
+			audio->muteBackgroundMusic();
 			button->setTitleText("Music On");
 		}
 	}

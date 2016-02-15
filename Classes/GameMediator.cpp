@@ -56,6 +56,7 @@ bool GameMediator::init()
 
 		// load music
 		auto audio_engine = AudioCtrl::getInstance();
+		audio_engine->addBackgroundMusic("Alan Walker - Faded.mp3");
 		audio_engine->addBackgroundMusic("Alan Walker - Spectre.mp3");
 		audio_engine->addBackgroundMusic("Arty - Worlds Collide.mp3");
 		audio_engine->addBackgroundMusic("Calvin Harris - Iron.mp3");
@@ -447,7 +448,10 @@ void GameMediator::setDeadCount(int deadCount)
 		if (m_nMaxGameLevel >= m_nFirstStoryMaxGameLevel && m_nCurGameLevel <= m_nFirstStoryMaxGameLevel)
 			CSC_IOSHelper::getInstance()->GameCenter_reportScoreForLeaderboard("com.reallycsc.lifeishard.totaldeadcount1", this->getDeadCountAll(m_nFirstStoryMaxGameLevel));
 		if (m_nMaxGameLevel == m_nGameLevelCount)
+		{
 			CSC_IOSHelper::getInstance()->GameCenter_reportScoreForLeaderboard("com.reallycsc.lifeishard.totaldeadcount_all", m_nTotalDeadCount);
+			CSC_IOSHelper::getInstance()->GameCenter_checkAndUnlockAchievement(" com.reallycsc.lifeishard.finish");
+		}
 		else if (deadCount >= 500)
 			CSC_IOSHelper::getInstance()->GameCenter_checkAndUnlockAchievement("com.reallycsc.lifeishard.dead500");
 	}
@@ -467,7 +471,7 @@ void GameMediator::setMaxGameLevel()
 void GameMediator::saveUserConfig()
 {
 	auto audio = AudioCtrl::getInstance();
-	UserDefault::getInstance()->setBoolForKey("Music", audio->getIsListPlaying() & !audio->getIsPause());
+	UserDefault::getInstance()->setBoolForKey("Music", audio->getIsListPlaying() & !audio->getIsMute());
 }
 
 void GameMediator::gotoNextGameLevel()
