@@ -43,12 +43,12 @@ bool StoryScene::init()
 		// show the end
 		auto total_dead_count = pGameMediator->getTotalDeadCount();
 		auto end_story = pGameMediator->getEndStoryLines(story->end);
-		if (total_dead_count > 500)
-			this->showStoryline(NULL, &end_story->at("deadCount>500"), 0);
-		else if (total_dead_count > 0)
-			this->showStoryline(NULL, &end_story->at("deadCount>0"), 0);
+		if (total_dead_count > 1000)
+			this->showStoryline(NULL, &end_story->at("deadCount>1000"), 0);
+		else if (total_dead_count > 400)
+			this->showStoryline(NULL, &end_story->at("deadCount>400"), 0);
 		else
-			this->showStoryline(NULL, &end_story->at("deadCount==0"), 0);
+			this->showStoryline(NULL, &end_story->at("deadCount<=400"), 0);
 		// for the whole story achievement
 		auto min_dead_vector = pGameMediator->getLevelMinDeadCount();
 		bool is_whole = true;

@@ -6,26 +6,14 @@
       <ObjectData Name="Scene" ctype="GameNodeObjectData">
         <Size X="1536.0000" Y="1024.0000" />
         <Children>
-          <AbstractNodeData Name="Text_Title" ActionTag="-858646474" Tag="86" IconVisible="False" HorizontalEdge="LeftEdge" VerticalEdge="TopEdge" LeftMargin="74.0001" RightMargin="841.9999" TopMargin="104.1705" BottomMargin="796.8295" FontSize="100" LabelText="Life is HARD" OutlineSize="4" OutlineEnabled="True" ShadowOffsetX="4.0000" ShadowOffsetY="-4.0000" ShadowEnabled="True" ctype="TextObjectData">
-            <Size X="620.0000" Y="123.0000" />
+          <AbstractNodeData Name="Text_Title" ActionTag="-858646474" Tag="86" IconVisible="False" HorizontalEdge="LeftEdge" VerticalEdge="TopEdge" LeftMargin="13.5000" RightMargin="781.5000" TopMargin="122.8800" BottomMargin="803.1200" FontSize="78" LabelText="This Game is HARD" OutlineSize="4" OutlineEnabled="True" ShadowOffsetX="4.0000" ShadowOffsetY="-4.0000" ShadowEnabled="True" ctype="TextObjectData">
+            <Size X="741.0000" Y="98.0000" />
             <AnchorPoint ScaleX="0.5000" ScaleY="1.0000" />
-            <Position X="384.0001" Y="919.8295" />
+            <Position X="384.0000" Y="901.1200" />
             <Scale ScaleX="1.0000" ScaleY="1.0000" />
             <CColor A="255" R="255" G="0" B="0" />
-            <PrePosition X="0.2500" Y="0.8983" />
-            <PreSize X="0.4036" Y="0.1201" />
-            <FontResource Type="Normal" Path="Resource/fzzj.ttf" Plist="" />
-            <OutlineColor A="255" R="30" G="144" B="255" />
-            <ShadowColor A="255" R="0" G="0" B="0" />
-          </AbstractNodeData>
-          <AbstractNodeData Name="Text_Subtitle" ActionTag="578967309" Tag="143" IconVisible="False" HorizontalEdge="LeftEdge" VerticalEdge="TopEdge" LeftMargin="74.0352" RightMargin="1290.9648" TopMargin="81.9200" BottomMargin="901.0800" FontSize="34" LabelText="This Game" OutlineEnabled="True" ShadowOffsetX="2.0000" ShadowOffsetY="-2.0000" ShadowEnabled="True" ctype="TextObjectData">
-            <Size X="171.0000" Y="41.0000" />
-            <AnchorPoint ScaleY="1.0000" />
-            <Position X="74.0352" Y="942.0800" />
-            <Scale ScaleX="1.0000" ScaleY="1.0000" />
-            <CColor A="255" R="255" G="0" B="0" />
-            <PrePosition X="0.0482" Y="0.9200" />
-            <PreSize X="0.1113" Y="0.0400" />
+            <PrePosition X="0.2500" Y="0.8800" />
+            <PreSize X="0.4824" Y="0.0957" />
             <FontResource Type="Normal" Path="Resource/fzzj.ttf" Plist="" />
             <OutlineColor A="255" R="30" G="144" B="255" />
             <ShadowColor A="255" R="0" G="0" B="0" />
@@ -58,13 +46,13 @@
             <OutlineColor A="255" R="255" G="0" B="0" />
             <ShadowColor A="255" R="110" G="110" B="110" />
           </AbstractNodeData>
-          <AbstractNodeData Name="Button_DataEncryption" ActionTag="-1540397454" Tag="16" IconVisible="False" PositionPercentXEnabled="True" PositionPercentYEnabled="True" LeftMargin="1072.0000" RightMargin="304.0000" TopMargin="738.0000" BottomMargin="226.0000" TouchEnable="True" FontSize="20" ButtonText="Data Encryption" Scale9Enable="True" LeftEage="15" RightEage="15" TopEage="11" BottomEage="11" Scale9OriginX="15" Scale9OriginY="11" Scale9Width="16" Scale9Height="14" ShadowOffsetX="2.0000" ShadowOffsetY="-2.0000" ctype="ButtonObjectData">
+          <AbstractNodeData Name="Button_DataEncryption" ActionTag="-1540397454" Tag="16" IconVisible="False" HorizontalEdge="LeftEdge" VerticalEdge="BottomEdge" LeftMargin="578.0000" RightMargin="798.0000" TopMargin="954.0000" BottomMargin="10.0000" TouchEnable="True" FontSize="20" ButtonText="Data Encryption" Scale9Enable="True" LeftEage="15" RightEage="15" TopEage="11" BottomEage="11" Scale9OriginX="15" Scale9OriginY="11" Scale9Width="16" Scale9Height="14" ShadowOffsetX="2.0000" ShadowOffsetY="-2.0000" ctype="ButtonObjectData">
             <Size X="160.0000" Y="60.0000" />
             <AnchorPoint ScaleX="0.5000" ScaleY="0.5000" />
-            <Position X="1152.0000" Y="256.0000" />
+            <Position X="658.0000" Y="40.0000" />
             <Scale ScaleX="1.0000" ScaleY="1.0000" />
             <CColor A="255" R="144" G="238" B="144" />
-            <PrePosition X="0.7500" Y="0.2500" />
+            <PrePosition X="0.4284" Y="0.0391" />
             <PreSize X="0.1042" Y="0.0586" />
             <FontResource Type="Normal" Path="Resource/fzzj.ttf" Plist="" />
             <TextColor A="255" R="65" G="65" B="70" />

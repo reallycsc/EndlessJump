@@ -124,6 +124,6 @@ void AppDelegate::applicationWillEnterForeground() {
 
     // if you use SimpleAudioEngine, it must resume here
     auto audio = CSCClass::AudioCtrl::getInstance();
-    if (audio->getIsListPlaying())
+    if (audio->getIsListPlaying() && !audio->getIsMute())
         audio->resumeBackgroundMusic();
 }
