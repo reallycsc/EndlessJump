@@ -46,19 +46,19 @@
             <OutlineColor A="255" R="255" G="0" B="0" />
             <ShadowColor A="255" R="110" G="110" B="110" />
           </AbstractNodeData>
-          <AbstractNodeData Name="Button_DataEncryption" ActionTag="-1540397454" Tag="16" IconVisible="False" HorizontalEdge="LeftEdge" VerticalEdge="BottomEdge" LeftMargin="578.0000" RightMargin="798.0000" TopMargin="954.0000" BottomMargin="10.0000" TouchEnable="True" FontSize="20" ButtonText="Data Encryption" Scale9Enable="True" LeftEage="15" RightEage="15" TopEage="11" BottomEage="11" Scale9OriginX="15" Scale9OriginY="11" Scale9Width="16" Scale9Height="14" ShadowOffsetX="2.0000" ShadowOffsetY="-2.0000" ctype="ButtonObjectData">
-            <Size X="160.0000" Y="60.0000" />
+          <AbstractNodeData Name="Button_DataEncryption" ActionTag="-1540397454" Tag="16" IconVisible="False" HorizontalEdge="LeftEdge" VerticalEdge="BottomEdge" LeftMargin="568.0000" RightMargin="788.0000" TopMargin="954.0000" BottomMargin="10.0000" TouchEnable="True" FontSize="20" ButtonText="Data Encryption" Scale9Enable="True" LeftEage="15" RightEage="15" TopEage="11" BottomEage="11" Scale9OriginX="15" Scale9OriginY="11" Scale9Width="150" Scale9Height="38" ShadowOffsetX="2.0000" ShadowOffsetY="-2.0000" ctype="ButtonObjectData">
+            <Size X="180.0000" Y="60.0000" />
             <AnchorPoint ScaleX="0.5000" ScaleY="0.5000" />
             <Position X="658.0000" Y="40.0000" />
             <Scale ScaleX="1.0000" ScaleY="1.0000" />
             <CColor A="255" R="144" G="238" B="144" />
             <PrePosition X="0.4284" Y="0.0391" />
-            <PreSize X="0.1042" Y="0.0586" />
+            <PreSize X="0.1172" Y="0.0586" />
             <FontResource Type="Normal" Path="Resource/fzzj.ttf" Plist="" />
             <TextColor A="255" R="65" G="65" B="70" />
-            <DisabledFileData Type="Default" Path="Default/Button_Disable.png" Plist="" />
-            <PressedFileData Type="Default" Path="Default/Button_Press.png" Plist="" />
-            <NormalFileData Type="Default" Path="Default/Button_Normal.png" Plist="" />
+            <DisabledFileData Type="Normal" Path="Resource/Button_disable.png" Plist="" />
+            <PressedFileData Type="Normal" Path="Resource/Button_down.png" Plist="" />
+            <NormalFileData Type="Normal" Path="Resource/Button_up.png" Plist="" />
             <OutlineColor A="255" R="255" G="0" B="0" />
             <ShadowColor A="255" R="110" G="110" B="110" />
           </AbstractNodeData>
@@ -74,25 +74,25 @@
             <FirstColor A="255" R="191" G="191" B="191" />
             <EndColor A="255" R="255" G="255" B="255" />
             <ColorVector ScaleY="1.0000" />
-            <InnerNodeSize Width="700" Height="600" />
+            <InnerNodeSize Width="700" Height="899" />
           </AbstractNodeData>
-          <AbstractNodeData Name="Button_Credit" ActionTag="-868953858" Tag="186" FrameEvent="Scene_Start_End" IconVisible="False" HorizontalEdge="LeftEdge" VerticalEdge="TopEdge" LeftMargin="10.0000" RightMargin="1366.0000" TopMargin="10.0000" BottomMargin="954.0000" TouchEnable="True" FontSize="32" ButtonText="Credit" Scale9Enable="True" LeftEage="15" RightEage="15" TopEage="11" BottomEage="11" Scale9OriginX="15" Scale9OriginY="11" Scale9Width="16" Scale9Height="14" ShadowOffsetX="2.0000" ShadowOffsetY="-2.0000" ctype="ButtonObjectData">
-            <Size X="160.0000" Y="60.0000" />
+          <AbstractNodeData Name="Button_Credit" ActionTag="-868953858" Tag="186" FrameEvent="Scene_Start_End" IconVisible="False" HorizontalEdge="LeftEdge" VerticalEdge="TopEdge" LeftMargin="10.0000" RightMargin="1346.0000" TopMargin="10.0000" BottomMargin="954.0000" TouchEnable="True" FontSize="32" ButtonText="Credit" Scale9Enable="True" LeftEage="15" RightEage="15" TopEage="11" BottomEage="11" Scale9OriginX="15" Scale9OriginY="11" Scale9Width="150" Scale9Height="38" ShadowOffsetX="2.0000" ShadowOffsetY="-2.0000" ctype="ButtonObjectData">
+            <Size X="180.0000" Y="60.0000" />
             <AnchorPoint ScaleY="1.0000" />
             <Position X="10.0000" Y="1014.0000" />
             <Scale ScaleX="1.0000" ScaleY="1.0000" />
             <CColor A="255" R="144" G="238" B="144" />
             <PrePosition X="0.0065" Y="0.9902" />
-            <PreSize X="0.1042" Y="0.0586" />
+            <PreSize X="0.1172" Y="0.0586" />
             <FontResource Type="Normal" Path="Resource/fzzj.ttf" Plist="" />
             <TextColor A="255" R="65" G="65" B="70" />
-            <DisabledFileData Type="Default" Path="Default/Button_Disable.png" Plist="" />
-            <PressedFileData Type="Default" Path="Default/Button_Press.png" Plist="" />
-            <NormalFileData Type="Default" Path="Default/Button_Normal.png" Plist="" />
+            <DisabledFileData Type="Normal" Path="Resource/Button_disable.png" Plist="" />
+            <PressedFileData Type="Normal" Path="Resource/Button_down.png" Plist="" />
+            <NormalFileData Type="Normal" Path="Resource/Button_up.png" Plist="" />
             <OutlineColor A="255" R="255" G="0" B="0" />
             <ShadowColor A="255" R="110" G="110" B="110" />
           </AbstractNodeData>
-          <AbstractNodeData Name="Button_Mute" ActionTag="-350296174" Tag="172" FrameEvent="Scene_Start_End" IconVisible="False" HorizontalEdge="LeftEdge" VerticalEdge="TopEdge" LeftMargin="578.0000" RightMargin="778.0000" TopMargin="10.0000" BottomMargin="954.0000" TouchEnable="True" FontSize="32" ButtonText="Music Off" Scale9Enable="True" LeftEage="15" RightEage="15" TopEage="11" BottomEage="11" Scale9OriginX="15" Scale9OriginY="11" Scale9Width="16" Scale9Height="14" ShadowOffsetX="2.0000" ShadowOffsetY="-2.0000" ctype="ButtonObjectData">
+          <AbstractNodeData Name="Button_Mute" ActionTag="-350296174" Tag="172" FrameEvent="Scene_Start_End" IconVisible="False" HorizontalEdge="LeftEdge" VerticalEdge="TopEdge" LeftMargin="578.0000" RightMargin="778.0000" TopMargin="10.0000" BottomMargin="954.0000" TouchEnable="True" FontSize="32" ButtonText="Music Off" Scale9Enable="True" LeftEage="15" RightEage="15" TopEage="11" BottomEage="11" Scale9OriginX="15" Scale9OriginY="11" Scale9Width="150" Scale9Height="38" ShadowOffsetX="2.0000" ShadowOffsetY="-2.0000" ctype="ButtonObjectData">
             <Size X="180.0000" Y="60.0000" />
             <AnchorPoint ScaleX="1.0000" ScaleY="1.0000" />
             <Position X="758.0000" Y="1014.0000" />
@@ -102,41 +102,41 @@
             <PreSize X="0.1172" Y="0.0586" />
             <FontResource Type="Normal" Path="Resource/fzzj.ttf" Plist="" />
             <TextColor A="255" R="65" G="65" B="70" />
-            <DisabledFileData Type="Default" Path="Default/Button_Disable.png" Plist="" />
-            <PressedFileData Type="Default" Path="Default/Button_Press.png" Plist="" />
-            <NormalFileData Type="Default" Path="Default/Button_Normal.png" Plist="" />
+            <DisabledFileData Type="Normal" Path="Resource/Button_disable.png" Plist="" />
+            <PressedFileData Type="Normal" Path="Resource/Button_down.png" Plist="" />
+            <NormalFileData Type="Normal" Path="Resource/Button_up.png" Plist="" />
             <OutlineColor A="255" R="255" G="0" B="0" />
             <ShadowColor A="255" R="110" G="110" B="110" />
           </AbstractNodeData>
-          <AbstractNodeData Name="Button_GameCenter" ActionTag="-199750997" Tag="159" FrameEvent="Scene_Start_End" IconVisible="False" HorizontalEdge="LeftEdge" VerticalEdge="BottomEdge" LeftMargin="304.0000" RightMargin="1072.0000" TopMargin="954.0000" BottomMargin="10.0000" TouchEnable="True" FontSize="26" ButtonText="Game Center" Scale9Enable="True" LeftEage="15" RightEage="15" TopEage="11" BottomEage="11" Scale9OriginX="15" Scale9OriginY="11" Scale9Width="16" Scale9Height="14" ShadowOffsetX="2.0000" ShadowOffsetY="-2.0000" ctype="ButtonObjectData">
-            <Size X="160.0000" Y="60.0000" />
+          <AbstractNodeData Name="Button_GameCenter" ActionTag="-199750997" Tag="159" FrameEvent="Scene_Start_End" IconVisible="False" HorizontalEdge="LeftEdge" VerticalEdge="BottomEdge" LeftMargin="294.0000" RightMargin="1062.0000" TopMargin="954.0000" BottomMargin="10.0000" TouchEnable="True" FontSize="26" ButtonText="Game Center" Scale9Enable="True" LeftEage="15" RightEage="15" TopEage="11" BottomEage="11" Scale9OriginX="15" Scale9OriginY="11" Scale9Width="150" Scale9Height="38" ShadowOffsetX="2.0000" ShadowOffsetY="-2.0000" ctype="ButtonObjectData">
+            <Size X="180.0000" Y="60.0000" />
             <AnchorPoint ScaleX="0.5000" />
             <Position X="384.0000" Y="10.0000" />
             <Scale ScaleX="1.0000" ScaleY="1.0000" />
             <CColor A="255" R="255" G="165" B="0" />
             <PrePosition X="0.2500" Y="0.0098" />
-            <PreSize X="0.1042" Y="0.0586" />
+            <PreSize X="0.1172" Y="0.0586" />
             <FontResource Type="Normal" Path="Resource/fzzj.ttf" Plist="" />
             <TextColor A="255" R="65" G="65" B="70" />
-            <DisabledFileData Type="Default" Path="Default/Button_Disable.png" Plist="" />
-            <PressedFileData Type="Default" Path="Default/Button_Press.png" Plist="" />
-            <NormalFileData Type="Default" Path="Default/Button_Normal.png" Plist="" />
+            <DisabledFileData Type="Normal" Path="Resource/Button_disable.png" Plist="" />
+            <PressedFileData Type="Normal" Path="Resource/Button_down.png" Plist="" />
+            <NormalFileData Type="Normal" Path="Resource/Button_up.png" Plist="" />
             <OutlineColor A="255" R="255" G="0" B="0" />
             <ShadowColor A="255" R="110" G="110" B="110" />
           </AbstractNodeData>
-          <AbstractNodeData Name="Button_DataReset" ActionTag="897246577" Tag="17" FrameEvent="Scene_Start_End" IconVisible="False" HorizontalEdge="LeftEdge" VerticalEdge="BottomEdge" LeftMargin="10.0000" RightMargin="1366.0000" TopMargin="954.0000" BottomMargin="10.0000" TouchEnable="True" FontSize="26" ButtonText="Data Reset" Scale9Enable="True" LeftEage="15" RightEage="15" TopEage="11" BottomEage="11" Scale9OriginX="15" Scale9OriginY="11" Scale9Width="16" Scale9Height="14" ShadowOffsetX="2.0000" ShadowOffsetY="-2.0000" ctype="ButtonObjectData">
-            <Size X="160.0000" Y="60.0000" />
+          <AbstractNodeData Name="Button_DataReset" ActionTag="897246577" Tag="17" FrameEvent="Scene_Start_End" IconVisible="False" HorizontalEdge="LeftEdge" VerticalEdge="BottomEdge" RightMargin="1356.0000" TopMargin="954.0000" BottomMargin="10.0000" TouchEnable="True" FontSize="26" ButtonText="Data Reset" Scale9Enable="True" LeftEage="15" RightEage="15" TopEage="11" BottomEage="11" Scale9OriginX="15" Scale9OriginY="11" Scale9Width="150" Scale9Height="38" ShadowOffsetX="2.0000" ShadowOffsetY="-2.0000" ctype="ButtonObjectData">
+            <Size X="180.0000" Y="60.0000" />
             <AnchorPoint ScaleX="0.5000" />
             <Position X="90.0000" Y="10.0000" />
             <Scale ScaleX="1.0000" ScaleY="1.0000" />
             <CColor A="255" R="255" G="192" B="203" />
             <PrePosition X="0.0586" Y="0.0098" />
-            <PreSize X="0.1042" Y="0.0586" />
+            <PreSize X="0.1172" Y="0.0586" />
             <FontResource Type="Normal" Path="Resource/fzzj.ttf" Plist="" />
             <TextColor A="255" R="65" G="65" B="70" />
-            <DisabledFileData Type="Default" Path="Default/Button_Disable.png" Plist="" />
-            <PressedFileData Type="Default" Path="Default/Button_Press.png" Plist="" />
-            <NormalFileData Type="Default" Path="Default/Button_Normal.png" Plist="" />
+            <DisabledFileData Type="Normal" Path="Resource/Button_disable.png" Plist="" />
+            <PressedFileData Type="Normal" Path="Resource/Button_down.png" Plist="" />
+            <NormalFileData Type="Normal" Path="Resource/Button_up.png" Plist="" />
             <OutlineColor A="255" R="255" G="0" B="0" />
             <ShadowColor A="255" R="110" G="110" B="110" />
           </AbstractNodeData>

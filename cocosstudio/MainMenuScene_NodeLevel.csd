@@ -6,7 +6,7 @@
       <ObjectData Name="Node" Tag="114" ctype="GameNodeObjectData">
         <Size X="0.0000" Y="0.0000" />
         <Children>
-          <AbstractNodeData Name="Button_Level" ActionTag="-1429553447" CallBackType="Click" Tag="116" IconVisible="False" LeftMargin="-120.0000" RightMargin="-120.0000" TopMargin="-40.0000" BottomMargin="-40.0000" TouchEnable="True" FontSize="46" ButtonText="1" Scale9Enable="True" LeftEage="15" RightEage="15" TopEage="11" BottomEage="11" Scale9OriginX="15" Scale9OriginY="11" Scale9Width="16" Scale9Height="14" ShadowOffsetX="2.0000" ShadowOffsetY="-2.0000" ctype="ButtonObjectData">
+          <AbstractNodeData Name="Button_Level" ActionTag="-1429553447" CallBackType="Click" Tag="116" IconVisible="False" LeftMargin="-120.0000" RightMargin="-120.0000" TopMargin="-40.0000" BottomMargin="-40.0000" TouchEnable="True" FontSize="46" ButtonText="1" Scale9Enable="True" LeftEage="15" RightEage="15" TopEage="11" BottomEage="11" Scale9OriginX="15" Scale9OriginY="11" Scale9Width="150" Scale9Height="38" ShadowOffsetX="2.0000" ShadowOffsetY="-2.0000" ctype="ButtonObjectData">
             <Size X="240.0000" Y="80.0000" />
             <AnchorPoint ScaleX="0.5000" ScaleY="0.5000" />
             <Position />
@@ -16,9 +16,9 @@
             <PreSize X="0.0000" Y="0.0000" />
             <FontResource Type="Normal" Path="Resource/fzzj.ttf" Plist="" />
             <TextColor A="255" R="65" G="65" B="70" />
-            <DisabledFileData Type="Default" Path="Default/Button_Disable.png" Plist="" />
-            <PressedFileData Type="Default" Path="Default/Button_Press.png" Plist="" />
-            <NormalFileData Type="Default" Path="Default/Button_Normal.png" Plist="" />
+            <DisabledFileData Type="Normal" Path="Resource/Button_disable.png" Plist="" />
+            <PressedFileData Type="Normal" Path="Resource/Button_down.png" Plist="" />
+            <NormalFileData Type="Normal" Path="Resource/Button_up.png" Plist="" />
             <OutlineColor A="255" R="255" G="0" B="0" />
             <ShadowColor A="255" R="110" G="110" B="110" />
           </AbstractNodeData>

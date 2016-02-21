@@ -15,7 +15,7 @@ using namespace tinyxml2;
 	//#define LEVEL_MAKER_MODE
 	//#define SHOW_ALL_ROOM_MODE
 #elif (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
-	#define IAP_TEST
+	//#define IAP_TEST
 #endif
 
 // physics mask  

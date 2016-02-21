@@ -103,12 +103,15 @@ bool MainMenuScene::init()
 	int innerHeight = 0;
 	int curLevelHeight = 0;
 	int interval = 50;
+    int maxDeadCount = 0;
 	for (int i = 0, length = pGameMediator->getGameLevelCount(); i < length; i++)
 	{
 		auto levelData = levelsData->at(i);
 		int curDeadCount = levelDeadCounts->at(i);
 		// if the next level of curLevel open condition < total dead, need open the next level (when update new level will have this situation)
-		int maxDeadCount = levelData->getMaxDeadTime();
+        if (i > 0) {
+            maxDeadCount = levelsData->at(i-1)->getMaxDeadTime();
+        }
 		if (i > 0 && i == curLevel && curDeadCount < 0 && levelDeadCounts->at(i - 1) >= 0 && totalDead < maxDeadCount)
 		{
 			pGameMediator->gotoNextGameLevel();
@@ -191,6 +194,13 @@ bool MainMenuScene::init()
 	else // since Hx = -(Hw-Hi)*(1-p)/100, so p = (1 - Hx/(Hi-Hw))*100
 		scrollView->jumpToPercentVertical((1 - static_cast<float>(curLevelHeight - scrollInnerHeightHalf) / static_cast<float>(innerHeight - scrollInnerHeight)) * 100);
 	scrollView->setScrollBarEnabled(false);
+    
+    // add custom listener
+    auto listener = EventListenerCustom::create(EVENT_PURCHASED + "com.reallycsc.lifeishard.unlocklevel", [=](EventCustom* event) {
+        GameMediator::getInstance()->gotoNextGameLevel();
+        Director::getInstance()->replaceScene(MainMenuScene::createScene());
+    });
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
 
 #ifndef LEVEL_MAKER_MODE
 	buttonEditor->setEnabled(false);

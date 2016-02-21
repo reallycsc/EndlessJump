@@ -4,6 +4,9 @@
     <Group ctype="ResourceGroup">
       <RootFolder Name=".">
         <Folder Name="Resource">
+          <Image Name="Button_disable.png" />
+          <Image Name="Button_down.png" />
+          <Image Name="Button_up.png" />
           <TTF Name="fzzj.ttf" />
         </Folder>
         <Project Name="CreditScene.csd" Type="Scene" />

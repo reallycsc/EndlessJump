@@ -42,6 +42,10 @@ bool GameMediator::init()
 		// login-in GameCenter
 		auto helper = CSC_IOSHelper::getInstance();
 		helper->GameCenter_authenticateLocalUser();
+        
+        vector<string> products;
+        products.push_back("com.reallycsc.lifeishard.unlocklevel");
+        helper->IAP_initWithProductSet(&products);
 #ifdef IAP_TEST
 		helper->IAP_requestAllPurchasedProducts(true);
 #else
@@ -144,6 +148,10 @@ void GameMediator::resetData()
 	}
 	this->saveDataForKey(TOTAL_DEAD, -1);
 	m_nTotalDeadCount = -1;
+    this->saveDataForKey(CURRENT_LEVEL, 1);
+    this->saveDataForKey(MAX_LEVEL, 1);
+    m_nCurGameLevel = 1;
+    m_nMaxGameLevel = 1;
 }
 
 int GameMediator::loadDataForKey(const int& key, const int& default_data)
