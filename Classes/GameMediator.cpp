@@ -169,14 +169,14 @@ bool GameMediator::loadGameLevelFile()
 	{
 		tinyxml2::XMLDocument document;
 		// Decryption
-        string filename = FileUtils::getInstance()->fullPathForFilename("config/GameLevels.xml");
-		document.LoadFile(filename.c_str());
-		//string filename = FileUtils::getInstance()->fullPathForFilename("config/GameLevels_Encryption.dat");
-		//string file_string = FileUtils::getInstance()->getStringFromFile(filename);
-		//unsigned char* buffer;
-		//int decoded_length = base64Decode((unsigned char*)file_string.c_str(), file_string.length(), &buffer);
-		//string xml_data_decoded = csc_decode_aes(buffer, decoded_length);
-		//document.Parse(xml_data_decoded.c_str(), xml_data_decoded.size());
+        //string filename = FileUtils::getInstance()->fullPathForFilename("config/GameLevels.xml");
+		//document.LoadFile(filename.c_str());
+		string filename = FileUtils::getInstance()->fullPathForFilename("config/GameLevels_Encryption.dat");
+		string file_string = FileUtils::getInstance()->getStringFromFile(filename);
+		unsigned char* buffer;
+		int decoded_length = base64Decode((unsigned char*)file_string.c_str(), file_string.length(), &buffer);
+		string xml_data_decoded = csc_decode_aes(buffer, decoded_length);
+		document.Parse(xml_data_decoded.c_str(), xml_data_decoded.size());
 		XMLElement* root = document.RootElement();
 		CC_BREAK_IF(!root);
 
