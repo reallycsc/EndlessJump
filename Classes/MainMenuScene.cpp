@@ -62,8 +62,8 @@ bool MainMenuScene::init()
 	auto buttonEditor = dynamic_cast<Button*>(rootNode->getChildByName("Button_LevelEditor"));
 	buttonEditor->addClickEventListener(CC_CALLBACK_1(MainMenuScene::buttonCallback_LevelEditor, this));
 	auto buttonDataEncryption = dynamic_cast<Button*>(rootNode->getChildByName("Button_DataEncryption"));
-	//buttonDataEncryption->addClickEventListener(CC_CALLBACK_1(MainMenuScene::buttonCallback_DataEncryption, this));
-	buttonDataEncryption->removeFromParent();
+	buttonDataEncryption->addClickEventListener(CC_CALLBACK_1(MainMenuScene::buttonCallback_DataEncryption, this));
+	//buttonDataEncryption->removeFromParent();
 	auto buttonCredit = dynamic_cast<Button*>(rootNode->getChildByName("Button_Credit"));
 	buttonCredit->addClickEventListener(CC_CALLBACK_1(MainMenuScene::buttonCallback_Credit, this));
 	auto buttonMute = dynamic_cast<Button*>(rootNode->getChildByName("Button_Mute"));
@@ -205,8 +205,6 @@ bool MainMenuScene::init()
 #ifndef LEVEL_MAKER_MODE
 	buttonEditor->setEnabled(false);
 	buttonEditor->setVisible(false);
-	buttonDataEncryption->setEnabled(false);
-	buttonDataEncryption->setVisible(false);
 #endif
 
 	this->scheduleUpdate();
